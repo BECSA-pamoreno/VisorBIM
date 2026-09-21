@@ -17,7 +17,7 @@ Los archivos se leen en el navegador: no se suben a ningún servidor.
 - Propiedades por elemento y coordenadas del punto pulsado.
 - Búsqueda en parámetros, suma de parámetros numéricos, aislar resultados.
 - Colorear por categoría, por modelo o por cualquier parámetro.
-- Caja de sección, vistas en planta y alzados, proyección ortogonal, rayos X, aristas.
+- Caja de sección y plano de corte alineado a una cara del modelo, vistas en planta y alzados, proyección ortogonal, rayos X, aristas.
 - Ocultar (H), aislar (I), encuadrar (F), deseleccionar (Esc).
 - Medición por tipo o por código de montaje, con cantidad, coste unitario e importe.
   Toma el código de montaje, la descripción y el coste del modelo; lo que falte se puede

@@ -36,12 +36,13 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 
 // ---------- Pegar desde aquí dentro de la clase ThisApplication ----------
 
     private const double PIES_A_METROS = 0.3048;
-    private const bool USAR_COORDENADAS_COMPARTIDAS = true;
+    private static readonly bool USAR_COORDENADAS_COMPARTIDAS = true; // static readonly, no const: evita el aviso CS0429
 
     // Columnas de medición: valor interno de Revit convertido a m, m² y m³ (no dependen de las unidades del proyecto)
     private const string COL_LONG = "Longitud (m)";
@@ -49,6 +50,8 @@ using Autodesk.Revit.UI;
     private const string COL_VOL = "Volumen (m³)";
     private const string COL_AREA_BRUTA = "Área bruta (m²)";   // muros: longitud x altura, sin descontar huecos
     private const string COL_TAM_MEP = "Tamaño MEP";            // tamaño calculado, o espesor en aislamientos
+    private const string COL_W = "W (kg/m)";                    // peso lineal del perfil (parámetro W)
+    private const string COL_KG = "Peso (kg)";                  // W x longitud (longitud de corte en vigas)
 
     // Instalaciones que se miden por tipo + tamaño (mismo criterio que el add-in de Woodea)
     private static readonly HashSet<BuiltInCategory> CATEGORIAS_MEP = new HashSet<BuiltInCategory>
@@ -115,14 +118,28 @@ using Autodesk.Revit.UI;
             {
                 Category cat = el.Category;
                 if (cat == null || cat.CategoryType != CategoryType.Model) continue;
+                // Tramos, descansillos y zancas se exportan dentro de su escalera (una sola fila)
+                if (EsParteDeEscalera(el)) continue;
 
                 GeometryElement geo = null;
                 try { geo = el.get_Geometry(opciones); } catch { geo = null; }
-                if (geo == null) continue;
+                Stairs escalera = el as Stairs;
+                if (geo == null && escalera == null) continue;
 
                 List<XYZ> vertices = new List<XYZ>();
                 List<int> triangulos = new List<int>();
-                RecogerGeometria(geo, vertices, triangulos);
+                if (geo != null) RecogerGeometria(geo, vertices, triangulos);
+                // Si la escalera no trae geometría propia, se toma la de sus tramos, descansillos y zancas
+                if (escalera != null && triangulos.Count == 0)
+                {
+                    foreach (ElementId pid in PartesEscalera(escalera))
+                    {
+                        Element parte = doc.GetElement(pid);
+                        GeometryElement gp = null;
+                        try { gp = parte != null ? parte.get_Geometry(opciones) : null; } catch { gp = null; }
+                        if (gp != null) RecogerGeometria(gp, vertices, triangulos);
+                    }
+                }
                 if (triangulos.Count == 0) continue;
 
                 string id = el.Id.ToString();
@@ -137,7 +154,7 @@ using Autodesk.Revit.UI;
             EscribirEscena(dae, ids);
         }
 
-        List<string> fijas = new List<string> { "ElementId", "UniqueId", "Categoría", "Familia", "Tipo", "Nivel", COL_TAM_MEP, COL_LONG, COL_AREA, COL_AREA_BRUTA, COL_VOL };
+        List<string> fijas = new List<string> { "ElementId", "UniqueId", "Categoría", "Familia", "Tipo", "Nivel", COL_TAM_MEP, COL_LONG, COL_AREA, COL_AREA_BRUTA, COL_VOL, COL_W, COL_KG };
         List<string> columnas = new List<string>(fijas);
         columnas.AddRange(columnasExtra.Where(c => !fijas.Contains(c)).OrderBy(c => c.StartsWith("Tipo: ") ? 1 : 0).ThenBy(c => c, StringComparer.CurrentCultureIgnoreCase));
         EscribirXlsx(rutaXlsx, columnas, filas);
@@ -279,6 +296,9 @@ using Autodesk.Revit.UI;
         BuiltInCategory bic = el.Category != null ? el.Category.BuiltInCategory : BuiltInCategory.INVALID;
         double v;
 
+        Stairs escalera = el as Stairs;
+        if (escalera != null) { MedicionEscalera(escalera, d); return; }
+
         // Tamaño para instalaciones: espesor en aislamientos, tamaño calculado en el resto
         if (CATEGORIAS_MEP.Contains(bic))
         {
@@ -340,6 +360,162 @@ using Autodesk.Revit.UI;
         // Volumen (m³)
         if (Medida(el, BuiltInParameter.HOST_VOLUME_COMPUTED, SpecTypeId.Volume, new string[] { "Volumen", "Volume" }, out v))
             d[COL_VOL] = M(v, UnitTypeId.CubicMeters);
+
+        // Peso (kg) = W x longitud, pensado para vigas y pilares de acero
+        double w;
+        if (PesoLineal(el, out w))
+        {
+            d[COL_W] = w.ToString("0.####", INV);
+            double lm = LongitudParaPeso(el, bic) * PIES_A_METROS;
+            if (lm > 0) d[COL_KG] = (w * lm).ToString("0.###", INV);
+        }
+    }
+
+    // Lee W (de ejemplar o de tipo) y lo devuelve en kg/m
+    private bool PesoLineal(Element el, out double kgPorMetro)
+    {
+        kgPorMetro = 0;
+        Parameter p = el.LookupParameter("W");
+        if (p == null || !p.HasValue)
+        {
+            Element tipo = el.Document.GetElement(el.GetTypeId());
+            if (tipo != null) p = tipo.LookupParameter("W");
+        }
+        if (p == null || !p.HasValue) return false;
+
+        if (p.StorageType == StorageType.Double)
+        {
+            string spec = "";
+            try { ForgeTypeId dt = p.Definition.GetDataType(); spec = dt != null ? dt.TypeId : ""; } catch { spec = ""; }
+            double bruto = p.AsDouble();
+            if (spec.Contains("massPerUnitLength")) kgPorMetro = bruto / PIES_A_METROS;          // interno kg/pie
+            else if (spec.Contains("weightPerUnitLength")) kgPorMetro = bruto / 9.80665;          // interno N/m -> kg/m
+            else if (spec == "" || spec.Contains("spec:number")) kgPorMetro = bruto;              // número: ya en kg/m
+            else kgPorMetro = NumeroDeTexto(p.AsValueString());
+        }
+        else if (p.StorageType == StorageType.String) kgPorMetro = NumeroDeTexto(p.AsString());
+        else if (p.StorageType == StorageType.Integer) kgPorMetro = p.AsInteger();
+        return kgPorMetro > 0;
+    }
+
+    // Longitud en unidades internas: de corte en vigas, longitud del pilar en pilares
+    private double LongitudParaPeso(Element el, BuiltInCategory bic)
+    {
+        Parameter p;
+        if (bic == BuiltInCategory.OST_StructuralFraming)
+        {
+            p = el.get_Parameter(BuiltInParameter.STRUCTURAL_FRAME_CUT_LENGTH);
+            if (p != null && p.HasValue && p.AsDouble() > 0) return p.AsDouble();
+        }
+        if (bic == BuiltInCategory.OST_StructuralColumns)
+        {
+            p = el.get_Parameter(BuiltInParameter.INSTANCE_LENGTH_PARAM);
+            if (p != null && p.HasValue && p.AsDouble() > 0) return p.AsDouble();
+        }
+        p = el.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH);
+        if (p != null && p.HasValue && p.AsDouble() > 0) return p.AsDouble();
+        LocationCurve lc = el.Location as LocationCurve;
+        if (lc != null && lc.Curve != null) return lc.Curve.Length;
+        return 0;
+    }
+
+    private double NumeroDeTexto(string texto)
+    {
+        if (string.IsNullOrEmpty(texto)) return 0;
+        StringBuilder sb = new StringBuilder();
+        foreach (char c in texto.Trim())
+        {
+            if (char.IsDigit(c) || c == ',' || c == '.' || c == '-') sb.Append(c); else break;
+        }
+        double r;
+        return double.TryParse(sb.ToString().Replace(',', '.'), NumberStyles.Float, INV, out r) ? r : 0;
+    }
+
+    // ---------- Escaleras ----------
+    // m³: volumen real de los sólidos (escalera, tramos, descansillos y zancas)
+    // m²: proyección horizontal de tramos + descansillos
+    // ml: nº de contrahuellas x ancho de tramo (ml de peldaño)
+    private void MedicionEscalera(Stairs escalera, Dictionary<string, string> d)
+    {
+        Document doc = escalera.Document;
+        Options op = new Options();
+        op.DetailLevel = ViewDetailLevel.Fine;
+        op.ComputeReferences = false;
+
+        double volumen = VolumenSolidos(escalera.get_Geometry(op));
+        if (volumen <= 0)
+        {
+            foreach (ElementId pid in PartesEscalera(escalera))
+            {
+                Element parte = doc.GetElement(pid);
+                if (parte != null) volumen += VolumenSolidos(parte.get_Geometry(op));
+            }
+        }
+        if (volumen > 0) d[COL_VOL] = M(volumen, UnitTypeId.CubicMeters);
+
+        double area = 0, mlPeldano = 0;
+        foreach (ElementId id in escalera.GetStairsRuns())
+        {
+            StairsRun tramo = doc.GetElement(id) as StairsRun;
+            if (tramo == null) continue;
+            try { area += AreaPlanta(tramo.GetFootprintBoundary()); } catch { }
+            mlPeldano += tramo.ActualRisersNumber * tramo.ActualRunWidth;
+        }
+        foreach (ElementId id in escalera.GetStairsLandings())
+        {
+            StairsLanding descansillo = doc.GetElement(id) as StairsLanding;
+            if (descansillo == null) continue;
+            try { area += AreaPlanta(descansillo.GetFootprintBoundary()); } catch { }
+        }
+        if (area > 0) d[COL_AREA] = M(area, UnitTypeId.SquareMeters);
+        if (mlPeldano > 0) d[COL_LONG] = M(mlPeldano, UnitTypeId.Meters);
+    }
+
+    private List<ElementId> PartesEscalera(Stairs escalera)
+    {
+        List<ElementId> ids = new List<ElementId>();
+        try { ids.AddRange(escalera.GetStairsRuns()); } catch { }
+        try { ids.AddRange(escalera.GetStairsLandings()); } catch { }
+        try { ids.AddRange(escalera.GetStairsSupports()); } catch { }
+        return ids;
+    }
+
+    private bool EsParteDeEscalera(Element el)
+    {
+        if (el is StairsRun || el is StairsLanding) return true;
+        return el.Category != null && el.Category.BuiltInCategory == BuiltInCategory.OST_StairsStringerCarriage;
+    }
+
+    private double VolumenSolidos(GeometryElement geo)
+    {
+        double total = 0;
+        if (geo == null) return 0;
+        foreach (GeometryObject obj in geo)
+        {
+            Solid solido = obj as Solid;
+            if (solido != null) { try { if (solido.Volume > 0) total += solido.Volume; } catch { } continue; }
+            GeometryInstance inst = obj as GeometryInstance;
+            if (inst != null) total += VolumenSolidos(inst.GetInstanceGeometry());
+        }
+        return total;
+    }
+
+    // Área en planta de un contorno cerrado (fórmula del polígono sobre la curva teselada)
+    private double AreaPlanta(CurveLoop contorno)
+    {
+        List<XYZ> puntos = new List<XYZ>();
+        foreach (Curve c in contorno)
+        {
+            IList<XYZ> pts = c.Tessellate();
+            for (int i = 0; i < pts.Count - 1; i++) puntos.Add(pts[i]);   // el último punto es el primero de la siguiente curva
+        }
+        double a = 0;
+        for (int i = 0; i < puntos.Count; i++)
+        {
+            XYZ p1 = puntos[i], p2 = puntos[(i + 1) % puntos.Count];
+            a += p1.X * p2.Y - p2.X * p1.Y;
+        }
+        return Math.Abs(a) / 2.0;
     }
 
     private string M(double valorInterno, ForgeTypeId unidad)
@@ -446,7 +622,7 @@ using Autodesk.Revit.UI;
                 w.Write("<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">");
                 w.Write("<sheetViews><sheetView workbookViewId=\"0\"><pane ySplit=\"1\" topLeftCell=\"A2\" activePane=\"bottomLeft\" state=\"frozen\"/></sheetView></sheetViews>");
                 w.Write("<sheetData>");
-                HashSet<int> numericas = new HashSet<int> { columnas.IndexOf(COL_LONG), columnas.IndexOf(COL_AREA), columnas.IndexOf(COL_AREA_BRUTA), columnas.IndexOf(COL_VOL) };
+                HashSet<int> numericas = new HashSet<int> { columnas.IndexOf(COL_LONG), columnas.IndexOf(COL_AREA), columnas.IndexOf(COL_AREA_BRUTA), columnas.IndexOf(COL_VOL), columnas.IndexOf(COL_W), columnas.IndexOf(COL_KG) };
                 EscribirFila(w, 1, columnas, null);
                 int r = 2;
                 foreach (Dictionary<string, string> fila in filas)

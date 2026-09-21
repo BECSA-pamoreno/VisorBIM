@@ -91,7 +91,13 @@ input[type=text],select{width:100%;padding:6px 9px;border:1px solid var(--line);
 .toolbar select{width:auto;background:var(--panel);padding:5px 8px}
 .toolbar .btn{padding:5px 10px;font-size:14px}
 .sep{width:1px;background:var(--line);margin:0 2px}
-#sectionPanel{position:absolute;left:12px;bottom:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;width:280px;max-width:calc(100% - 24px)}
+#clipPanels{position:absolute;left:12px;bottom:12px;display:flex;flex-direction:column;gap:8px;max-width:calc(100% - 24px)}
+#sectionPanel,#cutPanel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;width:290px;max-width:100%}
+#cutPanel h2{margin-bottom:6px}
+#cutPanel .btn{white-space:normal}
+.cutrow{display:grid;grid-template-columns:1fr 84px;gap:8px;align-items:center;margin:4px 0}
+.cutrow input[type=number]{width:100%;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--soft);text-align:right;font-variant-numeric:tabular-nums}
+#view.picking canvas{cursor:crosshair}
 #sectionPanel h2{margin-bottom:6px}
 #sectionPanel .btn{white-space:normal}
 .rng{display:grid;grid-template-columns:62px 1fr 1fr;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin:4px 0}
@@ -230,12 +236,31 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
       <button class="btn" id="fitBtn" title="Encuadrar lo visible (F)">Encuadrar</button>
       <span class="sep"></span>
       <button class="btn" id="sectionBtn" aria-pressed="false">Sección</button>
+      <button class="btn" id="cutBtn" aria-pressed="false" title="Corte alineado a una cara del modelo">Plano de corte</button>
       <button class="btn" id="xrayBtn" aria-pressed="false">Rayos X</button>
       <button class="btn" id="edgesBtn" aria-pressed="true">Aristas</button>
       <span class="sep"></span>
       <button class="btn" id="showAllBtn" title="Quitar ocultos y aislamiento">Mostrar todo</button>
       <span class="sep"></span>
       <button class="btn" id="measureBtn" aria-pressed="false">Medición</button>
+    </div>
+    <div id="clipPanels">
+    <div id="cutPanel" hidden>
+      <h2>Plano de corte</h2>
+      <p class="muted" id="cutHint" style="margin:0 0 6px">Haz clic en una cara del modelo.</p>
+      <div id="cutControls" hidden>
+        <div class="cutrow">
+          <input type="range" id="cutRange" min="-100" max="100" step="0.01" value="0" aria-label="Desplazar el plano">
+          <input type="number" id="cutNum" step="0.01" value="0" aria-label="Desplazamiento en metros" title="Desplazamiento en metros">
+        </div>
+        <div class="muted" style="font-size:13px;margin-bottom:6px">Desplazamiento desde la cara (m). Positivo: hacia dentro.</div>
+        <label class="check"><input type="checkbox" id="cutShow" checked> Mostrar el plano</label>
+        <div class="row" style="margin:6px 0 0;flex-wrap:wrap">
+          <button class="btn small" id="cutFlip">Invertir</button>
+          <button class="btn small" id="cutLook">Mirar al corte</button>
+          <button class="btn small" id="cutNew">Nuevo plano</button>
+        </div>
+      </div>
     </div>
     <div id="sectionPanel" hidden>
       <h2>Caja de sección</h2>
@@ -246,6 +271,7 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
         <button class="btn small" id="sectionSel" disabled>Ajustar a selección</button>
         <button class="btn small" id="sectionReset">Restablecer</button>
       </div>
+    </div>
     </div>
     <div id="toast" hidden></div>
   </div>
@@ -591,7 +617,9 @@ function workerMain(){
   sun.position.set(0.6, 1, 0.4);
   scene.add(sun);
 
-  const clipPlanes = [];
+  const clipPlanes = [];        // caja de sección
+  const allPlanes = [];         // lo que usan los materiales: caja + plano de corte
+  const CUT = { on:false, picking:false, point:new THREE.Vector3(), normal:new THREE.Vector3(0, -1, 0), offset:0, plane:new THREE.Plane() };
   const matMain = new THREE.MeshLambertMaterial({ vertexColors:true, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 });
   const matGhost = new THREE.MeshLambertMaterial({ color:0x9aa5ab, transparent:true, opacity:0.07, depthWrite:false, side:THREE.DoubleSide });
   const matSel = new THREE.MeshLambertMaterial({ color:0xF2B705, emissive:0x3a2a00, side:THREE.DoubleSide });
@@ -783,7 +811,7 @@ function workerMain(){
     if (S.isolate) S.isolate.delete(m.id);
     if (!S.models.some(mm => mm.ready)) S.sceneOrigin = null;
     onModelsChanged(false);
-    if (!S.models.length){ $("empty").hidden = false; $("toolbar").hidden = true; setSection(false); }
+    if (!S.models.length){ $("empty").hidden = false; $("toolbar").hidden = true; setSection(false); setCut(false); }
   }
 
   // ---------- Categorías, colores y dibujo ----------
@@ -1124,7 +1152,12 @@ function workerMain(){
     if (tmax < 0) return null;
     return Math.max(tmin, 0);
   }
-  function inSection(p){ return !S.section || S.sectionBox.containsPoint(p); }
+  function inSection(p){
+    if (S.section && !S.sectionBox.containsPoint(p)) return false;
+    if (CUT.on && CUT.plane.distanceToPoint(p) < -1e-6) return false;
+    return true;
+  }
+  let lastHitNormal = null;
   function rayElement(m, e, o, d, off){
     const c = m.chunks[m.elC[e]], P = c.pos, F = c.full;
     const t0 = m.elT[e] * 3, t1 = t0 + m.elTN[e] * 3;
@@ -1147,6 +1180,7 @@ function workerMain(){
       wp.set(o.x + d.x*tt + off.x, o.y + d.y*tt + off.y, o.z + d.z*tt + off.z);
       if (!inSection(wp)) continue;
       best = tt;
+      lastHitNormal = [e1y*e2z - e1z*e2y, e1z*e2x - e1x*e2z, e1x*e2y - e1y*e2x];
     }
     return best === Infinity ? null : best;
   }
@@ -1171,8 +1205,13 @@ function workerMain(){
       for (const i of order){
         if (best && cands[i] > best.t) break;
         const e = cands[i + 1];
+        lastHitNormal = null;
         const t = rayElement(m, e, o, d, off);
-        if (t !== null && (!best || t < best.t)) best = { t, m, e, point: ray.ray.at(t, new THREE.Vector3()) };
+        if (t !== null && (!best || t < best.t)){
+          const n = new THREE.Vector3().fromArray(lastHitNormal).normalize();
+          if (n.dot(d) > 0) n.negate();          // la normal mira hacia la cámara
+          best = { t, m, e, point: ray.ray.at(t, new THREE.Vector3()), normal:n };
+        }
       }
     });
     return best;
@@ -1186,6 +1225,10 @@ function workerMain(){
     down = null;
     if (moved > 5 || !S.models.some(m => m.ready)) return;
     const hit = pick(e.clientX, e.clientY);
+    if (CUT.picking){
+      if (hit) setCutFromFace(hit.point, hit.normal); else toast("No has tocado ninguna cara. Prueba otra vez.");
+      return;
+    }
     select(hit ? { m:hit.m, e:hit.e, point:hit.point } : null);
   });
 
@@ -1275,13 +1318,83 @@ function workerMain(){
     rebuildAll();
   }
 
+  // ---------- Plano de corte alineado a una cara ----------
+  const cutMat = new THREE.MeshBasicMaterial({ color:0xF2B705, transparent:true, opacity:0.07, side:THREE.DoubleSide, depthWrite:false });
+  const cutHelper = new THREE.Group();
+  const cutQuad = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), cutMat);
+  const cutEdge = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-.5, -.5, 0), new THREE.Vector3(.5, -.5, 0), new THREE.Vector3(.5, .5, 0), new THREE.Vector3(-.5, .5, 0)]),
+    new THREE.LineBasicMaterial({ color:0xF2B705 }));
+  cutHelper.add(cutQuad, cutEdge); cutHelper.visible = false; cutHelper.renderOrder = 3;
+  scene.add(cutHelper);
+
+  function syncClipping(){
+    const before = allPlanes.length;
+    allPlanes.length = 0;
+    if (S.section) clipPlanes.forEach(pl => allPlanes.push(pl));
+    if (CUT.on) allPlanes.push(CUT.plane);
+    MATS.forEach(mt => {
+      mt.clippingPlanes = allPlanes.length ? allPlanes : null;
+      if (before !== allPlanes.length) mt.needsUpdate = true;
+    });
+    requestRender();
+  }
+
+  // El plano se coloca sobre la cara; se conserva lo que hay detrás de ella (el objeto)
+  function setCutFromFace(point, normalTowardCamera){
+    CUT.point.copy(point);
+    CUT.normal.copy(normalTowardCamera).negate();     // apunta hacia dentro: lo que se conserva
+    CUT.offset = 0;
+    CUT.on = true; CUT.picking = false;
+    view.classList.remove("picking");
+    const size = Math.max(S.bounds.isEmpty() ? 50 : S.bounds.getSize(new THREE.Vector3()).length(), 1);
+    $("cutRange").min = (-size).toFixed(2); $("cutRange").max = size.toFixed(2);
+    $("cutHint").textContent = "Plano sobre la cara elegida.";
+    $("cutControls").hidden = false;
+    updateCut();
+  }
+  function updateCut(){
+    const p0 = CUT.point.clone().addScaledVector(CUT.normal, CUT.offset);
+    CUT.plane.setFromNormalAndCoplanarPoint(CUT.normal, p0);
+    $("cutRange").value = CUT.offset; $("cutNum").value = CUT.offset.toFixed(2);
+    const size = Math.max(S.bounds.isEmpty() ? 50 : S.bounds.getSize(new THREE.Vector3()).length(), 1) * 0.75;
+    // centrado sobre el modelo, no sobre el punto pulsado
+    const center = S.bounds.isEmpty() ? p0 : CUT.plane.projectPoint(S.bounds.getCenter(new THREE.Vector3()), new THREE.Vector3());
+    cutHelper.position.copy(center);
+    cutHelper.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), CUT.normal);
+    cutHelper.scale.set(size, size, 1);
+    cutHelper.visible = CUT.on && $("cutShow").checked;
+    syncClipping();
+  }
+  function startCutPick(){
+    CUT.picking = true;
+    view.classList.add("picking");
+    $("cutPanel").hidden = false;
+    $("cutHint").textContent = "Haz clic en una cara del modelo.";
+    $("cutBtn").setAttribute("aria-pressed", "true");
+  }
+  function setCut(on){
+    if (on){ startCutPick(); return; }
+    CUT.on = false; CUT.picking = false;
+    view.classList.remove("picking");
+    $("cutPanel").hidden = true; $("cutControls").hidden = true;
+    $("cutBtn").setAttribute("aria-pressed", "false");
+    cutHelper.visible = false;
+    syncClipping();
+  }
+  function lookAtCut(){
+    if (!CUT.on) return;
+    if (camera !== ortho) setOrtho(true);
+    fitTo(visibleBox(), CUT.normal.clone().negate());   // desde el lado cortado, mirando la sección
+  }
+
   // ---------- Sección ----------
   function setSection(on){
     S.section = on;
     $("sectionBtn").setAttribute("aria-pressed", String(on));
     $("sectionPanel").hidden = !on;
-    MATS.forEach(mt => { mt.clippingPlanes = on ? clipPlanes : null; mt.needsUpdate = true; });
     if (on) applySection();
+    syncClipping();
     sectionHelper.visible = on;
     requestRender();
   }
@@ -1305,7 +1418,7 @@ function workerMain(){
     );
     S.sectionBox.set(new THREE.Vector3(x0, z0, -y1), new THREE.Vector3(x1, z1, -y0));
     sectionHelper.box.copy(S.sectionBox);
-    requestRender();
+    syncClipping();
   }
   function sectionToSelection(){
     if (!S.sel || S.bounds.isEmpty()) return;
@@ -1971,6 +2084,13 @@ function workerMain(){
   $("orthoBtn").addEventListener("click", () => setOrtho(camera !== ortho));
   $("fitBtn").addEventListener("click", fitAll);
   $("sectionBtn").addEventListener("click", () => setSection(!S.section));
+  $("cutBtn").addEventListener("click", () => setCut(!(CUT.on || CUT.picking)));
+  $("cutRange").addEventListener("input", e => { CUT.offset = +e.target.value; updateCut(); });
+  $("cutNum").addEventListener("change", e => { const v = parseNum(e.target.value); if (!isNaN(v)){ CUT.offset = v; updateCut(); } });
+  $("cutFlip").addEventListener("click", () => { CUT.point.addScaledVector(CUT.normal, CUT.offset); CUT.offset = 0; CUT.normal.negate(); updateCut(); });
+  $("cutShow").addEventListener("change", updateCut);
+  $("cutLook").addEventListener("click", lookAtCut);
+  $("cutNew").addEventListener("click", () => { CUT.on = false; cutHelper.visible = false; syncClipping(); $("cutControls").hidden = true; startCutPick(); });
   ["sx0","sx1","sy0","sy1","sz0","sz1"].forEach(id => $(id).addEventListener("input", applySection));
   $("sectionSel").addEventListener("click", sectionToSelection);
   $("sectionReset").addEventListener("click", sectionReset);
@@ -2015,7 +2135,7 @@ function workerMain(){
   window.addEventListener("keydown", e => {
     if (e.target.matches("input, select, textarea")) return;
     const k = e.key.toLowerCase();
-    if (k === "escape") select(null);
+    if (k === "escape"){ if (CUT.picking && !CUT.on) setCut(false); else if (CUT.picking){ CUT.picking = false; view.classList.remove("picking"); } else select(null); }
     else if (k === "h") hideSelected();
     else if (k === "i") isolateSelected();
     else if (k === "f") fitSelection();
@@ -2023,7 +2143,7 @@ function workerMain(){
 
   applyTheme();
   resize();
-  window.__visor = { MS, S, handleFiles, pick, select, setView, setSection, fitAll, renderer, get camera(){ return camera; } };
+  window.__visor = { CUT, MS, S, handleFiles, pick, select, setView, setSection, fitAll, renderer, get camera(){ return camera; } };
 })();
 </script>
 </body>
