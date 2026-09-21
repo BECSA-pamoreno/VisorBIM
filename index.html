@@ -118,6 +118,11 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
 #mInfo{padding:6px 12px;font-size:13px}
 .mtable{flex:1;overflow:auto;min-height:0}
 #mTable{font-size:13px}
+#mTable.fixed{table-layout:fixed}
+#mTable.fixed td{overflow:hidden;text-overflow:ellipsis}
+.col-rs{position:absolute;top:0;right:-4px;width:9px;height:100%;cursor:col-resize;z-index:2;touch-action:none}
+.col-rs::after{content:"";position:absolute;top:20%;bottom:20%;left:4px;width:1px;background:var(--line)}
+.col-rs:hover::after,.col-rs.drag::after{background:var(--accent);width:3px;left:3px}
 #mTable th{position:sticky;top:0;background:var(--soft);text-align:left;font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;z-index:1}
 #mTable td{padding:3px 8px;border-bottom:1px solid var(--line);vertical-align:middle;width:auto;color:var(--ink)}
 #mTable td.num,#mTable th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -1438,8 +1443,8 @@ function workerMain(){
 
   // ---------- Medición ----------
   const M_KEY = "visor-bim-medicion-v1";
-  const UNITS = { m:"m", m2:"m²", m3:"m³", ud:"ud" };
-  const UNIT_LABELS = { m:"m lineal", m2:"m² superficie", m3:"m³ volumen", ud:"ud" };
+  const UNITS = { m:"m", m2:"m²", m3:"m³", kg:"kg", ud:"ud" };
+  const UNIT_LABELS = { m:"m lineal", m2:"m² superficie", m3:"m³ volumen", kg:"kg (W × longitud)", ud:"ud" };
   const UNIT_RULES = [
     [/accesorio|union|fitting|terminal|equipo|aparato|luminaria|puerta|ventana|mobiliario|door|window|equipment|fixture/, "ud"],
     [/^(muros|suelos|cubiertas|techos|suelos estructurales|paneles de muro cortina|walls|floors|roofs|ceilings|curtain panels)$/, "m2"],
@@ -1484,12 +1489,15 @@ function workerMain(){
     const m2 = pick(["area (m²)", "area (m2)"], ["area"]);
     const m3 = pick(["volumen (m³)", "volumen (m3)"], ["volumen", "volume"]);
     const m2b = exact(["area bruta (m²)", "area bruta (m2)"]);
-    return { m:m.i, m2:m2.i, m3:m3.i, m2b, raw:{ m:m.raw, m2:m2.raw, m3:m3.raw } };
+    const kg = exact(["peso (kg)"]);
+    const w = pick(["w (kg/m)"], ["w"]);
+    return { m:m.i, m2:m2.i, m3:m3.i, m2b, kg, w:w.i, raw:{ m:m.raw, m2:m2.raw, m3:m3.raw, w:w.raw } };
   }
   const UNIT_FACTORS = {
     m:  { mm:1e-3, cm:1e-2, dm:1e-1, m:1, km:1e3 },
     m2: { "mm²":1e-6, "cm²":1e-4, "dm²":1e-2, "m²":1, "mm2":1e-6, "cm2":1e-4, "m2":1 },
-    m3: { "mm³":1e-9, "cm³":1e-6, "dm³":1e-3, "m³":1, "l":1e-3, "mm3":1e-9, "cm3":1e-6, "m3":1 }
+    m3: { "mm³":1e-9, "cm³":1e-6, "dm³":1e-3, "m³":1, "l":1e-3, "mm3":1e-9, "cm3":1e-6, "m3":1 },
+    kgm: { "kg/m":1, "kgf/m":1 }
   };
   function parseQty(v, kind, raw){
     const s = String(v ?? "").trim();
@@ -1509,6 +1517,8 @@ function workerMain(){
 
   function defaultUnit(cat, row){
     const c = plain(cat);
+    // Vigas y pilares con W (acero): por peso
+    if (/pilares estructurales|armazon estructural|structural columns|structural framing/.test(c) && row.miss.kg < row.n) return "kg";
     let u = "ud";
     for (const [re, unit] of UNIT_RULES){ if (re.test(c)){ u = unit; break; } }
     if (u !== "ud" && row.miss[u] === row.n){
@@ -1538,7 +1548,7 @@ function workerMain(){
         const key = cat + "|" + fam + "|" + tipo + (size ? "|" + size : "");
         let it = byKey.get(key);
         if (!it){
-          it = { key, cat, fam, tipo, size, n:0, sums:{ m2:0, m3:0, m:0, m2b:0 }, miss:{ m2:0, m3:0, m:0, m2b:0 }, model:{ code:"", desc:"", cost:null }, els:[] };
+          it = { key, cat, fam, tipo, size, n:0, sums:{ m2:0, m3:0, m:0, m2b:0, kg:0 }, miss:{ m2:0, m3:0, m:0, m2b:0, kg:0 }, model:{ code:"", desc:"", cost:null }, els:[] };
           byKey.set(key, it);
         }
         it.n++;
@@ -1547,6 +1557,13 @@ function workerMain(){
           const v = mc[u] >= 0 ? parseQty(row[mc[u]], u, mc.raw[u]) : NaN;
           if (isNaN(v) || v <= 0) it.miss[u]++; else it.sums[u] += v;
         });
+        // kg: peso calculado por la macro; si no está, W x longitud
+        let kg = mc.kg >= 0 ? parseQty(row[mc.kg], "kg", true) : NaN;
+        if ((isNaN(kg) || kg <= 0) && mc.w >= 0 && mc.m >= 0){
+          const w = parseQty(row[mc.w], "kgm", mc.raw.w), l = parseQty(row[mc.m], "m", mc.raw.m);
+          if (w > 0 && l > 0) kg = w * l;
+        }
+        if (isNaN(kg) || kg <= 0) it.miss.kg++; else it.sums.kg += kg;
         const vb = mc.m2b >= 0 ? parseQty(row[mc.m2b], "m2", true) : NaN;
         if (isNaN(vb) || vb <= 0) it.miss.m2b++; else { it.sums.m2b += vb; it.hasGross = true; }
         if (!it.model.code && mc.code >= 0 && row[mc.code]) it.model.code = String(row[mc.code]).trim();
@@ -1659,6 +1676,7 @@ function workerMain(){
       });
     }
     tbody.append(frag);
+    applyColWidths();
     updateMeasureTotals();
     if (MS.active) markActive();
   }
@@ -1783,6 +1801,51 @@ function workerMain(){
     if (!box.isEmpty()) fitTo(box);
   }
 
+  // Anchos de columna ajustables: arrastrar el borde; doble clic para volver a los de por defecto
+  const COLW_KEY = "visor-bim-anchos-columnas-v1";
+  let colW = (() => { try{ return JSON.parse(localStorage.getItem(COLW_KEY) || "{}") || {}; } catch(e){ return {}; } })();
+  function applyColWidths(){
+    const table = $("mTable"), mode = $("mMode").value, ths = Array.from(table.tHead.rows[0].cells);
+    const ws = colW[mode];
+    if (ws && ws.length === ths.length){
+      ths.forEach((th, i) => th.style.width = ws[i] + "px");
+      table.style.width = ws.reduce((a, b) => a + b, 0) + "px";
+      table.classList.add("fixed");
+    } else {
+      ths.forEach(th => th.style.width = "");
+      table.style.width = ""; table.classList.remove("fixed");
+    }
+    ths.forEach((th, i) => {
+      const h = document.createElement("span"); h.className = "col-rs";
+      h.title = "Arrastra para cambiar el ancho. Doble clic: anchos por defecto";
+      h.addEventListener("pointerdown", e => startResize(e, i, h));
+      h.addEventListener("dblclick", e => { e.stopPropagation(); delete colW[mode]; saveColW(); applyColWidths(); });
+      th.append(h);
+    });
+  }
+  function saveColW(){ try{ localStorage.setItem(COLW_KEY, JSON.stringify(colW)); } catch(e){} }
+  function startResize(e, i, handle){
+    e.preventDefault(); e.stopPropagation();
+    const table = $("mTable"), mode = $("mMode").value, ths = Array.from(table.tHead.rows[0].cells);
+    const widths = ths.map(th => th.getBoundingClientRect().width);
+    ths.forEach((th, k) => th.style.width = widths[k] + "px");
+    table.style.width = widths.reduce((a, b) => a + b, 0) + "px";
+    table.classList.add("fixed");
+    const x0 = e.clientX, w0 = widths[i];
+    handle.classList.add("drag"); handle.setPointerCapture(e.pointerId);
+    const move = ev => {
+      widths[i] = Math.max(48, Math.round(w0 + ev.clientX - x0));
+      ths[i].style.width = widths[i] + "px";
+      table.style.width = widths.reduce((a, b) => a + b, 0) + "px";
+    };
+    const up = () => {
+      handle.classList.remove("drag");
+      handle.removeEventListener("pointermove", move); handle.removeEventListener("pointerup", up); handle.removeEventListener("pointercancel", up);
+      colW[mode] = widths.map(Math.round); saveColW();
+    };
+    handle.addEventListener("pointermove", move); handle.addEventListener("pointerup", up); handle.addEventListener("pointercancel", up);
+  }
+
   function refreshMeasure(){ if (!MS.open) return; computeMeasure(); renderMeasure(); }
   function setMeasure(on){
     MS.open = on;
@@ -1869,7 +1932,8 @@ function workerMain(){
         ["Ámbito", $("mScope").options[$("mScope").selectedIndex].text],
         ["Muros en m²", MS.wallArea === "bruta" ? "Área bruta: longitud x altura, sin descontar huecos" : "Área neta: área de Revit, descontando huecos"],
         ["Instalaciones", "Una línea por tipo y tamaño; aislamientos por espesor"],
-        ["Unidades", "Valores internos de Revit convertidos a m, m² y m³"]
+        ["Unidades", "Valores internos de Revit convertidos a m, m² y m³"],
+        ["kg", "W (kg/m) x longitud; en vigas, longitud de corte"]
       ];
       const wsC = X.utils.aoa_to_sheet(crit); wsC["!cols"] = [{ wch:18 }, { wch:70 }];
       X.utils.book_append_sheet(wb, wsC, "Criterios");
