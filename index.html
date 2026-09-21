@@ -194,14 +194,6 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
       <ul class="results" id="results"></ul>
     </section>
     <section>
-      <h2>Colorear</h2>
-      <div class="row"><select id="colorBy" aria-label="Colorear por">
-        <option value="@cat">Por categoría</option>
-        <option value="@model">Por modelo</option>
-      </select></div>
-      <ul class="list" id="legend"></ul>
-    </section>
-    <section>
       <h2>Categorías</h2>
       <div class="row">
         <button class="btn small" id="allOn">Mostrar todas</button>
@@ -579,7 +571,7 @@ function workerMain(){
   const $ = id => document.getElementById(id);
   const PALETTE = ["#8FA3B0","#C4A882","#9DB39A","#B79595","#A59CC0","#86AEB5","#C2B28A","#A0A8A2","#B7A08E","#8E9EC4","#B3A2B8","#94B39F"];
   const MODEL_COLORS = ["#6F93B5","#C98B5B","#7FA87A","#B07AA1","#C9B458","#6FAFB0","#A87C6F","#8C8FC4"];
-  const OTHER = "#B8BEC2", NODATA = "#A9B0B5";
+  const NODATA = "#A9B0B5";
   const FAR_METERS = 20000;
   const fmtInt = n => n.toLocaleString("es-ES");
 
@@ -663,7 +655,6 @@ function workerMain(){
     isolate: null,                        // Map(modelId -> Set(e))
     search: false, ghostOn: true,
     edges: true, xray: false,
-    colorBy: "@cat", valueColors: null,
     section: false, sectionBox: new THREE.Box3(), bounds: new THREE.Box3(),
     pendingData: new Map()                // stem -> File (xlsx sin su dae)
   };
@@ -841,24 +832,13 @@ function workerMain(){
     return d.rows[r][ci];
   }
 
-  function computeValueColors(){
-    S.valueColors = null;
-    if (S.colorBy[0] === "@") return;
-    const counts = new Map();
-    S.models.forEach(m => { if (!m.ready) return; for (let e = 0; e < m.n; e++){ const v = String(cellOf(m, e, S.colorBy)); if (v) counts.set(v, (counts.get(v) || 0) + 1); } });
-    const top = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).slice(0, PALETTE.length);
-    const map = new Map(top.map(([v], i) => [v, PALETTE[i]]));
-    let others = 0; counts.forEach((n, v) => { if (!map.has(v)) others += n; });
-    S.valueColors = { map, top, others };
-  }
+
 
   const tmpColor = new THREE.Color();
   function colorFor(m, e){
-    if (S.colorBy === "@cat") return S.cats[m.catIdx[e]] ? S.cats[m.catIdx[e]].color : NODATA;
-    if (S.colorBy === "@model") return m.color;
-    const v = String(cellOf(m, e, S.colorBy));
-    return (v && S.valueColors && S.valueColors.map.get(v)) || OTHER;
+    return S.cats[m.catIdx[e]] ? S.cats[m.catIdx[e]].color : NODATA;
   }
+
 
   function recolor(m){
     if (!m.ready) return;
@@ -930,8 +910,6 @@ function workerMain(){
   function onModelsChanged(fit){
     rebuildCats();
     fillColumnSelects();
-    computeValueColors();
-    renderLegend();
     S.models.forEach(recolor);
     if (S.search) runSearch(true);
     rebuildAll();
@@ -1039,23 +1017,7 @@ function workerMain(){
       ul.append(li);
     });
   }
-  function renderLegend(){
-    const ul = $("legend");
-    ul.innerHTML = "";
-    const add = (color, text, count) => {
-      const li = document.createElement("li");
-      const sw = document.createElement("span"); sw.className = "sw"; sw.style.background = color;
-      const nm = document.createElement("span"); nm.className = "name"; nm.style.flex = "1"; nm.textContent = text; nm.title = text;
-      li.append(sw, nm);
-      if (count != null){ const ct = document.createElement("span"); ct.className = "count"; ct.textContent = fmtInt(count); li.append(ct); }
-      ul.append(li);
-    };
-    if (S.colorBy === "@model") S.models.filter(m => m.ready).forEach(m => add(m.color, m.name, m.n));
-    else if (S.colorBy !== "@cat" && S.valueColors){
-      S.valueColors.top.forEach(([v, n]) => add(S.valueColors.map.get(v), v, n));
-      if (S.valueColors.others) add(OTHER, "Otros valores", S.valueColors.others);
-    }
-  }
+
 
   function setAllCats(v){ S.cats.forEach(c => c.visible = v); renderCats(); rebuildAll(); }
 
@@ -1442,15 +1404,10 @@ function workerMain(){
     const cols = allColumns();
     const sc = $("searchCol"), prevS = sc.value;
     sc.innerHTML = '<option value="">Cualquier parámetro</option>';
-    const cb = $("colorBy"), prevC = cb.value;
-    cb.innerHTML = '<option value="@cat">Por categoría</option><option value="@model">Por modelo</option>';
     cols.forEach(c => {
       const o = document.createElement("option"); o.value = c; o.textContent = c; sc.append(o);
-      if (/^(elementid|uniqueid)$/i.test(c)) return;
-      const o2 = document.createElement("option"); o2.value = c; o2.textContent = "Por " + c; cb.append(o2);
     });
     if (cols.includes(prevS)) sc.value = prevS;
-    if (prevC[0] === "@" || cols.includes(prevC)) cb.value = prevC; else { cb.value = "@cat"; S.colorBy = "@cat"; }
   }
 
   function parseNum(v){
@@ -2127,7 +2084,6 @@ function workerMain(){
   $("clearBtn").addEventListener("click", clearSearch);
   $("ghost").addEventListener("change", () => { S.ghostOn = $("ghost").checked; rebuildAll(); });
   $("sumCol").addEventListener("change", updateSum);
-  $("colorBy").addEventListener("change", e => { S.colorBy = e.target.value; computeValueColors(); renderLegend(); S.models.forEach(recolor); requestRender(); });
   $("propFilter").addEventListener("input", renderPropRows);
   $("zoomSel").addEventListener("click", fitSelection);
   $("hideSel").addEventListener("click", hideSelected);
