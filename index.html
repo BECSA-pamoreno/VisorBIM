@@ -1443,7 +1443,7 @@ function workerMain(){
   const UNIT_RULES = [
     [/accesorio|union|fitting|terminal|equipo|aparato|luminaria|puerta|ventana|mobiliario|door|window|equipment|fixture/, "ud"],
     [/^(muros|suelos|cubiertas|techos|suelos estructurales|paneles de muro cortina|walls|floors|roofs|ceilings|curtain panels)$/, "m2"],
-    [/pilares estructurales|armazon estructural|cimentacion estructural|structural columns|structural framing|structural foundations/, "m3"],
+    [/pilares estructurales|armazon estructural|cimentacion estructural|structural columns|structural framing|structural foundations|^escaleras$|^stairs$/, "m3"],
     [/tuberia|conducto|bandeja|tubo|barandilla|aislamiento|pipe|duct|cable tray|conduit|railing|insulation/, "m"]
   ];
   // Instalaciones: el tamaño es de ejemplar, así que cada tamaño va en su propia línea
