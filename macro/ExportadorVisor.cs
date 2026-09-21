@@ -15,7 +15,9 @@
  *      (Proyecto > Añadir referencia). En Revit 2025+ no hace falta.
  *   4. Compila, abre una vista 3D, oculta lo que no quieras exportar y ejecuta ExportarVisor.
  *
- * Unidades: la geometría se escribe en metros.
+ * Unidades: la geometría se escribe en metros. Requiere Revit 2023 o posterior.
+ * Medición: las columnas "Longitud (m)", "Área (m²)" y "Volumen (m³)" salen del valor interno
+ * de Revit, así que son exactas aunque el proyecto use mm u otras unidades.
  *
  * Coordenadas: con USAR_COORDENADAS_COMPARTIDAS = true la geometría sale en coordenadas
  * compartidas, para que varios modelos (arquitectura, estructura, instalaciones...) caigan
@@ -40,6 +42,22 @@ using Autodesk.Revit.UI;
 
     private const double PIES_A_METROS = 0.3048;
     private const bool USAR_COORDENADAS_COMPARTIDAS = true;
+
+    // Columnas de medición: valor interno de Revit convertido a m, m² y m³ (no dependen de las unidades del proyecto)
+    private const string COL_LONG = "Longitud (m)";
+    private const string COL_AREA = "Área (m²)";
+    private const string COL_VOL = "Volumen (m³)";
+    private const string COL_AREA_BRUTA = "Área bruta (m²)";   // muros: longitud x altura, sin descontar huecos
+    private const string COL_TAM_MEP = "Tamaño MEP";            // tamaño calculado, o espesor en aislamientos
+
+    // Instalaciones que se miden por tipo + tamaño (mismo criterio que el add-in de Woodea)
+    private static readonly HashSet<BuiltInCategory> CATEGORIAS_MEP = new HashSet<BuiltInCategory>
+    {
+        BuiltInCategory.OST_Conduit, BuiltInCategory.OST_FlexDuctCurves, BuiltInCategory.OST_PipeCurves,
+        BuiltInCategory.OST_PipeFitting, BuiltInCategory.OST_DuctCurves, BuiltInCategory.OST_DuctFitting,
+        BuiltInCategory.OST_CableTray, BuiltInCategory.OST_CableTrayFitting, BuiltInCategory.OST_FlexPipeCurves,
+        BuiltInCategory.OST_PipeInsulations, BuiltInCategory.OST_DuctInsulations
+    };
 
     // Transformación interna -> compartida y origen (en metros) del archivo que se está exportando
     private Transform _transformacion = Transform.Identity;
@@ -119,7 +137,7 @@ using Autodesk.Revit.UI;
             EscribirEscena(dae, ids);
         }
 
-        List<string> fijas = new List<string> { "ElementId", "UniqueId", "Categoría", "Familia", "Tipo", "Nivel" };
+        List<string> fijas = new List<string> { "ElementId", "UniqueId", "Categoría", "Familia", "Tipo", "Nivel", COL_TAM_MEP, COL_LONG, COL_AREA, COL_AREA_BRUTA, COL_VOL };
         List<string> columnas = new List<string>(fijas);
         columnas.AddRange(columnasExtra.Where(c => !fijas.Contains(c)).OrderBy(c => c.StartsWith("Tipo: ") ? 1 : 0).ThenBy(c => c, StringComparer.CurrentCultureIgnoreCase));
         EscribirXlsx(rutaXlsx, columnas, filas);
@@ -250,9 +268,107 @@ using Autodesk.Revit.UI;
         }
         d["Nivel"] = nivel;
 
+        AnadirMediciones(el, d);
         AnadirParametros(el, "", d, columnasExtra);
         if (tipo != null) AnadirParametros(tipo, "Tipo: ", d, columnasExtra);
         return d;
+    }
+
+    private void AnadirMediciones(Element el, Dictionary<string, string> d)
+    {
+        BuiltInCategory bic = el.Category != null ? el.Category.BuiltInCategory : BuiltInCategory.INVALID;
+        double v;
+
+        // Tamaño para instalaciones: espesor en aislamientos, tamaño calculado en el resto
+        if (CATEGORIAS_MEP.Contains(bic))
+        {
+            BuiltInParameter bipTam = bic == BuiltInCategory.OST_PipeInsulations ? BuiltInParameter.RBS_INSULATION_THICKNESS_FOR_PIPE
+                : bic == BuiltInCategory.OST_DuctInsulations ? BuiltInParameter.RBS_INSULATION_THICKNESS_FOR_DUCT
+                : BuiltInParameter.RBS_CALCULATED_SIZE;
+            Parameter pt = null;
+            try { pt = el.get_Parameter(bipTam); } catch { pt = null; }
+            if (pt != null && pt.HasValue)
+            {
+                string tam = pt.AsValueString();
+                if (!string.IsNullOrEmpty(tam)) d[COL_TAM_MEP] = tam;
+            }
+        }
+
+        // Longitud (ml)
+        bool sinLongitud = bic == BuiltInCategory.OST_Floors || bic == BuiltInCategory.OST_Roofs || bic == BuiltInCategory.OST_Ceilings;
+        if (!sinLongitud)
+        {
+            double lon = 0;
+            if (bic == BuiltInCategory.OST_Walls)
+            {
+                LocationCurve lc = el.Location as LocationCurve;
+                if (lc != null && lc.Curve != null) lon = lc.Curve.Length;
+            }
+            else if (bic == BuiltInCategory.OST_CurtainWallPanels)
+            {
+                Parameter pw = el.get_Parameter(BuiltInParameter.CURTAIN_WALL_PANELS_WIDTH);
+                if (pw != null && pw.HasValue) lon = pw.AsDouble();
+            }
+            else if (Medida(el, BuiltInParameter.CURVE_ELEM_LENGTH, SpecTypeId.Length, new string[] { "Longitud", "Length" }, out v)) lon = v;
+            if (lon > 0) d[COL_LONG] = M(lon, UnitTypeId.Meters);
+        }
+
+        // Área (m²): en muros se guardan neta y bruta; el visor usa la que elija el usuario
+        double area = 0;
+        if (bic == BuiltInCategory.OST_Walls)
+        {
+            Parameter pa = el.get_Parameter(BuiltInParameter.HOST_AREA_COMPUTED);
+            if (pa != null && pa.HasValue) area = pa.AsDouble();
+            Parameter ph = el.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM);
+            Parameter pl = el.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH);
+            if (ph != null && pl != null && ph.HasValue && pl.HasValue && ph.AsDouble() * pl.AsDouble() > 0)
+                d[COL_AREA_BRUTA] = M(ph.AsDouble() * pl.AsDouble(), UnitTypeId.SquareMeters);
+        }
+        else if (bic == BuiltInCategory.OST_Windows)
+        {
+            FamilyInstance fi = el as FamilyInstance;
+            if (fi != null && fi.Symbol != null)
+            {
+                Parameter pw = fi.Symbol.get_Parameter(BuiltInParameter.WINDOW_WIDTH);
+                Parameter ph = fi.Symbol.get_Parameter(BuiltInParameter.WINDOW_HEIGHT);
+                if (pw != null && ph != null && pw.HasValue && ph.HasValue) area = pw.AsDouble() * ph.AsDouble();
+            }
+        }
+        else if (Medida(el, BuiltInParameter.HOST_AREA_COMPUTED, SpecTypeId.Area, new string[] { "Área", "Area" }, out v)) area = v;
+        if (area > 0) d[COL_AREA] = M(area, UnitTypeId.SquareMeters);
+
+        // Volumen (m³)
+        if (Medida(el, BuiltInParameter.HOST_VOLUME_COMPUTED, SpecTypeId.Volume, new string[] { "Volumen", "Volume" }, out v))
+            d[COL_VOL] = M(v, UnitTypeId.CubicMeters);
+    }
+
+    private string M(double valorInterno, ForgeTypeId unidad)
+    {
+        return UnitUtils.ConvertFromInternalUnits(valorInterno, unidad).ToString("0.####", INV);
+    }
+
+    // Primero el parámetro de sistema; si no existe, uno con ese nombre y ese tipo de dato (conductos, aislamientos...)
+    private bool Medida(Element el, BuiltInParameter bip, ForgeTypeId tipoDato, string[] nombres, out double valor)
+    {
+        valor = 0;
+        Parameter p = null;
+        try { p = el.get_Parameter(bip); } catch { p = null; }
+        if (p != null && p.HasValue && p.StorageType == StorageType.Double)
+        {
+            valor = p.AsDouble();
+            if (valor > 0) return true;
+        }
+        foreach (Parameter q in el.Parameters)
+        {
+            if (q == null || !q.HasValue || q.StorageType != StorageType.Double || q.Definition == null) continue;
+            if (Array.IndexOf(nombres, q.Definition.Name) < 0) continue;
+            ForgeTypeId dt = null;
+            try { dt = q.Definition.GetDataType(); } catch { dt = null; }
+            if (dt == null || !dt.Equals(tipoDato)) continue;
+            valor = q.AsDouble();
+            if (valor > 0) return true;
+        }
+        return false;
     }
 
     private void AnadirParametros(Element el, string prefijo, Dictionary<string, string> d, HashSet<string> columnasExtra)
@@ -330,7 +446,8 @@ using Autodesk.Revit.UI;
                 w.Write("<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">");
                 w.Write("<sheetViews><sheetView workbookViewId=\"0\"><pane ySplit=\"1\" topLeftCell=\"A2\" activePane=\"bottomLeft\" state=\"frozen\"/></sheetView></sheetViews>");
                 w.Write("<sheetData>");
-                EscribirFila(w, 1, columnas);
+                HashSet<int> numericas = new HashSet<int> { columnas.IndexOf(COL_LONG), columnas.IndexOf(COL_AREA), columnas.IndexOf(COL_AREA_BRUTA), columnas.IndexOf(COL_VOL) };
+                EscribirFila(w, 1, columnas, null);
                 int r = 2;
                 foreach (Dictionary<string, string> fila in filas)
                 {
@@ -340,20 +457,25 @@ using Autodesk.Revit.UI;
                         string v;
                         valores.Add(fila.TryGetValue(c, out v) ? v : "");
                     }
-                    EscribirFila(w, r++, valores);
+                    EscribirFila(w, r++, valores, numericas);
                 }
                 w.Write("</sheetData></worksheet>");
             }
         }
     }
 
-    private void EscribirFila(StreamWriter w, int r, List<string> valores)
+    private void EscribirFila(StreamWriter w, int r, List<string> valores, HashSet<int> numericas)
     {
         w.Write("<row r=\"" + r + "\">");
         for (int i = 0; i < valores.Count; i++)
         {
             string v = valores[i];
             if (string.IsNullOrEmpty(v)) continue;
+            if (numericas != null && numericas.Contains(i))
+            {
+                w.Write("<c r=\"" + LetraColumna(i) + r + "\"><v>" + v + "</v></c>");
+                continue;
+            }
             w.Write("<c r=\"" + LetraColumna(i) + r + "\" t=\"inlineStr\"><is><t xml:space=\"preserve\">" + EscaparXml(v) + "</t></is></c>");
         }
         w.Write("</row>");

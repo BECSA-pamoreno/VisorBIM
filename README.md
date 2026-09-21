@@ -22,7 +22,8 @@ Los archivos se leen en el navegador: no se suben a ningún servidor.
 - Medición por tipo o por código de montaje, con cantidad, coste unitario e importe.
   Toma el código de montaje, la descripción y el coste del modelo; lo que falte se puede
   añadir a mano (se guarda en el navegador). Exporta a Excel y CSV.
-  Las instalaciones (tuberías, conductos, bandejas, accesorios, aislamientos) se desglosan por tamaño.
+  Las instalaciones (tuberías, conductos, bandejas, tubos y sus accesorios) se desglosan por tamaño,
+  y los aislamientos por espesor. Los muros en m² se miden por área bruta o neta, a elegir.
 
 ## Estructura
 

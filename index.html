@@ -130,6 +130,8 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
 #mTable input:focus,#mTable select:focus{border-color:var(--accent);background:var(--panel);outline:none}
 #mTable input.manual,#mTable select.manual{background:color-mix(in srgb,var(--accent) 22%,transparent)}
 #mTable input.cost{text-align:right;width:90px}
+.tag-area{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-right:6px;vertical-align:1px}
+#mTable select{min-width:128px}
 #mTable input.code{width:90px}
 #mTable input.desc{min-width:170px}
 #mTable td.ft{min-width:220px}
@@ -273,6 +275,10 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
       <select id="mMode" aria-label="Agrupar">
         <option value="type">Por tipo</option>
         <option value="code">Por código de montaje</option>
+      </select>
+      <select id="mWallArea" aria-label="Criterio de área de muros" title="Cómo se miden los muros en m²">
+        <option value="bruta">Muros: área bruta</option>
+        <option value="neta">Muros: área neta</option>
       </select>
       <input type="text" id="mFilter" placeholder="Filtrar" aria-label="Filtrar filas">
       <label class="check"><input type="checkbox" id="mMissing"> Sin código o sin coste</label>
@@ -1432,7 +1438,8 @@ function workerMain(){
 
   // ---------- Medición ----------
   const M_KEY = "visor-bim-medicion-v1";
-  const UNITS = { m2:"m²", m3:"m³", m:"m", ud:"ud" };
+  const UNITS = { m:"m", m2:"m²", m3:"m³", ud:"ud" };
+  const UNIT_LABELS = { m:"m lineal", m2:"m² superficie", m3:"m³ volumen", ud:"ud" };
   const UNIT_RULES = [
     [/accesorio|union|fitting|terminal|equipo|aparato|luminaria|puerta|ventana|mobiliario|door|window|equipment|fixture/, "ud"],
     [/^(muros|suelos|cubiertas|techos|suelos estructurales|paneles de muro cortina|walls|floors|roofs|ceilings|curtain panels)$/, "m2"],
@@ -1442,7 +1449,9 @@ function workerMain(){
   // Instalaciones: el tamaño es de ejemplar, así que cada tamaño va en su propia línea
   const SIZE_CATS = /tuberia|conducto|bandeja|tubo|aislamiento|accesorio|union|revestimiento|pipe|duct|cable tray|conduit|insulation|fitting|lining/;
   const plain = s => String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
-  const MS = { open:false, rows:[], active:null, ov:loadOverrides() };
+  const MS = { open:false, rows:[], active:null, ov:loadOverrides(), wallArea:loadPref("visor-bim-area-muros", "bruta") };
+  function loadPref(k, d){ try{ return localStorage.getItem(k) || d; } catch(e){ return d; } }
+  function savePref(k, v){ try{ localStorage.setItem(k, v); } catch(e){} }
 
   function loadOverrides(){ try{ return JSON.parse(localStorage.getItem(M_KEY) || "{}") || {}; } catch(e){ return {}; } }
   function saveOverrides(){ try{ localStorage.setItem(M_KEY, JSON.stringify(MS.ov)); } catch(e){ toast("No se pudieron guardar los cambios en este navegador."); } }
@@ -1458,11 +1467,44 @@ function workerMain(){
     return {
       code: find(["codigo de montaje", "assembly code"]),
       desc: find(["descripcion de montaje", "assembly description"]),
+      desc2: find(["descripcion", "description"]),   // descripción del tipo, como hace el add-in
       cost: find(["coste", "cost"]),
       fam: exact(["familia", "family"]), tipo: exact(["tipo", "type"]),
-      m2: exact(["area"]), m3: exact(["volumen", "volume"]), m: exact(["longitud", "length"]),
-      size: exact(["tamano", "size"])
+      size: exact(["tamano", "size"]),
+      mepSize: exact(["tamano mep"]),
+      ...qtyCols(exact)
     };
+  }
+
+  // Longitud (m), Área (m²), Volumen (m³) vienen en valor interno de Revit: exactas en cualquier proyecto.
+  // Si no están (exportación antigua), se usa el parámetro formateado y se convierte su unidad.
+  function qtyCols(exact){
+    const pick = (rawNames, fmtNames) => { const r = exact(rawNames); return r >= 0 ? { i:r, raw:true } : { i:exact(fmtNames), raw:false }; };
+    const m = pick(["longitud (m)"], ["longitud", "length"]);
+    const m2 = pick(["area (m²)", "area (m2)"], ["area"]);
+    const m3 = pick(["volumen (m³)", "volumen (m3)"], ["volumen", "volume"]);
+    const m2b = exact(["area bruta (m²)", "area bruta (m2)"]);
+    return { m:m.i, m2:m2.i, m3:m3.i, m2b, raw:{ m:m.raw, m2:m2.raw, m3:m3.raw } };
+  }
+  const UNIT_FACTORS = {
+    m:  { mm:1e-3, cm:1e-2, dm:1e-1, m:1, km:1e3 },
+    m2: { "mm²":1e-6, "cm²":1e-4, "dm²":1e-2, "m²":1, "mm2":1e-6, "cm2":1e-4, "m2":1 },
+    m3: { "mm³":1e-9, "cm³":1e-6, "dm³":1e-3, "m³":1, "l":1e-3, "mm3":1e-9, "cm3":1e-6, "m3":1 }
+  };
+  function parseQty(v, kind, raw){
+    const s = String(v ?? "").trim();
+    if (!s) return NaN;
+    if (raw) return parseFloat(s.replace(",", "."));
+    const m = s.replace(/(\d)\s+(?=\d)/g, "$1").match(/^(-?[\d.,]+)\s*([^\s]*)/);
+    if (!m) return NaN;
+    let num = m[1];
+    if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(num)) num = num.replace(/\./g, "").replace(",", ".");   // 12.500 o 12.500,5
+    else if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(num)) num = num.replace(/,/g, "");                   // 12,500.5
+    else num = num.replace(",", ".");
+    let x = parseFloat(num);
+    const f = UNIT_FACTORS[kind] && UNIT_FACTORS[kind][m[2].toLowerCase()];
+    if (f !== undefined) x *= f;
+    return x;
   }
 
   function defaultUnit(cat, row){
@@ -1490,21 +1532,26 @@ function workerMain(){
         const cat = d.catCol >= 0 ? String(row[d.catCol] || "") : "";
         const fam = mc.fam >= 0 ? String(row[mc.fam] || "") : "";
         const tipo = mc.tipo >= 0 ? String(row[mc.tipo] || "") : "";
-        const size = mc.size >= 0 && SIZE_CATS.test(plain(cat)) ? String(row[mc.size] || "").trim() : "";
+        const size = mc.mepSize >= 0
+          ? String(row[mc.mepSize] || "").trim()                                            // macro nueva: tamaño o espesor
+          : (mc.size >= 0 && SIZE_CATS.test(plain(cat)) ? String(row[mc.size] || "").trim() : "");
         const key = cat + "|" + fam + "|" + tipo + (size ? "|" + size : "");
         let it = byKey.get(key);
         if (!it){
-          it = { key, cat, fam, tipo, size, n:0, sums:{ m2:0, m3:0, m:0 }, miss:{ m2:0, m3:0, m:0 }, model:{ code:"", desc:"", cost:null }, els:[] };
+          it = { key, cat, fam, tipo, size, n:0, sums:{ m2:0, m3:0, m:0, m2b:0 }, miss:{ m2:0, m3:0, m:0, m2b:0 }, model:{ code:"", desc:"", cost:null }, els:[] };
           byKey.set(key, it);
         }
         it.n++;
         it.els.push(m, e);
         ["m2", "m3", "m"].forEach(u => {
-          const v = mc[u] >= 0 ? parseNum(row[mc[u]]) : NaN;
-          if (isNaN(v)) it.miss[u]++; else it.sums[u] += v;
+          const v = mc[u] >= 0 ? parseQty(row[mc[u]], u, mc.raw[u]) : NaN;
+          if (isNaN(v) || v <= 0) it.miss[u]++; else it.sums[u] += v;
         });
+        const vb = mc.m2b >= 0 ? parseQty(row[mc.m2b], "m2", true) : NaN;
+        if (isNaN(vb) || vb <= 0) it.miss.m2b++; else { it.sums.m2b += vb; it.hasGross = true; }
         if (!it.model.code && mc.code >= 0 && row[mc.code]) it.model.code = String(row[mc.code]).trim();
         if (!it.model.desc && mc.desc >= 0 && row[mc.desc]) it.model.desc = String(row[mc.desc]).trim();
+        if (!it.model.desc2 && mc.desc2 >= 0 && row[mc.desc2]) it.model.desc2 = String(row[mc.desc2]).trim();
         if (it.model.cost === null && mc.cost >= 0){
           const c = parseNum(row[mc.cost]);
           if (!isNaN(c) && c !== 0) it.model.cost = c;   // coste 0 se trata como vacío
@@ -1512,6 +1559,7 @@ function workerMain(){
       }
     });
     MS.rows = Array.from(byKey.values());
+    MS.rows.forEach(r => { if (!r.model.desc && r.model.desc2) r.model.desc = r.model.desc2; });
     MS.rows.forEach(r => r.defUnit = defaultUnit(r.cat, r));
     MS.rows.sort((a, b) => {
       const ca = eff(a, "code"), cb = eff(b, "code");
@@ -1540,8 +1588,10 @@ function workerMain(){
     return r.model[f] || "";
   }
   const isManual = (r, f) => !!(MS.ov[r.key] && Object.prototype.hasOwnProperty.call(MS.ov[r.key], f));
-  const qtyOf = r => { const u = eff(r, "unit"); return u === "ud" ? r.n : r.sums[u]; };
-  const missOf = r => { const u = eff(r, "unit"); return u === "ud" ? 0 : r.miss[u]; };
+  // Muros en m²: bruta (longitud x altura, como el add-in) o neta (Área de Revit, descontando huecos)
+  const useGross = r => MS.wallArea === "bruta" && r.hasGross;
+  const qtyOf = r => { const u = eff(r, "unit"); return u === "ud" ? r.n : (u === "m2" && useGross(r) ? r.sums.m2b : r.sums[u]); };
+  const missOf = r => { const u = eff(r, "unit"); return u === "ud" ? 0 : (u === "m2" && useGross(r) ? r.miss.m2b : r.miss[u]); };
   const amountOf = r => { const c = eff(r, "cost"); return (c === null || c === "" || isNaN(c)) ? null : c * qtyOf(r); };
   const incomplete = r => !eff(r, "code") || amountOf(r) === null;
 
@@ -1589,7 +1639,7 @@ function workerMain(){
     tbody.innerHTML = ""; tfoot.innerHTML = "";
     const frag = document.createDocumentFragment();
     if (mode === "type"){
-      thead.innerHTML = "<tr><th>Código de montaje</th><th>Descripción</th><th>Categoría</th><th>Familia y tipo</th><th>Tamaño</th><th class='num'>Nº</th><th>Ud</th><th class='num'>Cantidad</th><th class='num'>Coste unitario</th><th class='num'>Importe</th><th></th></tr>";
+      thead.innerHTML = "<tr><th>Código de montaje</th><th>Categoría</th><th>Familia y tipo</th><th>Tamaño</th><th>Descripción</th><th class='num'>Nº</th><th>Ud</th><th class='num'>Cantidad</th><th class='num'>Coste unitario</th><th class='num'>Importe</th><th></th></tr>";
       rows.forEach(r => frag.append(typeRow(r)));
     } else {
       thead.innerHTML = "<tr><th>Código de montaje</th><th>Descripción</th><th class='num'>Tipos</th><th class='num'>Nº</th><th>Ud</th><th class='num'>Cantidad</th><th class='num'>Precio medio</th><th class='num'>Importe</th></tr>";
@@ -1622,13 +1672,13 @@ function workerMain(){
       i.value = val; i.placeholder = ph; i.setAttribute("aria-label", ph); return i;
     };
     td(inp("code", "code", eff(r, "code"), "Código"));
-    td(inp("desc", "desc", eff(r, "desc"), "Descripción"));
     td(document.createTextNode(r.cat || "Sin categoría"));
     td(document.createTextNode([r.fam, r.tipo].filter(Boolean).join(": ") || "Sin tipo")).className = "ft";
     td(document.createTextNode(r.size || "")).className = "sz";
+    td(inp("desc", "desc", eff(r, "desc"), "Descripción"));
     td(document.createTextNode(fmtInt(r.n))).className = "num";
     const sel = document.createElement("select"); sel.dataset.f = "unit"; sel.setAttribute("aria-label", "Unidad de medida");
-    Object.keys(UNITS).forEach(u => { const o = document.createElement("option"); o.value = u; o.textContent = UNITS[u]; sel.append(o); });
+    Object.keys(UNITS).forEach(u => { const o = document.createElement("option"); o.value = u; o.textContent = UNIT_LABELS[u]; sel.append(o); });
     sel.value = eff(r, "unit"); if (isManual(r, "unit")) sel.className = "manual";
     td(sel);
     const q = td(null); q.className = "num q";
@@ -1641,9 +1691,15 @@ function workerMain(){
     return tr;
   }
 
+  const u2 = r => eff(r, "unit");
   function fillCalc(tr, r){
     const q = tr.querySelector("td.q"), a = tr.querySelector("td.a");
     q.textContent = fmtQ(qtyOf(r));
+    if (u2(r) === "m2" && r.hasGross){
+      const t = document.createElement("span"); t.className = "tag-area"; t.textContent = useGross(r) ? "bruta" : "neta";
+      t.title = useGross(r) ? "Longitud x altura, sin descontar huecos" : "Área de Revit, descontando huecos";
+      q.prepend(t);
+    }
     const miss = missOf(r);
     if (miss){ const w = document.createElement("span"); w.className = "warn-dot"; w.textContent = "!"; w.title = miss + " elementos sin valor de " + UNITS[eff(r, "unit")] + ": no suman."; q.append(w); }
     const am = amountOf(r);
@@ -1739,10 +1795,10 @@ function workerMain(){
   // ---------- Exportar ----------
   function tableData(mode){
     if (mode === "type"){
-      const head = ["Código de montaje", "Descripción", "Categoría", "Familia", "Tipo", "Tamaño", "Nº elementos", "Ud", "Cantidad", "Coste unitario (€)", "Importe (€)", "Origen código", "Origen coste"];
+      const head = ["Código de montaje", "Categoría", "Familia", "Tipo", "Tamaño", "Descripción", "Nº elementos", "Ud", "Cantidad", "Coste unitario (€)", "Importe (€)", "Origen código", "Origen coste"];
       const body = MS.rows.map(r => {
         const c = eff(r, "cost"), a = amountOf(r);
-        return [eff(r, "code"), eff(r, "desc"), r.cat, r.fam, r.tipo, r.size, r.n, UNITS[eff(r, "unit")], round(qtyOf(r), 3),
+        return [eff(r, "code"), r.cat, r.fam, r.tipo, r.size, eff(r, "desc"), r.n, UNITS[eff(r, "unit")], round(qtyOf(r), 3),
           c === null || c === "" ? "" : round(c, 2), a === null ? "" : round(a, 2),
           eff(r, "code") ? (isManual(r, "code") ? "Manual" : "Modelo") : "", c === null || c === "" ? "" : (isManual(r, "cost") ? "Manual" : "Modelo")];
       });
@@ -1802,10 +1858,21 @@ function workerMain(){
             if (c && c.t === "n") c.z = /nº|tipos/i.test(t.head[C]) ? "0" : (/Cantidad/.test(t.head[C]) ? "#,##0.000" : "#,##0.00");
           });
         }
-        ws["!cols"] = t.head.map((h, i) => ({ wch: i === 1 ? 32 : Math.max(10, Math.min(28, h.length + 2)) }));
+        ws["!cols"] = t.head.map(h => ({ wch: /Descripción|Tipo$|Familia/.test(h) ? 30 : Math.max(10, Math.min(28, h.length + 2)) }));
         ws["!autofilter"] = { ref: X.utils.encode_range({ s:{ r:0, c:0 }, e:{ r:range.e.r - 1, c:range.e.c } }) };
         X.utils.book_append_sheet(wb, ws, name);
       });
+      const crit = [
+        ["Criterios de medición"],
+        ["Fecha", new Date().toLocaleString("es-ES")],
+        ["Modelos", S.models.filter(m => m.ready).map(m => m.name).join(", ")],
+        ["Ámbito", $("mScope").options[$("mScope").selectedIndex].text],
+        ["Muros en m²", MS.wallArea === "bruta" ? "Área bruta: longitud x altura, sin descontar huecos" : "Área neta: área de Revit, descontando huecos"],
+        ["Instalaciones", "Una línea por tipo y tamaño; aislamientos por espesor"],
+        ["Unidades", "Valores internos de Revit convertidos a m, m² y m³"]
+      ];
+      const wsC = X.utils.aoa_to_sheet(crit); wsC["!cols"] = [{ wch:18 }, { wch:70 }];
+      X.utils.book_append_sheet(wb, wsC, "Criterios");
       X.writeFile(wb, "Medicion_" + stamp() + ".xlsx");
     }).catch(err => toast(err.message));
   }
@@ -1860,6 +1927,8 @@ function workerMain(){
   $("mRefresh").addEventListener("click", refreshMeasure);
   $("mScope").addEventListener("change", refreshMeasure);
   $("mMode").addEventListener("change", renderMeasure);
+  $("mWallArea").value = MS.wallArea;
+  $("mWallArea").addEventListener("change", e => { MS.wallArea = e.target.value; savePref("visor-bim-area-muros", MS.wallArea); renderMeasure(); });
   $("mFilter").addEventListener("input", renderMeasure);
   $("mMissing").addEventListener("change", renderMeasure);
   $("mCsv").addEventListener("click", exportCsv);
