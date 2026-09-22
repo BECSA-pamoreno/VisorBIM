@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visor IFC · BECSA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M4 24 16 4l12 20z' fill='%23d9831a'/><path d='M10 24h12' stroke='%23ffffff' stroke-width='3'/></svg>">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("visorIfcTheme")==="dark"?"dark":"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
+<style>
+:root{
+  --bg:#f3f5f8; --panel:#ffffff; --panel2:#eef1f5; --line:#e0e5eb; --line2:#c9d1db;
+  --text:#1c2430; --muted:#5d6979; --faint:#8a94a2;
+  --accent:#d9831a; --accent-ink:#ffffff; --accent-soft:rgba(217,131,26,.12);
+  --danger:#c8453b; --ok:#3f9a62;
+  --shadow:0 8px 24px rgba(20,30,45,.14);
+  --view-bg:radial-gradient(ellipse at 50% 15%,#ffffff 0%,#edf0f4 65%,#e1e6ec 100%);
+  --glass:rgba(255,255,255,.94); --swatch-border:rgba(0,0,0,.18);
+  --row-line:rgba(0,0,0,.05); --row-hover:rgba(0,0,0,.03);
+  color-scheme:light;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --left:300px; --right:350px; --top:46px; --status:26px;
+}
+:root[data-theme="dark"]{
+  --bg:#14191f; --panel:#1b222b; --panel2:#222b36; --line:#2c3744; --line2:#3a4757;
+  --text:#dbe3ec; --muted:#8a97a8; --faint:#5f6b7a;
+  --accent:#f0a73a; --accent-ink:#1d1300; --accent-soft:rgba(240,167,58,.14);
+  --danger:#e5645a; --ok:#6cc28a;
+  --shadow:0 8px 24px rgba(0,0,0,.4);
+  --view-bg:radial-gradient(ellipse at 50% 20%,#2a333e 0%,#1a2028 70%,#161b21 100%);
+  --glass:rgba(27,34,43,.94); --swatch-border:rgba(255,255,255,.25);
+  --row-line:rgba(255,255,255,.035); --row-hover:rgba(255,255,255,.025);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:13px/1.45 var(--sans);overflow:hidden}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+/* ---------- Barra superior ---------- */
+#topbar{position:fixed;inset:0 0 auto 0;height:var(--top);display:flex;align-items:center;gap:6px;padding:0 10px;background:var(--panel);border-bottom:1px solid var(--line);z-index:20;overflow-x:auto;scrollbar-width:none}
+#topbar::-webkit-scrollbar{display:none}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;letter-spacing:.01em;margin-right:6px;white-space:nowrap}
+.brand svg{width:20px;height:20px}
+.sep{width:1px;height:24px;background:var(--line);margin:0 4px;flex:none}
+a.btn{text-decoration:none;color:inherit}
+.btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:5px;border:1px solid transparent;background:transparent;white-space:nowrap;flex:none}
+.btn:hover{background:var(--panel2);border-color:var(--line)}
+.btn svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.btn.primary{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.primary:hover{filter:brightness(1.08);border-color:transparent;background:var(--accent)}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.icon{padding:0 7px}
+.btn:disabled{opacity:.4;cursor:default}
+.spacer{flex:1}
+
+/* ---------- Paneles ---------- */
+#left,#right{position:fixed;top:var(--top);bottom:var(--status);background:var(--panel);display:flex;flex-direction:column;z-index:10}
+#left{left:0;width:var(--left);border-right:1px solid var(--line)}
+#right{right:0;width:var(--right);border-left:1px solid var(--line)}
+body.hide-left #left{display:none}
+body.hide-right #right{display:none}
+.tabs{display:flex;border-bottom:1px solid var(--line);flex:none}
+.tab{flex:1;height:36px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font-weight:500}
+.tab.active{color:var(--text);border-bottom-color:var(--accent)}
+.pane{flex:1;overflow:auto;display:none;min-height:0}
+.pane.active{display:flex;flex-direction:column}
+.panel-title{padding:10px 12px;font-weight:600;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;flex:none}
+.panel-title .muted{font-weight:400}
+.muted{color:var(--muted)}
+.empty{padding:22px 16px;color:var(--muted);line-height:1.6}
+
+/* Modelos */
+.model{padding:10px 12px;border-bottom:1px solid var(--line)}
+.model-head{display:flex;align-items:center;gap:8px}
+.swatch{width:18px;height:18px;border-radius:4px;border:1px solid var(--swatch-border);flex:none;padding:0;position:relative;overflow:hidden}
+.swatch input{position:absolute;inset:-6px;width:40px;height:40px;opacity:0;cursor:pointer}
+.model-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.model-meta{display:flex;gap:10px;color:var(--muted);font-size:12px;margin:4px 0 8px 26px}
+.model-meta .schema{color:var(--accent);font-family:var(--mono);font-size:11.5px}
+.row{display:flex;align-items:center;gap:8px;margin-left:26px}
+.row label{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;cursor:pointer}
+.row input[type=range]{flex:1;accent-color:var(--accent)}
+.mini{height:24px;width:24px;border-radius:4px;border:1px solid transparent;background:none;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);flex:none}
+.mini:hover{background:var(--panel2);border-color:var(--line);color:var(--text)}
+.mini svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.mini.danger:hover{color:var(--danger)}
+.mini.on{color:var(--accent);border-color:var(--accent)}
+.pct{width:34px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px}
+.global-actions{padding:10px 12px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:auto}
+.chip{height:26px;padding:0 9px;font-weight:400;border-radius:13px;border:1px solid var(--line2);background:var(--panel2);font-size:12px}
+.chip:hover{border-color:var(--accent)}
+.chip.on{border-color:var(--accent);color:var(--accent)}
+
+/* Árbol */
+.tree-tools{display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line);flex:none}
+select,input[type=search]{height:28px;border-radius:5px;border:1px solid var(--line2);background:var(--bg);padding:0 8px}
+select{flex:1}
+#tree{flex:1;overflow:auto;padding:6px 4px 20px 0}
+#tree ul{list-style:none;margin:0;padding-left:15px}
+#tree > ul{padding-left:6px}
+#tree li{white-space:nowrap;position:relative}
+#tree li > a{display:inline-block;width:14px;text-align:center;color:var(--muted);text-decoration:none;font-family:var(--mono);font-size:12px}
+#tree li > a:hover{color:var(--accent)}
+#tree li:not(:has(> a)){padding-left:14px}
+#tree input[type=checkbox]{margin:0 5px 0 2px;vertical-align:-2px;accent-color:var(--accent)}
+#tree span{cursor:pointer;padding:1px 4px;border-radius:3px}
+#tree span:hover{background:var(--panel2)}
+#tree .highlighted-node > span{background:var(--accent);color:var(--accent-ink)}
+#tree .xrayed-node > span{opacity:.5}
+
+/* Buscar */
+.search-box{padding:8px 10px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px;flex:none}
+.search-box input{width:100%}
+.search-box .hint{font-size:12px;color:var(--muted)}
+#results{flex:1;overflow:auto}
+.res{padding:6px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.res:hover{background:var(--panel2)}
+.res .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res .t{font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.res .t code{font-family:var(--mono)}
+
+/* Propiedades */
+#props{flex:1;overflow:auto}
+.p-head{padding:12px;border-bottom:1px solid var(--line)}
+.p-name{font-size:15px;font-weight:600;line-height:1.3;word-break:break-word}
+.p-type{color:var(--accent);font-family:var(--mono);font-size:12px;margin-top:2px}
+.guid{display:flex;align-items:center;gap:6px;margin-top:8px;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:4px 4px 4px 8px}
+.guid code{flex:1;font-family:var(--mono);font-size:12.5px;user-select:all;overflow:hidden;text-overflow:ellipsis}
+.p-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+details{border-bottom:1px solid var(--line)}
+summary{padding:8px 12px;cursor:pointer;font-weight:500;display:flex;align-items:center;gap:6px;list-style:none;user-select:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"";width:0;height:0;border:4px solid transparent;border-left:5px solid var(--muted);margin-right:2px;transition:transform .12s}
+details[open] > summary::before{transform:rotate(90deg) translateX(2px)}
+summary .count{margin-left:auto;color:var(--faint);font-weight:400;font-size:12px}
+summary .kind{font-size:11px;color:var(--muted);font-weight:400}
+table.kv{width:100%;border-collapse:collapse;margin:0 0 8px}
+table.kv td{padding:3px 12px;vertical-align:top;border-top:1px solid var(--row-line)}
+table.kv td:first-child{color:var(--muted);width:44%;word-break:break-word}
+table.kv td:last-child{word-break:break-word;font-variant-numeric:tabular-nums}
+table.kv tr:hover td{background:var(--row-hover)}
+.p-filter{padding:8px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.p-filter input{width:100%}
+
+/* Secciones */
+#sections{border-top:1px solid var(--line);flex:none;max-height:40%;overflow:auto}
+#sections:empty,#measures:empty{display:none}
+#measures{border-top:1px solid var(--line);flex:none;max-height:35%;overflow:auto}
+.sec.hl{background:var(--accent-soft)}
+.sec .val{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px}
+.sec{display:flex;align-items:center;gap:4px;padding:5px 8px 5px 12px;border-bottom:1px solid var(--line)}
+.sec .lbl{flex:1;font-size:12.5px}
+.sec input{accent-color:var(--accent)}
+
+/* ---------- Visor ---------- */
+#view{position:fixed;top:var(--top);bottom:var(--status);left:var(--left);right:var(--right);background:var(--view-bg)}
+body.hide-left #view{left:0}
+body.hide-right #view{right:0}
+#viewerCanvas{width:100%;height:100%;display:block;touch-action:none}
+#navCube{position:absolute;right:10px;bottom:10px;width:130px;height:130px;z-index:5}
+#dropzone{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+#dropzone .card{pointer-events:auto;text-align:center;max-width:420px;padding:28px 30px;border:1.5px dashed var(--line2);border-radius:10px;background:var(--glass);backdrop-filter:blur(3px);box-shadow:var(--shadow)}
+#dropzone h2{margin:0 0 6px;font-size:18px;font-weight:600}
+#dropzone p{margin:0 0 16px;color:var(--muted);line-height:1.6}
+#dropzone .formats{display:flex;justify-content:center;gap:6px;margin-top:16px}
+#dropzone .formats span{font-family:var(--mono);font-size:11.5px;padding:2px 8px;border:1px solid var(--line2);border-radius:10px;color:var(--muted)}
+body.has-models #dropzone,body.busy #dropzone{display:none}
+#jobs{position:absolute;left:12px;bottom:12px;width:330px;max-width:calc(100% - 170px);display:flex;flex-direction:column;gap:8px;z-index:6}
+.job{background:var(--glass);box-shadow:var(--shadow);border:1px solid var(--line2);border-radius:8px;padding:9px 10px 10px}
+.job-head{display:flex;align-items:center;gap:8px}
+.job-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.job-size{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.job-phase{font-size:12px;color:var(--muted);margin:3px 0 7px}
+.job-phase b{color:var(--accent);font-weight:500}
+.jbar{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.jbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.jbar.ind i{width:35%;animation:slide 1.1s ease-in-out infinite;transition:none}
+body.dragging #view::after{content:"Suelta los archivos IFC para añadirlos";position:absolute;inset:10px;border:2px dashed var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--accent);background:var(--accent-soft);pointer-events:none;z-index:6}
+#modeHint{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--glass);box-shadow:var(--shadow);border:1px solid var(--line2);border-radius:16px;padding:5px 14px;font-size:12.5px;display:none;z-index:5;white-space:nowrap}
+#modeHint.show{display:block}
+#modeHint b{color:var(--accent);font-weight:600}
+
+/* ---------- Estado, overlay, menú, toast ---------- */
+#status{position:fixed;inset:auto 0 0 0;height:var(--status);display:flex;align-items:center;gap:16px;padding:0 12px;background:var(--panel);border-top:1px solid var(--line);font-size:12px;color:var(--muted);z-index:20}
+#status b{color:var(--text);font-weight:500}
+@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(290%)}}
+#ctx{position:fixed;display:none;min-width:190px;background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:4px;z-index:200;box-shadow:var(--shadow)}
+#ctx.show{display:block}
+#ctx button{display:flex;width:100%;justify-content:space-between;gap:16px;background:none;border:0;padding:6px 10px;border-radius:4px;text-align:left}
+#ctx button:hover{background:var(--accent-soft);color:var(--accent)}
+#ctx button kbd{font-family:var(--mono);font-size:11px;color:var(--faint)}
+#ctx hr{border:0;border-top:1px solid var(--line2);margin:4px 2px}
+#toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:var(--panel);box-shadow:var(--shadow);border:1px solid var(--line2);padding:8px 14px;border-radius:6px;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none;max-width:80vw}
+#toast.show{opacity:1}
+#toast.err{border-color:var(--danger)}
+#help{position:fixed;right:12px;top:52px;width:300px;background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:12px 14px;z-index:150;display:none;box-shadow:var(--shadow)}
+#help.show{display:block}
+#help h3{margin:0 0 8px;font-size:13px}
+#help table{width:100%;border-collapse:collapse;font-size:12.5px}
+#help td{padding:3px 0}
+#help td:first-child{font-family:var(--mono);color:var(--accent);width:92px}
+
+/* Etiquetas de medición xeokit */
+.viewer-ruler-label,.viewer-angle-label{font-family:var(--sans)!important}
+
+@media (max-width:900px){
+  :root{--left:260px;--right:290px}
+  body:not(.show-left) #left{display:none}
+  body:not(.show-right) #right{display:none}
+  body:not(.show-left) #view{left:0}
+  body:not(.show-right) #view{right:0}
+  .btn .t{display:none}
+}
+@media (prefers-reduced-motion:reduce){.jbar.ind i{animation:none;width:100%}}
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <a class="btn icon" href="../index.html" title="Volver al selector de visores"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></a>
+  <div class="brand">
+    <svg viewBox="0 0 32 32"><path d="M4 24 16 4l12 20z" style="fill:var(--accent)"/><path d="M10 24h12" style="stroke:var(--panel)" stroke-width="3"/></svg>
+    Visor IFC
+  </div>
+  <button class="btn icon" id="btnLeft" title="Mostrar u ocultar panel izquierdo"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
+  <button class="btn primary" id="btnOpen" title="Abrir uno o varios archivos IFC">
+    <svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg><span class="t">Abrir IFC</span>
+  </button>
+  <input type="file" id="fileInput" accept=".ifc,.IFC" multiple hidden>
+  <div class="sep"></div>
+  <button class="btn on" data-mode="select" title="Seleccionar elementos (Esc)">
+    <svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-2 6z"/></svg><span class="t">Seleccionar</span></button>
+  <button class="btn" data-mode="section" title="Clic en una superficie para crear un plano de sección">
+    <svg viewBox="0 0 24 24"><path d="M3 17 12 21l9-4M3 12l9 4 9-4"/><path d="M12 3v9" stroke-dasharray="2 2"/></svg><span class="t">Sección</span></button>
+  <button class="btn" data-mode="distance" title="Medir distancias (con imán a vértices y aristas)">
+    <svg viewBox="0 0 24 24"><path d="M3 17 17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/></svg><span class="t">Distancia</span></button>
+  <button class="btn" data-mode="angle" title="Medir ángulos (tres clics)">
+    <svg viewBox="0 0 24 24"><path d="M4 20 20 6M4 20h16"/><path d="M12 20a8 8 0 0 0-2.5-5.8"/></svg><span class="t">Ángulo</span></button>
+  <div class="sep"></div>
+  <button class="btn" id="btnHide" title="Ocultar selección (H)"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><path d="M4 4l16 16"/></svg><span class="t">Ocultar</span></button>
+  <button class="btn" id="btnIsolate" title="Aislar selección (I)"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="8"/><path d="M3 3h4M17 3h4v4M21 17v4h-4M7 21H3v-4M3 7V3"/></svg><span class="t">Aislar</span></button>
+  <button class="btn" id="btnXray" title="Transparentar selección (T)"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="11" height="11" rx="1"/><rect x="9" y="9" width="11" height="11" rx="1" stroke-dasharray="2 2"/></svg><span class="t">Transparentar</span></button>
+  <button class="btn" id="btnShowAll" title="Mostrar todo y quitar transparencias (Mayús+H)"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg><span class="t">Mostrar todo</span></button>
+  <div class="sep"></div>
+  <button class="btn icon" id="btnFit" title="Encuadrar (F: selección o todo)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+  <button class="btn icon" id="btnProj" title="Cambiar perspectiva / ortogonal"><svg viewBox="0 0 24 24"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg></button>
+  <button class="btn icon" id="btnSnap" title="Guardar captura PNG"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+  <button class="btn" id="btnClearMeas" title="Borrar todas las cotas (también: clic derecho sobre una cota)"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg><span class="t">Borrar cotas</span></button>
+  <div class="spacer"></div>
+  <button class="btn icon" id="btnTheme" title="Cambiar entre tema claro y oscuro"><svg viewBox="0 0 24 24" id="themeIcon"></svg></button>
+  <button class="btn icon" id="btnHelp" title="Atajos"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.7M12 17.5v.01"/></svg></button>
+  <button class="btn icon" id="btnRight" title="Mostrar u ocultar propiedades"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg></button>
+</header>
+
+<aside id="left">
+  <div class="tabs">
+    <button class="tab active" data-tab="models">Modelos</button>
+    <button class="tab" data-tab="tree">Árbol</button>
+    <button class="tab" data-tab="search">Buscar</button>
+  </div>
+  <div class="pane active" id="pane-models">
+    <div id="modelList"><div class="empty">Todavía no hay modelos. Abre uno o varios archivos .ifc; se superponen en sus coordenadas reales.</div></div>
+    <div class="global-actions">
+      <button class="chip" id="chipColor" title="Aplicar el color de cada modelo a todos sus elementos">Colorear por modelo</button>
+      <button class="chip" id="chipSpaces" title="Mostrar los IfcSpace (ocultos por defecto)">Espacios</button>
+      <button class="chip on" id="chipEdges" title="Mostrar aristas">Aristas</button>
+      <button class="chip" id="chipHSec" title="Crear un corte horizontal por el centro de lo visible">Corte en planta</button>
+    </div>
+    <div id="sections"></div>
+    <div id="measures"></div>
+  </div>
+  <div class="pane" id="pane-tree">
+    <div class="tree-tools">
+      <select id="hierarchy" title="Organización del árbol">
+        <option value="containment">Estructura espacial</option>
+        <option value="storeys">Por plantas</option>
+        <option value="types">Por clase IFC</option>
+      </select>
+      <button class="mini" id="btnCollapse" title="Contraer todo"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
+    </div>
+    <div id="tree"></div>
+  </div>
+  <div class="pane" id="pane-search">
+    <div class="search-box">
+      <input type="search" id="q" placeholder="Nombre, clase IFC o GUID" autocomplete="off">
+      <div class="hint" id="qHint">Busca en todos los modelos cargados.</div>
+      <div style="display:flex;gap:6px"><button class="chip" id="btnSelResults" disabled>Seleccionar resultados</button><button class="chip" id="btnIsoResults" disabled>Aislar resultados</button></div>
+    </div>
+    <div id="results"></div>
+  </div>
+</aside>
+
+<main id="view">
+  <canvas id="viewerCanvas"></canvas>
+  <canvas id="navCube"></canvas>
+  <div id="modeHint"></div>
+  <div id="jobs"></div>
+  <div id="dropzone">
+    <div class="card">
+      <h2>Arrastra aquí tus archivos IFC</h2>
+      <p>Puedes cargar varios a la vez para federarlos. Todo se procesa en tu navegador: los archivos no se suben a ningún servidor.</p>
+      <button class="btn primary" id="btnOpen2"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>Abrir IFC</button>
+      <div class="formats"><span>IFC2X3</span><span>IFC4</span><span>IFC4X3</span></div>
+    </div>
+  </div>
+</main>
+
+<aside id="right">
+  <div class="panel-title">Propiedades <span class="muted" id="selCountTitle"></span></div>
+  <div id="props"><div class="empty">Selecciona un elemento en el modelo o en el árbol para ver su GUID, atributos, Psets, cantidades, tipo y materiales.</div></div>
+</aside>
+
+<footer id="status">
+  <span id="stModels">Sin modelos</span>
+  <span id="stSel"></span>
+  <span class="spacer"></span>
+  <span id="stEngine"></span>
+</footer>
+
+<div id="ctx"></div>
+<div id="toast"></div>
+<div id="help">
+  <h3>Controles</h3>
+  <table>
+    <tr><td>Clic</td><td>Seleccionar elemento</td></tr>
+    <tr><td>Ctrl + clic</td><td>Añadir / quitar de la selección</td></tr>
+    <tr><td>Doble clic</td><td>Acercar al elemento</td></tr>
+    <tr><td>Clic derecho</td><td>Menú contextual</td></tr>
+    <tr><td>Arrastrar</td><td>Orbitar</td></tr>
+    <tr><td>Rueda + arrastrar</td><td>Desplazar (pan)</td></tr>
+    <tr><td>Mayús + arrastrar</td><td>Desplazar (alternativa)</td></tr>
+    <tr><td>Rueda</td><td>Zoom</td></tr>
+    <tr><td>H</td><td>Ocultar selección</td></tr>
+    <tr><td>I</td><td>Aislar selección</td></tr>
+    <tr><td>T</td><td>Transparentar selección</td></tr>
+    <tr><td>Mayús + H</td><td>Mostrar todo</td></tr>
+    <tr><td>F</td><td>Encuadrar selección o todo</td></tr>
+    <tr><td>Esc</td><td>Deseleccionar / salir de herramienta</td></tr>
+    <tr><td>Supr</td><td>Borrar la cota bajo el ratón</td></tr>
+  </table>
+</div>
+
+<script type="module">
+import {
+  Viewer, SceneModel, TreeViewPlugin, SectionPlanesPlugin,
+  DistanceMeasurementsPlugin, DistanceMeasurementsMouseControl,
+  AngleMeasurementsPlugin, AngleMeasurementsMouseControl,
+  PointerLens, NavCubePlugin, FastNavPlugin
+} from "https://cdn.jsdelivr.net/npm/@xeokit/xeokit-sdk@2.6.114/dist/xeokit-sdk.min.es.js";
+
+// web-ifc se ejecuta dentro de un Web Worker por cada modelo: la interfaz nunca se bloquea mientras se procesa el IFC.
+const WEBIFC_BASE = "https://cdn.jsdelivr.net/npm/web-ifc@0.0.77/";
+const MAX_PARALLEL = 2;     // modelos procesándose a la vez
+const EDGE_ANGLE = 20;      // grados: ángulo mínimo entre caras para dibujar arista
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nextPaint = () => new Promise(r => requestAnimationFrame(() => setTimeout(r, 30)));
+const PALETTE = ["#4f9dde","#e8a33d","#6cc28a","#d86fa6","#9b8cf0","#e2d25b","#4fc6c2","#e07a5f"];
+const hex2rgb = h => [1,3,5].map(i => parseInt(h.substr(i,2),16)/255);
+const fmtN = n => n.toLocaleString("es-ES");
+
+/* ============ Código del worker (se serializa a un Blob) ============ */
+function ifcWorkerMain(WebIFC, self) {
+  "use strict";
+  let api = null, modelID = null;
+  const eidInfo = new Map();     // expressID -> {guid, name, type}
+  const guidToEid = new Map();   // GUID -> expressID
+  const post = (m, t) => self.postMessage(m, t || []);
+
+  /* ---------- Utilidades de texto ---------- */
+  function dec(s) {
+    if (typeof s !== "string" || s.indexOf("\\") < 0) return s;
+    return s
+      .replace(/\\X2\\([0-9A-F]+?)\\X0\\/gi, (m, h) => { let o = ""; for (let i = 0; i < h.length; i += 4) o += String.fromCharCode(parseInt(h.substr(i, 4), 16)); return o; })
+      .replace(/\\X4\\([0-9A-F]+?)\\X0\\/gi, (m, h) => { let o = ""; for (let i = 0; i < h.length; i += 8) o += String.fromCodePoint(parseInt(h.substr(i, 8), 16)); return o; })
+      .replace(/\\X\\([0-9A-F]{2})/gi, (m, h) => String.fromCharCode(parseInt(h, 16)))
+      .replace(/\\S\\(.)/g, (m, c) => String.fromCharCode(c.charCodeAt(0) + 128))
+      .replace(/\\P[A-I]?\\/g, "");
+  }
+  const typeName = (code) => { try { return api.GetNameFromTypeCode(code) || ""; } catch (e) { return ""; } };
+  const TN = (o) => (o && o.type !== undefined ? typeName(o.type) : "");
+  const TU = (o) => TN(o).toUpperCase();
+  const fmtNum = (n) => Number.isInteger(n) ? n.toLocaleString("es-ES") : n.toLocaleString("es-ES", { maximumFractionDigits: 4 });
+  function val(v) {
+    if (v === null || v === undefined) return "";
+    if (Array.isArray(v)) return v.map(val).filter(x => x !== "").join("; ");
+    if (typeof v === "object") {
+      if ("value" in v) return val(v.value);
+      if (v.Name && v.Name.value !== undefined) return val(v.Name);
+      return "";
+    }
+    if (typeof v === "boolean") return v ? "Sí" : "No";
+    if (typeof v === "number") return fmtNum(v);
+    const s = dec(String(v));
+    if (s === "T" || s === ".T.") return "Sí";
+    if (s === "F" || s === ".F.") return "No";
+    if (s === "U" || s === ".U.") return "Desconocido";
+    return s;
+  }
+
+  /* ---------- Metadatos ---------- */
+  function info(eid) {
+    let o = eidInfo.get(eid);
+    if (o) return o;
+    let l = null;
+    try { l = api.GetLine(modelID, eid, false); } catch (e) { l = null; }
+    if (!l) return null;
+    const guid = (l.GlobalId && l.GlobalId.value) ? String(l.GlobalId.value) : ("EID" + eid);
+    const type = TN(l);
+    o = { guid, type, name: dec(l.Name && l.Name.value ? String(l.Name.value) : "") || type };
+    if (l.LongName && l.LongName.value && /Storey|Space|Site|Building/i.test(type)) {
+      const ln = dec(String(l.LongName.value));
+      if (ln && ln !== o.name) o.name = o.name + " (" + ln + ")";
+    }
+    eidInfo.set(eid, o);
+    guidToEid.set(guid, eid);
+    return o;
+  }
+
+  const parentOf = new Map();
+  function readRels(typeCode, relatingKey, relatedKey) {
+    if (typeCode === undefined) return;
+    const ids = api.GetLineIDsWithType(modelID, typeCode);
+    for (let i = 0, n = ids.size(); i < n; i++) {
+      let r;
+      try { r = api.GetLine(modelID, ids.get(i), false); } catch (e) { continue; }
+      if (!r) continue;
+      const p = r[relatingKey] && r[relatingKey].value;
+      const kids = r[relatedKey];
+      if (p === undefined || p === null || !kids) continue;
+      const arr = Array.isArray(kids) ? kids : [kids];
+      for (const k of arr) if (k && k.value !== undefined && !parentOf.has(k.value)) parentOf.set(k.value, p);
+    }
+  }
+
+  /* ---------- Aristas (en el worker para no bloquear la interfaz) ---------- */
+  function buildEdges(pos, idx, cosT) {
+    const nv = pos.length / 3;
+    const weld = new Uint32Array(nv);
+    const rep = [];
+    const map = new Map();
+    for (let i = 0; i < nv; i++) {
+      const k = Math.round(pos[3 * i] * 1e4) + "," + Math.round(pos[3 * i + 1] * 1e4) + "," + Math.round(pos[3 * i + 2] * 1e4);
+      let w = map.get(k);
+      if (w === undefined) { w = rep.length; rep.push(i); map.set(k, w); }
+      weld[i] = w;
+    }
+    const nu = rep.length;
+    const nf = idx.length / 3;
+    const fn = new Float32Array(nf * 3);
+    const edges = new Map();
+    const out = [];
+    for (let f = 0; f < nf; f++) {
+      const i0 = idx[3 * f], i1 = idx[3 * f + 1], i2 = idx[3 * f + 2];
+      const ax = pos[3 * i0], ay = pos[3 * i0 + 1], az = pos[3 * i0 + 2];
+      const ux = pos[3 * i1] - ax, uy = pos[3 * i1 + 1] - ay, uz = pos[3 * i1 + 2] - az;
+      const vx = pos[3 * i2] - ax, vy = pos[3 * i2 + 1] - ay, vz = pos[3 * i2 + 2] - az;
+      let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      const len = Math.hypot(nx, ny, nz) || 1;
+      fn[3 * f] = nx / len; fn[3 * f + 1] = ny / len; fn[3 * f + 2] = nz / len;
+      const w = [weld[i0], weld[i1], weld[i2]];
+      for (let e = 0; e < 3; e++) {
+        let a = w[e], b = w[(e + 1) % 3];
+        if (a === b) continue;
+        if (a > b) { const t = a; a = b; b = t; }
+        const key = a * nu + b;
+        const prev = edges.get(key);
+        if (prev === undefined) edges.set(key, f);
+        else if (prev >= 0) {
+          const d = fn[3 * prev] * fn[3 * f] + fn[3 * prev + 1] * fn[3 * f + 1] + fn[3 * prev + 2] * fn[3 * f + 2];
+          if (d < cosT) out.push(rep[a], rep[b]);
+          edges.set(key, -1);
+        }
+      }
+    }
+    for (const [key, f] of edges) if (f >= 0) { const a = Math.floor(key / nu), b = key - a * nu; out.push(rep[a], rep[b]); }
+    return new Uint32Array(out);
+  }
+
+  /* ---------- Lote de geometría ---------- */
+  function newBatch() { return { meta: [], ents: [], pos: [], idx: [], edg: [], nPos: 0, nIdx: 0, nEdg: 0, bytes: 0 }; }
+  function concat(chunks, n, Type) { const o = new Type(n); let off = 0; for (const c of chunks) { o.set(c, off); off += c.length; } return o; }
+  function flush(b, done, total) {
+    if (!b.ents.length) return;
+    const meta = new Float64Array(b.meta);
+    const pos = concat(b.pos, b.nPos, Float32Array);
+    const idx = concat(b.idx, b.nIdx, Uint32Array);
+    const edg = concat(b.edg, b.nEdg, Uint32Array);
+    post({ cmd: "batch", ents: b.ents, meta, pos, idx, edg, done, total }, [meta.buffer, pos.buffer, idx.buffer, edg.buffer]);
+  }
+
+  const heapMB = () => { try { return Math.round(api.wasmModule.HEAPU8.length / 1048576); } catch (e) { return 0; } };
+  const SKIP = new Set(["IfcOpeningElement", "IfcOpeningStandardCase", "IfcVoidingFeature"]);
+
+  async function load(d) {
+    const t0 = Date.now();
+    api = new WebIFC.IfcAPI();
+    api.SetWasmPath(d.wasmPath, true);
+    await api.Init(undefined, true);
+    post({ cmd: "progress", phase: "read" });
+    let data = new Uint8Array(await d.file.arrayBuffer());
+    post({ cmd: "progress", phase: "parse" });
+    modelID = api.OpenModel(data, { COORDINATE_TO_ORIGIN: false, MEMORY_LIMIT: 3221225472 });
+    data = null;
+    if (modelID < 0) throw new Error("web-ifc no pudo abrir el archivo");
+    let schema = "IFC";
+    try { schema = String(api.GetModelSchema(modelID) || "IFC"); } catch (e) {}
+    post({ cmd: "schema", schema });
+
+    post({ cmd: "progress", phase: "tree" });
+    readRels(WebIFC.IFCRELAGGREGATES, "RelatingObject", "RelatedObjects");
+    readRels(WebIFC.IFCRELCONTAINEDINSPATIALSTRUCTURE, "RelatingStructure", "RelatedElements");
+    readRels(WebIFC.IFCRELNESTS, "RelatingObject", "RelatedObjects");
+    const projIds = api.GetLineIDsWithType(modelID, WebIFC.IFCPROJECT);
+    const projectEid = projIds.size() ? projIds.get(0) : null;
+
+    const cosT = Math.cos((d.edgeAngle || 20) * Math.PI / 180);
+    const CELL = 1000;
+    let b = newBatch();
+    const meshEids = [];
+    let nTris = 0, done = 0, total = 0;
+
+    api.StreamAllMeshes(modelID, (fm, index, tot) => {
+      total = tot || total; done = index + 1;
+      const eid = fm.expressID;
+      const inf = info(eid);
+      if (!inf || SKIP.has(inf.type)) { if (fm.delete) fm.delete(); return; }
+      const geoms = fm.geometries;
+      let nMeshes = 0;
+      for (let j = 0, nj = geoms.size(); j < nj; j++) {
+        const pg = geoms.get(j);
+        let g;
+        try { g = api.GetGeometry(modelID, pg.geometryExpressID); } catch (e) { continue; }
+        const vd = api.GetVertexArray(g.GetVertexData(), g.GetVertexDataSize());
+        const id = api.GetIndexArray(g.GetIndexData(), g.GetIndexDataSize());
+        const nv = vd.length / 6;
+        if (!nv || !id.length) { if (g.delete) g.delete(); continue; }
+        const m = pg.flatTransformation;
+        const wp = new Float64Array(nv * 3);
+        let minx = Infinity, miny = Infinity, minz = Infinity, maxx = -Infinity, maxy = -Infinity, maxz = -Infinity;
+        for (let k = 0; k < nv; k++) {
+          const x = vd[6 * k], y = vd[6 * k + 1], z = vd[6 * k + 2];
+          const X = m[0] * x + m[4] * y + m[8] * z + m[12];
+          const Y = m[1] * x + m[5] * y + m[9] * z + m[13];
+          const Z = m[2] * x + m[6] * y + m[10] * z + m[14];
+          wp[3 * k] = X; wp[3 * k + 1] = Y; wp[3 * k + 2] = Z;
+          if (X < minx) minx = X; if (X > maxx) maxx = X;
+          if (Y < miny) miny = Y; if (Y > maxy) maxy = Y;
+          if (Z < minz) minz = Z; if (Z > maxz) maxz = Z;
+        }
+        const ox = Math.round((minx + maxx) / 2 / CELL) * CELL;
+        const oy = Math.round((miny + maxy) / 2 / CELL) * CELL;
+        const oz = Math.round((minz + maxz) / 2 / CELL) * CELL;
+        const pos = new Float32Array(nv * 3);
+        for (let k = 0; k < nv; k++) { pos[3 * k] = wp[3 * k] - ox; pos[3 * k + 1] = wp[3 * k + 1] - oy; pos[3 * k + 2] = wp[3 * k + 2] - oz; }
+        const idx = new Uint32Array(id);
+        if (g.delete) g.delete();
+        const edg = d.edges === false ? new Uint32Array(0) : buildEdges(pos, idx, cosT);
+        const c = pg.color;
+        // meta por malla: [entidadLocal, ox, oy, oz, r, g, b, a, nPos, nIdx, nEdg]
+        b.meta.push(b.ents.length, ox, oy, oz, c.x, c.y, c.z, c.w, pos.length, idx.length, edg.length);
+        b.pos.push(pos); b.idx.push(idx); b.edg.push(edg);
+        b.nPos += pos.length; b.nIdx += idx.length; b.nEdg += edg.length;
+        b.bytes += pos.byteLength + idx.byteLength + edg.byteLength;
+        nTris += idx.length / 3;
+        nMeshes++;
+      }
+      if (fm.delete) fm.delete();
+      if (nMeshes) { b.ents.push([inf.guid, inf.type, nMeshes]); meshEids.push(eid); }
+      if (b.bytes > (d.batchBytes || 24e6) || b.ents.length > 4000) { flush(b, done, total); b = newBatch(); }
+    });
+    flush(b, done, total);
+
+    // Árbol de metadatos: todo lo que cuelga de las relaciones + elementos con geometría
+    post({ cmd: "progress", phase: "meta" });
+    const nodes = new Set();
+    if (projectEid !== null) nodes.add(projectEid);
+    for (const [k, p] of parentOf) { nodes.add(k); nodes.add(p); }
+    for (const e of meshEids) nodes.add(e);
+    const projGuid = projectEid !== null && info(projectEid) ? info(projectEid).guid : null;
+    const metaObjects = [];
+    for (const e of nodes) {
+      const o = info(e);
+      if (!o) continue;
+      let parent = null;
+      if (e !== projectEid) {
+        const p = parentOf.get(e);
+        const po = p !== undefined ? info(p) : null;
+        parent = po ? po.guid : projGuid;
+        if (parent === o.guid) parent = projGuid;
+      }
+      metaObjects.push({ id: o.guid, name: o.name, type: o.type, parent });
+    }
+    post({ cmd: "done", metadata: { projectId: projGuid || "none", schema, metaObjects, propertySets: [] }, stats: { nTris, nObjects: meshEids.length, secs: (Date.now() - t0) / 1000, heapMB: heapMB() } });
+  }
+
+  /* ---------- Propiedades bajo demanda ---------- */
+  function propRows(props, prefix) {
+    prefix = prefix || "";
+    const rows = [];
+    for (const p of props || []) {
+      if (!p || typeof p !== "object") continue;
+      const name = prefix + (val(p.Name) || "(sin nombre)");
+      if (p.NominalValue !== undefined) rows.push([name, val(p.NominalValue)]);
+      else if (p.EnumerationValues !== undefined) rows.push([name, val(p.EnumerationValues)]);
+      else if (p.ListValues !== undefined) rows.push([name, val(p.ListValues)]);
+      else if (p.UpperBoundValue !== undefined || p.LowerBoundValue !== undefined) rows.push([name, val(p.LowerBoundValue) + " – " + val(p.UpperBoundValue)]);
+      else if (p.HasProperties) rows.push(...propRows(p.HasProperties, name + " › "));
+      else if (p.LengthValue !== undefined) rows.push([name, val(p.LengthValue)]);
+      else if (p.AreaValue !== undefined) rows.push([name, val(p.AreaValue)]);
+      else if (p.VolumeValue !== undefined) rows.push([name, val(p.VolumeValue)]);
+      else if (p.CountValue !== undefined) rows.push([name, val(p.CountValue)]);
+      else if (p.WeightValue !== undefined) rows.push([name, val(p.WeightValue)]);
+      else if (p.TimeValue !== undefined) rows.push([name, val(p.TimeValue)]);
+      else if (p.Quantities) rows.push(...propRows(p.Quantities, name + " › "));
+      else if (p.PropertyReference !== undefined) rows.push([name, val(p.PropertyReference)]);
+      else rows.push([name, ""]);
+    }
+    return rows;
+  }
+  function psetSections(sets, kindOverride) {
+    const out = [];
+    const sorted = [...(sets || [])].filter(Boolean).sort((a, b) => val(a.Name).localeCompare(val(b.Name), "es"));
+    for (const s of sorted) {
+      const isQto = TU(s) === "IFCELEMENTQUANTITY";
+      const rows = propRows(isQto ? s.Quantities : s.HasProperties);
+      if (rows.length) out.push({ title: val(s.Name) || TN(s), kind: kindOverride || (isQto ? "Cantidades" : ""), rows });
+    }
+    return out;
+  }
+  function materialRows(mats) {
+    const rows = [], seen = new Set();
+    const walk = (o, depth) => {
+      if (!o || typeof o !== "object" || depth > 8) return;
+      if (Array.isArray(o)) { o.forEach(x => walk(x, depth + 1)); return; }
+      const t = TU(o);
+      const once = (k) => { if (seen.has(k)) return false; seen.add(k); return true; };
+      if (t === "IFCMATERIALLAYER") { if (once("L" + o.expressID)) rows.push(["Capa: " + (val(o.Material) || val(o.Name) || "sin material"), "Espesor " + val(o.LayerThickness)]); return; }
+      if (t === "IFCMATERIALCONSTITUENT") { if (once("C" + o.expressID)) rows.push(["Componente: " + (val(o.Name) || "—"), val(o.Material)]); return; }
+      if (t === "IFCMATERIALPROFILE") { if (once("P" + o.expressID)) rows.push(["Perfil: " + (val(o.Name) || "—"), val(o.Material)]); return; }
+      if (t === "IFCMATERIAL") { if (once("M" + o.expressID)) rows.push(["Material", val(o.Name)]); return; }
+      for (const key of ["ForLayerSet", "MaterialLayers", "ForProfileSet", "MaterialProfiles", "MaterialConstituents", "Materials", "Material"]) if (o[key]) walk(o[key], depth + 1);
+    };
+    walk(mats, 0);
+    return rows;
+  }
+  async function props(guid) {
+    const eid = guidToEid.get(guid);
+    if (eid === undefined) return null;
+    const attrs = await api.properties.getItemProperties(modelID, eid, false);
+    const idRows = [["Clase IFC", TN(attrs)], ["GlobalId", guid], ["ExpressID", "#" + eid]];
+    for (const k of ["Name", "Description", "ObjectType", "LongName", "Tag", "PredefinedType", "Elevation", "CompositionType", "OperationType", "UsageType"]) {
+      const t = val(attrs && attrs[k]);
+      if (t !== "") idRows.push([k, t]);
+    }
+    const sections = [{ title: "Identificación", kind: "Atributos IFC", rows: idRows }];
+    try { sections.push(...psetSections(await api.properties.getPropertySets(modelID, eid, true))); } catch (e) {}
+    try {
+      const types = await api.properties.getTypeProperties(modelID, eid, true);
+      for (const t of types || []) {
+        const tRows = [["Clase", TN(t)], ["Nombre", val(t.Name)]];
+        if (t.GlobalId) tRows.push(["GlobalId", val(t.GlobalId)]);
+        for (const k of ["ElementType", "PredefinedType", "Tag", "Description"]) { const v = val(t[k]); if (v) tRows.push([k, v]); }
+        sections.push({ title: "Tipo: " + (val(t.Name) || TN(t)), kind: "", rows: tRows });
+        sections.push(...psetSections(t.HasPropertySets, "Del tipo"));
+      }
+    } catch (e) {}
+    try {
+      const mats = await api.properties.getMaterialsProperties(modelID, eid, true, true);
+      const mr = materialRows(mats);
+      if (mr.length) sections.push({ title: "Materiales", kind: "", rows: mr });
+    } catch (e) {}
+    return { sections };
+  }
+
+  self.onmessage = async (e) => {
+    const d = e.data;
+    try {
+      if (d.cmd === "load") await load(d);
+      else if (d.cmd === "props") post({ cmd: "props", reqId: d.reqId, data: await props(d.guid) });
+    } catch (err) {
+      post({ cmd: "error", reqId: d.reqId, message: String((err && err.message) || err) });
+    }
+  };
+}
+
+let workerURL = null;
+function makeWorker() {
+  if (!workerURL) {
+    // Worker clásico + build IIFE de web-ifc: funciona igual en GitHub Pages que abriendo el HTML con doble clic (file://)
+    const src = `importScripts("${WEBIFC_BASE}web-ifc-api-iife.js");\n(${ifcWorkerMain.toString()})(self.WebIFC, self);`;
+    workerURL = URL.createObjectURL(new Blob([src], { type: "text/javascript" }));
+  }
+  return new Worker(workerURL);
+}
+
+/* ============ Visor xeokit ============ */
+const viewer = new Viewer({ canvasId: "viewerCanvas", transparent: true, preserveDrawingBuffer: true, dtxEnabled: true });
+const scene = viewer.scene;
+viewer.camera.eye = [-20, 15, 20]; viewer.camera.look = [0, 0, 0]; viewer.camera.up = [0, 1, 0];
+viewer.camera.perspective.near = 0.05; viewer.camera.perspective.far = 20000;
+viewer.camera.ortho.near = 0.05; viewer.camera.ortho.far = 20000;
+viewer.cameraControl.followPointer = true;
+viewer.cameraControl.doublePickFlyTo = true;
+viewer.cameraControl.smartPivot = true;
+viewer.cameraControl.panRightClick = false;   // desplazar: rueda pulsada + arrastrar (el botón derecho queda para el menú)
+
+const THEME_MATERIALS = {
+  light: { sel: [0.96, 0.6, 0.15], selEdge: [0.6, 0.32, 0.02], hl: [0.3, 0.6, 0.95], hlEdge: [0.15, 0.45, 0.85],
+           xr: [0.45, 0.52, 0.6], xrA: 0.07, xrEdge: [0.35, 0.42, 0.5], xrEdgeA: 0.3, edge: [0.1, 0.12, 0.15], edgeA: 0.4, measure: "#d9831a" },
+  dark:  { sel: [0.94, 0.65, 0.23], selEdge: [1, 0.85, 0.5], hl: [0.55, 0.78, 1], hlEdge: [0.55, 0.78, 1],
+           xr: [0.72, 0.77, 0.83], xrA: 0.08, xrEdge: [0.55, 0.6, 0.66], xrEdgeA: 0.25, edge: [0.08, 0.09, 0.1], edgeA: 0.35, measure: "#f0a73a" }
+};
+function applySceneTheme(t) {
+  const m = THEME_MATERIALS[t] || THEME_MATERIALS.light;
+  scene.selectedMaterial.fillColor = m.sel; scene.selectedMaterial.fillAlpha = 0.9;
+  scene.selectedMaterial.edgeColor = m.selEdge; scene.selectedMaterial.edgeAlpha = 1;
+  scene.highlightMaterial.fillColor = m.hl; scene.highlightMaterial.fillAlpha = 0.25;
+  scene.highlightMaterial.edgeColor = m.hlEdge; scene.highlightMaterial.edgeAlpha = 0.8;
+  scene.xrayMaterial.fillColor = m.xr; scene.xrayMaterial.fillAlpha = m.xrA;
+  scene.xrayMaterial.edgeColor = m.xrEdge; scene.xrayMaterial.edgeAlpha = m.xrEdgeA;
+  scene.edgeMaterial.edgeColor = m.edge; scene.edgeMaterial.edgeAlpha = m.edgeA;
+}
+const currentTheme = () => document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+applySceneTheme(currentTheme());
+
+new FastNavPlugin(viewer, { hideEdges: true, hideSAO: true, hidePBR: true, scaleCanvasResolution: false });
+new NavCubePlugin(viewer, { canvasId: "navCube", visible: true, cameraFly: true, cameraFlyDuration: 0.4,
+  color: "#9aa7b6", frontColor: "#b8c3cf", backColor: "#b8c3cf", leftColor: "#a8b4c1", rightColor: "#a8b4c1", topColor: "#c9d2dc", bottomColor: "#8d99a7",
+  hoverColor: "rgba(217,131,26,0.6)", textColor: "#1b222b", fitVisible: true });
+
+const treeView = new TreeViewPlugin(viewer, {
+  containerElement: $("#tree"), autoAddModels: false, autoExpandDepth: 2,
+  hierarchy: "containment", sortNodes: true, pruneEmptyNodes: true
+});
+const sectionPlanes = new SectionPlanesPlugin(viewer, {});
+const pointerLens = new PointerLens(viewer);
+const distPlugin = new DistanceMeasurementsPlugin(viewer, { defaultColor: THEME_MATERIALS[currentTheme()].measure, zIndex: 8 });
+const distControl = new DistanceMeasurementsMouseControl(distPlugin, { pointerLens, snapping: true });
+const anglePlugin = new AngleMeasurementsPlugin(viewer, { zIndex: 8 });
+const angleControl = new AngleMeasurementsMouseControl(anglePlugin, { pointerLens, snapping: true });
+
+let modelSeq = 0;
+const models = {};   // id -> { sceneModel, worker, job, name, size, color, colorOn, opacity, schema, count, visible }
+const jobs = new Map();
+const queue = [];
+let running = 0;
+$("#stEngine").textContent = "web-ifc 0.0.77 en segundo plano · xeokit 2.6";
+
+const yieldUI = () => new Promise(r => setTimeout(r, 0));
+const PHASES = { read: "Leyendo archivo", parse: "Analizando IFC", tree: "Leyendo estructura espacial", meta: "Preparando árbol" };
+
+function loadFiles(fileList) {
+  const files = [...fileList].filter(f => /\.ifc$/i.test(f.name));
+  if (!files.length) { toast("Solo se admiten archivos .ifc", true); return; }
+  for (const f of files) {
+    const dup = Object.values(models).some(m => m.name === f.name && m.size === f.size) || [...jobs.values()].some(j => j.name === f.name && j.size === f.size);
+    if (dup) { toast(`${f.name} ya está cargado`); continue; }
+    const job = { id: "modelo" + (++modelSeq), file: f, name: f.name, size: f.size, phase: "En cola", frac: null };
+    jobs.set(job.id, job); queue.push(job);
+  }
+  renderJobs(); pump();
+}
+function pump() {
+  while (running < MAX_PARALLEL && queue.length) {
+    const job = queue.shift();
+    if (job.cancelled) continue;
+    running++;
+    startJob(job).finally(() => { running--; pump(); });
+  }
+}
+function startJob(job) {
+  return new Promise(resolve => {
+    job.resolve = resolve;
+    job.t0 = performance.now();
+    job.sm = new SceneModel(scene, { id: job.id, isModel: true, edges: $("#chipEdges").classList.contains("on"), dtxEnabled: true });
+    job.meshSeq = 0; job.count = 0; job.shared = 0; job.remap = new Map(); job.idList = [];
+    job.chain = Promise.resolve(); job.pending = new Map(); job.reqSeq = 0;
+    try { job.worker = makeWorker(); }
+    catch (e) { failJob(job, "No se pudo crear el proceso en segundo plano: " + e.message); return; }
+    job.worker.onmessage = e => onWorkerMsg(job, e.data);
+    job.worker.onerror = e => { if (e.preventDefault) e.preventDefault(); failJob(job, e.message || "No se pudo cargar web-ifc. Comprueba el acceso a cdn.jsdelivr.net."); };
+    setJob(job, "Iniciando motor IFC");
+    job.worker.postMessage({ cmd: "load", file: job.file, wasmPath: WEBIFC_BASE, edgeAngle: EDGE_ANGLE });
+  });
+}
+function onWorkerMsg(job, d) {
+  if (d.cmd === "props" || (d.cmd === "error" && d.reqId)) {
+    const p = job.pending.get(d.reqId); if (!p) return;
+    job.pending.delete(d.reqId);
+    d.cmd === "props" ? p.res(d.data) : p.rej(new Error(d.message));
+    return;
+  }
+  if (job.cancelled || job.finished) return;
+  if (d.cmd === "progress") setJob(job, PHASES[d.phase] || d.phase, null);
+  else if (d.cmd === "schema") job.schema = d.schema;
+  else if (d.cmd === "batch") {
+    job.chain = job.chain.then(() => ingest(job, d));
+    setJob(job, "Generando geometría", d.total ? d.done / d.total : null);
+  }
+  else if (d.cmd === "done") job.chain = job.chain.then(() => finish(job, d)).catch(e => failJob(job, e.message || String(e)));
+  else if (d.cmd === "error") failJob(job, d.message);
+}
+// Crea mallas y entidades por tramos de ~12 ms para que el navegador siga respondiendo
+async function ingest(job, d) {
+  const { ents, meta, pos, idx, edg } = d;
+  const sm = job.sm;
+  let mi = 0, po = 0, io = 0, eo = 0;
+  let deadline = performance.now() + 12;
+  for (let e = 0; e < ents.length; e++) {
+    if (job.cancelled) return;
+    const [guid, type, nm] = ents[e];
+    const meshIds = [];
+    for (let k = 0; k < nm; k++, mi++) {
+      const b = mi * 11;
+      const np = meta[b + 8], ni = meta[b + 9], ne = meta[b + 10];
+      const meshId = job.id + "_" + (job.meshSeq++);
+      sm.createMesh({
+        id: meshId, primitive: "triangles",
+        origin: [meta[b + 1], meta[b + 2], meta[b + 3]],
+        positions: pos.subarray(po, po + np), indices: idx.subarray(io, io + ni), edgeIndices: edg.subarray(eo, eo + ne),
+        color: [meta[b + 4], meta[b + 5], meta[b + 6]], opacity: meta[b + 7]
+      });
+      meshIds.push(meshId);
+      po += np; io += ni; eo += ne;
+    }
+    let id = guid;
+    if (allIds.has(id)) { id = job.id + "#" + guid; job.remap.set(guid, id); job.shared++; }
+    allIds.add(id); job.idList.push(id);
+    const hiddenType = type === "IfcSpace";
+    sm.createEntity({ id, meshIds, isObject: true, visible: !hiddenType, pickable: !hiddenType });
+    job.count++;
+    if (performance.now() > deadline) { await yieldUI(); deadline = performance.now() + 12; }
+  }
+}
+const allIds = new Set();
+let colorSeq = 0;
+async function finish(job, d) {
+  if (job.cancelled) return;
+  if (!job.count) throw new Error("el archivo no contiene geometría visible");
+  setJob(job, "Enviando a la tarjeta gráfica", null); await yieldUI(); await yieldUI();
+  job.sm.finalize();
+  const md = d.metadata;
+  if (job.remap.size) for (const o of md.metaObjects) {
+    if (job.remap.has(o.id)) o.id = job.remap.get(o.id);
+    if (o.parent && job.remap.has(o.parent)) o.parent = job.remap.get(o.parent);
+  }
+  setJob(job, "Construyendo árbol", null); await yieldUI();
+  viewer.metaScene.createMetaModel(job.id, md);
+  job.finished = true;
+  const first = !Object.keys(models).length;
+  models[job.id] = { sceneModel: job.sm, worker: job.worker, job, name: job.name, size: job.size, color: PALETTE[(colorSeq++) % PALETTE.length],
+    colorOn: colorByModel, opacity: 1, schema: job.schema || md.schema || "IFC", count: job.count, visible: true };
+  try { treeView.addModel(job.id, { rootName: job.name }); } catch (e) { console.warn(e); }
+  applyModelStyle(job.id);
+  applySpaces();
+  document.body.classList.add("has-models");
+  jobs.delete(job.id); renderJobs(); renderModels();
+  if (first) viewer.cameraFlight.jumpTo({ aabb: scene.getAABB(scene.visibleObjectIds), fit: true });
+  else fitAll();
+  const secs = ((performance.now() - job.t0) / 1000).toLocaleString("es-ES", { maximumFractionDigits: 1 });
+  if (job.shared) toast(`Aviso: ${fmtN(job.shared)} elementos de ${job.name} repiten GUID de otro modelo (¿mismo archivo?). Se han renombrado para poder cargarlos.`, true);
+  else toast(`${job.name}: ${fmtN(job.count)} elementos en ${secs} s`);
+  job.resolve();
+}
+function failJob(job, msg) {
+  if (job.finished) return;
+  job.finished = true;
+  try { job.worker && job.worker.terminate(); } catch (e) {}
+  try { job.sm && !job.sm.destroyed && job.sm.destroy(); } catch (e) {}
+  for (const id of job.idList || []) allIds.delete(id);
+  jobs.delete(job.id); renderJobs();
+  if (!job.cancelled) toast(`Error al cargar ${job.name}: ${msg}`, true);
+  job.resolve && job.resolve();
+}
+function cancelJob(id) {
+  const job = jobs.get(id); if (!job) return;
+  job.cancelled = true;
+  if (job.worker) failJob(job, "cancelado");
+  else { jobs.delete(id); renderJobs(); }
+}
+function setJob(job, phase, frac) { job.phase = phase; job.frac = frac; renderJobs(); }
+function renderJobs() {
+  const box = $("#jobs");
+  document.body.classList.toggle("busy", jobs.size > 0);
+  for (const el of [...box.children]) if (!jobs.has(el.dataset.job)) el.remove();
+  for (const j of jobs.values()) {
+    let el = box.querySelector(`[data-job="${j.id}"]`);
+    if (!el) {
+      el = document.createElement("div");
+      el.className = "job"; el.dataset.job = j.id;
+      el.innerHTML = `<div class="job-head"><span class="job-name" title="${esc(j.name)}">${esc(j.name)}</span>
+        <span class="job-size">${(j.size / 1048576).toLocaleString("es-ES", { maximumFractionDigits: 0 })} MB</span>
+        <button class="mini" data-cancel="${j.id}" title="Cancelar">${ICON.x}</button></div>
+        <div class="job-phase"></div><div class="jbar"><i></i></div>`;
+      box.appendChild(el);
+    }
+    el.querySelector(".job-phase").innerHTML = esc(j.phase) + (j.frac != null ? ` <b>${Math.round(j.frac * 100)} %</b>` : "");
+    el.querySelector(".jbar").classList.toggle("ind", j.frac == null);
+    el.querySelector(".jbar i").style.width = j.frac != null ? (j.frac * 100).toFixed(1) + "%" : "";
+  }
+}
+$("#jobs").addEventListener("click", e => { const b = e.target.closest("[data-cancel]"); if (b) cancelJob(b.dataset.cancel); });
+function askProps(m, guid) {
+  return new Promise((res, rej) => {
+    const job = m.job, reqId = ++job.reqSeq;
+    job.pending.set(reqId, { res, rej });
+    m.worker.postMessage({ cmd: "props", reqId, guid });
+    setTimeout(() => { if (job.pending.has(reqId)) { job.pending.delete(reqId); rej(new Error("tiempo agotado")); } }, 30000);
+  });
+}
+
+function removeModel(id) {
+  const m = models[id]; if (!m) return;
+  clearSelection();
+  for (const oid in (m.sceneModel.objects || {})) allIds.delete(oid);
+  try { m.sceneModel.destroy(); } catch (e) {}
+  if (viewer.metaScene.metaModels[id]) { try { viewer.metaScene.destroyMetaModel(id); } catch (e) {} }
+  try { m.worker.terminate(); } catch (e) {}
+  delete models[id];
+  if (!Object.keys(models).length) document.body.classList.remove("has-models");
+  renderModels(); runSearch();
+}
+
+/* ============ Lista de modelos ============ */
+let colorByModel = false;
+function applyModelStyle(id) {
+  const m = models[id]; if (!m) return;
+  m.sceneModel.colorize = m.colorOn ? hex2rgb(m.color) : null;
+  m.sceneModel.opacity = m.opacity;
+  m.sceneModel.visible = m.visible;
+}
+const ICON = {
+  eye: '<svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg>',
+  eyeOff: '<svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><path d="M4 4l16 16"/></svg>',
+  fit: '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>',
+  iso: '<svg viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="8"/><path d="M3 3h4M17 3h4v4M21 17v4h-4M7 21H3v-4M3 7V3"/></svg>',
+  x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  copy: '<svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>',
+  flip: '<svg viewBox="0 0 24 24"><path d="M7 4v16M4 17l3 3 3-3M17 20V4M14 7l3-3 3 3"/></svg>',
+  gizmo: '<svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="3"/></svg>'
+};
+function renderModels() {
+  const ids = Object.keys(models);
+  const box = $("#modelList");
+  if (!ids.length) {
+    box.innerHTML = '<div class="empty">Todavía no hay modelos. Abre uno o varios archivos .ifc; se superponen en sus coordenadas reales.</div>';
+  } else {
+    box.innerHTML = ids.map(id => {
+      const m = models[id];
+      return `<div class="model" data-id="${id}">
+        <div class="model-head">
+          <span class="swatch" style="background:${m.color}" title="Color del modelo"><input type="color" value="${m.color}" data-act="color"></span>
+          <span class="model-name" title="${esc(m.name)}">${esc(m.name)}</span>
+          <button class="mini" data-act="vis" title="${m.visible ? "Ocultar modelo" : "Mostrar modelo"}">${m.visible ? ICON.eye : ICON.eyeOff}</button>
+          <button class="mini" data-act="iso" title="Aislar modelo">${ICON.iso}</button>
+          <button class="mini" data-act="fit" title="Encuadrar modelo">${ICON.fit}</button>
+          <button class="mini danger" data-act="del" title="Quitar modelo">${ICON.x}</button>
+        </div>
+        <div class="model-meta"><span class="schema">${esc(m.schema)}</span><span>${fmtN(m.count)} elementos</span></div>
+        <div class="row">
+          <label title="Aplicar el color del modelo"><input type="checkbox" data-act="colorOn" ${m.colorOn ? "checked" : ""}>Color</label>
+          <input type="range" min="0.05" max="1" step="0.05" value="${m.opacity}" data-act="opacity" title="Opacidad del modelo">
+          <span class="pct">${Math.round(m.opacity * 100)}%</span>
+        </div>
+      </div>`;
+    }).join("");
+  }
+  const total = ids.reduce((a, id) => a + models[id].count, 0);
+  $("#stModels").innerHTML = ids.length ? `<b>${ids.length}</b> modelo${ids.length > 1 ? "s" : ""}, <b>${fmtN(total)}</b> elementos` : "Sin modelos";
+}
+$("#modelList").addEventListener("input", e => {
+  const el = e.target, card = el.closest(".model"); if (!card) return;
+  const m = models[card.dataset.id]; if (!m) return;
+  if (el.dataset.act === "opacity") { m.opacity = +el.value; card.querySelector(".pct").textContent = Math.round(m.opacity * 100) + "%"; m.sceneModel.opacity = m.opacity; }
+  if (el.dataset.act === "color") { m.color = el.value; m.colorOn = true; card.querySelector(".swatch").style.background = m.color; card.querySelector('[data-act=colorOn]').checked = true; applyModelStyle(card.dataset.id); }
+});
+$("#modelList").addEventListener("change", e => {
+  const el = e.target, card = el.closest(".model"); if (!card) return;
+  const m = models[card.dataset.id]; if (!m) return;
+  if (el.dataset.act === "colorOn") { m.colorOn = el.checked; applyModelStyle(card.dataset.id); }
+});
+$("#modelList").addEventListener("click", e => {
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const id = b.closest(".model").dataset.id, m = models[id]; if (!m) return;
+  const act = b.dataset.act;
+  if (act === "vis") { m.visible = !m.visible; m.sceneModel.visible = m.visible; if (m.visible) applySpaces(); renderModels(); }
+  if (act === "fit") viewer.cameraFlight.flyTo({ aabb: m.sceneModel.aabb, duration: 0.5 });
+  if (act === "del") { if (confirm(`¿Quitar ${m.name} del visor?`)) removeModel(id); }
+  if (act === "iso") {
+    for (const k in models) { models[k].visible = (k === id); models[k].sceneModel.visible = models[k].visible; }
+    applySpaces(); renderModels();
+    viewer.cameraFlight.flyTo({ aabb: m.sceneModel.aabb, duration: 0.5 });
+  }
+});
+$("#chipColor").addEventListener("click", e => {
+  colorByModel = !colorByModel;
+  e.currentTarget.classList.toggle("on", colorByModel);
+  for (const id in models) { models[id].colorOn = colorByModel; applyModelStyle(id); }
+  renderModels();
+});
+$("#chipEdges").addEventListener("click", e => {
+  const on = !e.currentTarget.classList.contains("on");
+  e.currentTarget.classList.toggle("on", on);
+  for (const id in models) models[id].sceneModel.edges = on;
+});
+let showSpaces = false;
+function applySpaces() {
+  const ids = (viewer.metaScene.getObjectIDsByType ? viewer.metaScene.getObjectIDsByType("IfcSpace") : []).filter(id => scene.objects[id]);
+  for (const id of ids) {
+    const ent = scene.objects[id];
+    const mv = models[ent.model?.id]?.visible !== false;
+    ent.visible = showSpaces && mv; ent.pickable = showSpaces; ent.xrayed = showSpaces;
+  }
+}
+$("#chipSpaces").addEventListener("click", e => { showSpaces = !showSpaces; e.currentTarget.classList.toggle("on", showSpaces); applySpaces(); });
+
+/* ============ Árbol ============ */
+$("#hierarchy").addEventListener("change", e => { treeView.hierarchy = e.target.value; });
+$("#btnCollapse").addEventListener("click", () => treeView.collapse());
+function nodeObjectIds(node) {
+  const ids = [];
+  treeView.withNodeTree(node, n => { if (n.objectId && scene.objects[n.objectId]) ids.push(n.objectId); });
+  return ids;
+}
+treeView.on("nodeTitleClicked", e => {
+  const node = e.treeViewNode;
+  const ids = nodeObjectIds(node);
+  const additive = e.event.ctrlKey || e.event.metaKey;
+  if (!additive) scene.setObjectsSelected(scene.selectedObjectIds, false);
+  scene.setObjectsSelected(ids, true);
+  const mo = node.objectId ? viewer.metaScene.metaObjects[node.objectId] : null;
+  afterSelectionChange(mo ? node.objectId : null, ids.length > 1 ? { title: node.title, n: ids.length } : null);
+});
+treeView.on("contextmenu", e => {
+  const ids = nodeObjectIds(e.treeViewNode);
+  if (!ids.length) return;
+  openCtx(e.event.pageX, e.event.pageY, ids, e.treeViewNode.objectId);
+});
+
+/* ============ Selección ============ */
+let mode = "select";
+let currentPropsId = null;
+
+function clearSelection() {
+  scene.setObjectsSelected(scene.selectedObjectIds, false);
+  afterSelectionChange(null);
+}
+function selectEntity(ent, additive) {
+  if (!ent) { if (!additive) clearSelection(); return; }
+  if (additive) ent.selected = !ent.selected;
+  else { scene.setObjectsSelected(scene.selectedObjectIds, false); ent.selected = true; }
+  afterSelectionChange(ent.selected ? ent.id : (scene.selectedObjectIds.at(-1) || null));
+}
+function afterSelectionChange(propsId, groupInfo) {
+  const n = scene.selectedObjectIds.length;
+  $("#stSel").innerHTML = n ? `<b>${fmtN(n)}</b> seleccionado${n > 1 ? "s" : ""}` : "";
+  $("#selCountTitle").textContent = n > 1 ? `(${fmtN(n)} seleccionados)` : "";
+  if (propsId) renderProps(propsId);
+  else if (groupInfo) renderGroup(groupInfo);
+  else if (!n) renderPropsEmpty();
+}
+
+const canvas = $("#viewerCanvas");
+let downPos = null;
+canvas.addEventListener("mousedown", e => {
+  if (e.button === 0) downPos = [e.clientX, e.clientY];
+  if (e.button === 1) e.preventDefault();   // evita el autodesplazamiento de Windows con la rueda
+});
+canvas.addEventListener("mouseup", e => {
+  if (e.button !== 0 || !downPos) return;
+  const moved = Math.hypot(e.clientX - downPos[0], e.clientY - downPos[1]); downPos = null;
+  if (moved > 4) return;
+  const r = canvas.getBoundingClientRect();
+  const canvasPos = [e.clientX - r.left, e.clientY - r.top];
+  if (mode === "select") {
+    const hit = scene.pick({ canvasPos });
+    const ent = hit && hit.entity && scene.objects[hit.entity.id] ? hit.entity : null;
+    selectEntity(ent, e.ctrlKey || e.metaKey || e.shiftKey);
+  } else if (mode === "section") {
+    const hit = scene.pick({ canvasPos, pickSurface: true });
+    if (hit && hit.entity && scene.objects[hit.entity.id] && hit.worldPos && hit.worldNormal) {
+      const n = hit.worldNormal;
+      addSectionPlane([...hit.worldPos], [-n[0], -n[1], -n[2]]);
+      setMode("select");
+    }
+  }
+});
+
+// Resaltado al pasar el ratón
+let hovered = null;
+function clearHover() { if (hovered && !hovered.destroyed) hovered.highlighted = false; hovered = null; }
+viewer.cameraControl.on("hover", e => {
+  if (mode !== "select") { clearHover(); return; }
+  const ent = e.entity && scene.objects[e.entity.id] ? e.entity : null;
+  if (ent === hovered) return;
+  clearHover();
+  if (ent) { hovered = ent; ent.highlighted = true; }
+});
+viewer.cameraControl.on("hoverOut", clearHover);
+canvas.addEventListener("mouseleave", clearHover);
+
+/* ============ Acciones de visibilidad ============ */
+function targetIds() { return scene.selectedObjectIds; }
+function hideIds(ids) { if (!ids.length) return toast("No hay nada seleccionado"); scene.setObjectsVisible(ids, false); scene.setObjectsSelected(ids, false); afterSelectionChange(null); }
+function isolateIds(ids) {
+  if (!ids.length) return toast("No hay nada seleccionado");
+  scene.setObjectsVisible(scene.visibleObjectIds, false);
+  scene.setObjectsXRayed(scene.xrayedObjectIds, false);
+  scene.setObjectsVisible(ids, true);
+  viewer.cameraFlight.flyTo({ aabb: scene.getAABB(ids), duration: 0.5 });
+}
+function xrayIds(ids) {
+  if (!ids.length) return toast("No hay nada seleccionado");
+  const allX = ids.every(id => scene.objects[id]?.xrayed);
+  scene.setObjectsXRayed(ids, !allX);
+  if (!allX) scene.setObjectsSelected(ids, false), afterSelectionChange(null);
+}
+function showAll() {
+  for (const id in models) { models[id].visible = true; models[id].sceneModel.visible = true; }
+  scene.setObjectsVisible(scene.objectIds, true);
+  scene.setObjectsXRayed(scene.xrayedObjectIds, false);
+  const openings = viewer.metaScene.getObjectIDsByType("IfcOpeningElement").filter(id => scene.objects[id]);
+  scene.setObjectsVisible(openings, false);
+  applySpaces(); renderModels();
+}
+$("#chipHSec").onclick = () => addHorizontalSection();
+function fitIds(ids) {
+  const list = ids && ids.length ? ids : scene.visibleObjectIds;
+  if (!list.length) return;
+  viewer.cameraFlight.flyTo({ aabb: scene.getAABB(list), duration: 0.5 });
+}
+function fitAll() { fitIds(scene.visibleObjectIds); }
+
+$("#btnHide").onclick = () => hideIds(targetIds());
+$("#btnIsolate").onclick = () => isolateIds(targetIds());
+$("#btnXray").onclick = () => xrayIds(targetIds());
+$("#btnShowAll").onclick = showAll;
+$("#btnFit").onclick = () => fitIds(scene.selectedObjectIds);
+$("#btnProj").onclick = () => {
+  const ortho = viewer.camera.projection !== "ortho";
+  viewer.camera.projection = ortho ? "ortho" : "perspective";
+  $("#btnProj").classList.toggle("on", ortho);
+  toast(ortho ? "Vista ortogonal" : "Vista en perspectiva");
+};
+$("#btnSnap").onclick = () => {
+  const url = viewer.getSnapshot({ format: "png", includeGizmos: false });
+  const a = document.createElement("a");
+  a.href = url; a.download = `captura-ifc-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.png`; a.click();
+};
+$("#btnClearMeas").onclick = () => clearMeasures();
+
+/* ============ Modos: seleccionar / sección / medición ============ */
+const HINTS = {
+  section: "<b>Sección:</b> haz clic sobre una cara para cortar por ese plano",
+  distance: "<b>Distancia:</b> clic en el punto inicial y clic en el final. Clic derecho sobre una cota para borrarla. Esc para salir",
+  angle: "<b>Ángulo:</b> clic en origen, vértice y destino. Esc para salir"
+};
+function setMode(m) {
+  distControl.active && distControl.deactivate();
+  angleControl.active && angleControl.deactivate();
+  const leavingMeasure = (mode === "distance" || mode === "angle") && m !== mode;
+  mode = m;
+  if (leavingMeasure && measures.length) toast("Las cotas se quedan en pantalla. Bórralas con clic derecho sobre ellas, con Supr o desde la pestaña Modelos.");
+  $$("[data-mode]").forEach(b => b.classList.toggle("on", b.dataset.mode === m));
+  if (m === "distance") distControl.activate();
+  if (m === "angle") angleControl.activate();
+  if (m !== "select") clearHover();
+  const h = $("#modeHint"); h.innerHTML = HINTS[m] || ""; h.classList.toggle("show", !!HINTS[m]);
+}
+$$("[data-mode]").forEach(b => b.addEventListener("click", () => { setMode(b.dataset.mode === mode ? "select" : b.dataset.mode); b.blur(); }));
+
+
+/* ============ Cotas (distancias y ángulos) ============ */
+const measures = [];   // { plugin, m, kind, n }
+let measureSeq = 0, hoverMeasure = null;
+const measureValue = x => x.kind === "dist"
+  ? x.m.length.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + " m"
+  : x.m.angle.toLocaleString("es-ES", { maximumFractionDigits: 1 }) + "°";
+function wireMeasures(plugin, kind) {
+  plugin.on("measurementCreated", m => { try { m.clickable = true; } catch (e) {} });
+  plugin.on("measurementEnd", m => { measures.push({ plugin, m, kind, n: ++measureSeq }); renderMeasures(); });
+  plugin.on("mouseOver", e => { hoverMeasure = e.measurement; e.measurement.setHighlighted(true); markMeasureRow(e.measurement, true); });
+  plugin.on("mouseLeave", e => { e.measurement.setHighlighted(false); markMeasureRow(e.measurement, false); if (hoverMeasure === e.measurement) hoverMeasure = null; });
+  plugin.on("contextMenu", e => {
+    if (e.event && e.event.preventDefault) e.event.preventDefault();
+    const x = measures.find(q => q.m === e.measurement); if (!x) return;
+    ctx.innerHTML = `<button data-mc="del">Borrar esta cota<kbd>Supr</kbd></button><button data-mc="all">Borrar todas las cotas</button>`;
+    ctx.classList.add("show");
+    ctx.style.left = Math.min(e.event.pageX, innerWidth - ctx.offsetWidth - 6) + "px";
+    ctx.style.top = Math.min(e.event.pageY, innerHeight - ctx.offsetHeight - 6) + "px";
+    ctx.onclick = ev => {
+      const b = ev.target.closest("[data-mc]"); if (!b) return;
+      b.dataset.mc === "del" ? deleteMeasure(x.m) : clearMeasures();
+      ctx.onclick = null; closeCtx();
+    };
+  });
+}
+function deleteMeasure(m) {
+  const i = measures.findIndex(q => q.m === m); if (i < 0) return;
+  const x = measures[i];
+  try { x.plugin.destroyMeasurement(m.id); } catch (e) { try { m.destroy(); } catch (e2) {} }
+  measures.splice(i, 1);
+  if (hoverMeasure === m) hoverMeasure = null;
+  renderMeasures();
+}
+function clearMeasures() {
+  if (distControl.active) distControl.reset();
+  if (angleControl.active) angleControl.reset();
+  distPlugin.clear(); anglePlugin.clear();
+  measures.length = 0; hoverMeasure = null;
+  renderMeasures();
+}
+function markMeasureRow(m, on) {
+  const i = measures.findIndex(q => q.m === m);
+  const row = $(`#measures .sec[data-i="${i}"]`); if (row) row.classList.toggle("hl", on);
+}
+function renderMeasures() {
+  const box = $("#measures");
+  if (!measures.length) { box.innerHTML = ""; return; }
+  box.innerHTML = `<div class="panel-title">Cotas <span class="muted">${measures.length}</span><span style="flex:1"></span>
+      <button class="chip" data-ms="clear">Borrar todas</button></div>` +
+    measures.map((x, i) => `<div class="sec" data-i="${i}">
+      <span class="lbl">${x.kind === "dist" ? "Distancia" : "Ángulo"} ${x.n}</span>
+      <span class="val">${esc(measureValue(x))}</span>
+      <button class="mini" data-ms="vis" title="Mostrar u ocultar">${x.m.visible === false ? ICON.eyeOff : ICON.eye}</button>
+      <button class="mini danger" data-ms="del" title="Borrar cota">${ICON.x}</button></div>`).join("");
+}
+$("#measures").addEventListener("click", e => {
+  const b = e.target.closest("[data-ms]"); if (!b) return;
+  if (b.dataset.ms === "clear") return clearMeasures();
+  const x = measures[+b.closest(".sec").dataset.i]; if (!x) return;
+  if (b.dataset.ms === "del") deleteMeasure(x.m);
+  if (b.dataset.ms === "vis") { x.m.visible = x.m.visible === false; renderMeasures(); }
+});
+$("#measures").addEventListener("mouseover", e => { const r = e.target.closest(".sec"); measures.forEach((x, i) => x.m.setHighlighted(!!r && +r.dataset.i === i)); });
+$("#measures").addEventListener("mouseleave", () => measures.forEach(x => x.m.setHighlighted(false)));
+wireMeasures(distPlugin, "dist");
+wireMeasures(anglePlugin, "angle");
+
+/* ============ Planos de sección ============ */
+let secSeq = 0;
+const secList = [];
+function addSectionPlane(pos, dir, label) {
+  const sp = sectionPlanes.createSectionPlane({ id: "corte" + (++secSeq), pos, dir });
+  secList.push({ sp, label: label || `Corte ${secSeq}` });
+  sectionPlanes.showControl(sp.id);
+  renderSections();
+  if (!$("#pane-models").classList.contains("active")) toast(`${label || "Corte " + secSeq} creado. Gestiona los cortes en la pestaña Modelos`);
+  return sp;
+}
+function renderSections() {
+  const box = $("#sections");
+  if (!secList.length) { box.innerHTML = ""; return; }
+  const shown = sectionPlanes.getShownControl ? sectionPlanes.getShownControl() : null;
+  box.innerHTML = `<div class="panel-title">Secciones <span class="muted">${secList.length}</span>
+      <span class="spacer" style="flex:1"></span>
+      <button class="chip" data-sec="clear">Quitar todas</button></div>` +
+    secList.map((s, i) => `<div class="sec" data-i="${i}">
+      <input type="checkbox" data-sec="active" ${s.sp.active ? "checked" : ""} title="Activar o desactivar">
+      <span class="lbl">${esc(s.label)}</span>
+      <button class="mini ${shown === s.sp.id ? "on" : ""}" data-sec="gizmo" title="Mostrar control para mover o girar">${ICON.gizmo}</button>
+      <button class="mini" data-sec="flip" title="Invertir lado del corte">${ICON.flip}</button>
+      <button class="mini danger" data-sec="del" title="Eliminar">${ICON.x}</button></div>`).join("");
+}
+$("#sections").addEventListener("click", e => {
+  const b = e.target.closest("[data-sec]"); if (!b || b.type === "checkbox") return;
+  const act = b.dataset.sec;
+  if (act === "clear") { sectionPlanes.clear(); secList.length = 0; renderSections(); return; }
+  const i = +b.closest(".sec").dataset.i, s = secList[i]; if (!s) return;
+  if (act === "flip") s.sp.flipDir();
+  if (act === "gizmo") { if (sectionPlanes.getShownControl() === s.sp.id) sectionPlanes.hideControl(); else sectionPlanes.showControl(s.sp.id); renderSections(); }
+  if (act === "del") { sectionPlanes.destroySectionPlane(s.sp.id); secList.splice(i, 1); renderSections(); }
+});
+$("#sections").addEventListener("change", e => {
+  if (e.target.dataset.sec !== "active") return;
+  const s = secList[+e.target.closest(".sec").dataset.i]; if (s) s.sp.active = e.target.checked;
+});
+function addHorizontalSection() {
+  if (!scene.visibleObjectIds.length) return toast("Carga un modelo primero");
+  const a = scene.getAABB(scene.visibleObjectIds);
+  const c = [(a[0] + a[3]) / 2, a[1] + (a[4] - a[1]) * 0.5, (a[2] + a[5]) / 2];
+  addSectionPlane(c, [0, -1, 0], `Planta ${secSeq + 1}`);
+}
+
+/* ============ Menú contextual ============ */
+const ctx = $("#ctx");
+let ctxIds = [], ctxPropsId = null;
+function openCtx(x, y, ids, propsId) {
+  ctx.onclick = null;
+  ctxIds = ids; ctxPropsId = propsId || (ids.length === 1 ? ids[0] : null);
+  const guid = ctxPropsId ? guidOf(viewer.metaScene.metaObjects[ctxPropsId]?.originalSystemId || ctxPropsId) : null;
+  ctx.innerHTML = `
+    <button data-c="isolate">Aislar<kbd>I</kbd></button>
+    <button data-c="hide">Ocultar<kbd>H</kbd></button>
+    <button data-c="xray">Transparentar<kbd>T</kbd></button>
+    <button data-c="fit">Encuadrar<kbd>F</kbd></button>
+    <hr>
+    <button data-c="showall">Mostrar todo<kbd>⇧H</kbd></button>
+    ${guid ? `<hr><button data-c="guid">Copiar GUID</button>` : ""}`;
+  ctx.classList.add("show");
+  const w = ctx.offsetWidth, h = ctx.offsetHeight;
+  ctx.style.left = Math.min(x, innerWidth - w - 6) + "px";
+  ctx.style.top = Math.min(y, innerHeight - h - 6) + "px";
+  ctx.dataset.guid = guid || "";
+}
+function closeCtx() { ctx.classList.remove("show"); }
+ctx.addEventListener("click", e => {
+  const b = e.target.closest("[data-c]"); if (!b) return;
+  const c = b.dataset.c;
+  if (c === "isolate") isolateIds(ctxIds);
+  if (c === "hide") hideIds(ctxIds);
+  if (c === "xray") xrayIds(ctxIds);
+  if (c === "fit") fitIds(ctxIds);
+  if (c === "showall") showAll();
+  if (c === "guid") copyText(ctx.dataset.guid, "GUID copiado");
+  closeCtx();
+});
+document.addEventListener("mousedown", e => { if (!ctx.contains(e.target)) closeCtx(); });
+canvas.addEventListener("contextmenu", e => {
+  e.preventDefault();
+  if (mode !== "select") return;
+  const r = canvas.getBoundingClientRect();
+  const hit = scene.pick({ canvasPos: [e.clientX - r.left, e.clientY - r.top] });
+  const ent = hit && hit.entity && scene.objects[hit.entity.id] ? hit.entity : null;
+  if (ent && !ent.selected) selectEntity(ent, false);
+  const ids = scene.selectedObjectIds;
+  if (!ids.length) { openCtx(e.pageX, e.pageY, [], null); return; }
+  openCtx(e.pageX, e.pageY, ids, ent ? ent.id : null);
+});
+
+/* ============ Propiedades ============ */
+function renderPropsEmpty() {
+  currentPropsId = null;
+  $("#props").innerHTML = '<div class="empty">Selecciona un elemento en el modelo o en el árbol para ver su GUID, atributos, Psets, cantidades, tipo y materiales.</div>';
+}
+function renderGroup(g) {
+  currentPropsId = null;
+  $("#props").innerHTML = `<div class="p-head"><div class="p-name">${esc(g.title)}</div><div class="p-type">${fmtN(g.n)} elementos seleccionados</div>
+    <div class="p-actions"><button class="chip" data-pa="fit">Encuadrar</button><button class="chip" data-pa="iso">Aislar</button></div></div>`;
+}
+
+function kvTable(rows) {
+  return `<table class="kv">${rows.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</table>`;
+}
+function section(title, rows, kind, open = true) {
+  if (!rows.length) return "";
+  return `<details ${open ? "open" : ""}><summary>${esc(title)}${kind ? ` <span class="kind">${esc(kind)}</span>` : ""}<span class="count">${rows.length}</span></summary>${kvTable(rows)}</details>`;
+}
+const guidOf = id => String(id).split("#").pop();
+
+let propsToken = 0;
+async function renderProps(objectId) {
+  currentPropsId = objectId;
+  const token = ++propsToken;
+  const mo = viewer.metaScene.metaObjects[objectId];
+  const ent = scene.objects[objectId];
+  const modelId = ent?.model?.id || mo?.metaModels?.[0]?.id || mo?.metaModel?.id;
+  const m = models[modelId];
+  const guid = guidOf(mo?.originalSystemId || objectId);
+  const name = mo?.name || objectId;
+  const type = mo?.type || "";
+
+  $("#props").innerHTML = `<div class="p-head">
+    <div class="p-name">${esc(name)}</div>
+    <div class="p-type">${esc(type)}</div>
+    <div class="guid" title="GlobalId (GUID IFC)"><code>${esc(guid)}</code><button class="mini" data-pa="copy" title="Copiar GUID">${ICON.copy}</button></div>
+    <div class="p-actions">
+      <button class="chip" data-pa="fit">Encuadrar</button>
+      <button class="chip" data-pa="iso">Aislar</button>
+      <button class="chip" data-pa="tree">Localizar en árbol</button>
+      <button class="chip" data-pa="copyall" title="Copiar todas las propiedades como texto tabulado (pegable en Excel)">Copiar todo</button>
+    </div></div>
+    <div class="p-filter"><input type="search" id="pFilter" placeholder="Filtrar propiedades"></div>
+    <div id="pBody"><div class="empty">Leyendo propiedades…</div></div>`;
+  $("#props").dataset.guid = guid;
+
+  let body = "";
+  try {
+    const data = m ? await askProps(m, guid) : null;
+    if (token !== propsToken) return;
+    const sections = data?.sections || [];
+    if (sections[0]) sections[0].rows.unshift(["Modelo", m.name], ["Esquema", m.schema]);
+    body = sections.map(s => section(s.title, s.rows, s.kind)).join("");
+  } catch (e) {
+    console.warn(e);
+    body = section("Identificación", [["Modelo", m?.name || ""], ["Clase IFC", type], ["GlobalId", guid]], "Atributos IFC") +
+      '<div class="empty">No se pudieron leer las propiedades: ' + esc(e.message) + '</div>';
+  }
+  if (token !== propsToken) return;
+  $("#pBody").innerHTML = body || '<div class="empty">Este elemento no tiene propiedades asociadas.</div>';
+}
+
+$("#props").addEventListener("click", e => {
+  const b = e.target.closest("[data-pa]"); if (!b) return;
+  const a = b.dataset.pa, ids = scene.selectedObjectIds;
+  if (a === "copy") copyText($("#props").dataset.guid, "GUID copiado");
+  if (a === "fit") fitIds(ids.length ? ids : [currentPropsId].filter(Boolean));
+  if (a === "iso") isolateIds(ids.length ? ids : [currentPropsId].filter(id => scene.objects[id]));
+  if (a === "tree") {
+    if (!currentPropsId) return;
+    $$(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === "tree"));
+    $$(".pane").forEach(p => p.classList.toggle("active", p.id === "pane-tree"));
+    document.body.classList.add("show-left");
+    treeView.showNode(currentPropsId);
+    setTimeout(() => { const n = $("#tree .highlighted-node"); if (n) n.scrollIntoView({ block: "center" }); else toast("Este elemento no aparece en el árbol actual"); }, 60);
+  }
+  if (a === "copyall") {
+    const lines = [];
+    $$("#pBody details").forEach(d => {
+      const title = d.querySelector("summary").firstChild.textContent.trim();
+      d.querySelectorAll("tr").forEach(tr => { const [k, v] = tr.querySelectorAll("td"); lines.push([title, k.textContent, v.textContent].join("\t")); });
+    });
+    copyText(lines.join("\n"), "Propiedades copiadas (pegables en Excel)");
+  }
+});
+$("#props").addEventListener("input", e => {
+  if (e.target.id !== "pFilter") return;
+  const q = e.target.value.trim().toLowerCase();
+  $$("#pBody details").forEach(d => {
+    let any = false;
+    const titleHit = q && d.querySelector("summary").textContent.toLowerCase().includes(q);
+    d.querySelectorAll("tr").forEach(tr => { const hit = !q || titleHit || tr.textContent.toLowerCase().includes(q); tr.style.display = hit ? "" : "none"; any ||= hit; });
+    d.style.display = any ? "" : "none";
+    if (q && any) d.open = true;
+  });
+});
+
+/* ============ Búsqueda ============ */
+let searchIds = [];
+let searchTimer = null;
+function runSearch() {
+  const q = $("#q").value.trim().toLowerCase();
+  const box = $("#results");
+  searchIds = [];
+  if (!q) { box.innerHTML = ""; $("#qHint").textContent = "Busca en todos los modelos cargados."; toggleResBtns(); return; }
+  const out = [];
+  const metaObjects = viewer.metaScene.metaObjects;
+  for (const id in metaObjects) {
+    const mo = metaObjects[id];
+    if (!scene.objects[id]) continue;
+    const name = (mo.name || "").toLowerCase(), type = (mo.type || "").toLowerCase(), guid = (mo.originalSystemId || id).toLowerCase();
+    if (name.includes(q) || type.includes(q) || guid.includes(q)) { searchIds.push(id); if (out.length < 400) out.push(mo); }
+  }
+  $("#qHint").textContent = searchIds.length ? `${fmtN(searchIds.length)} coincidencias${searchIds.length > out.length ? ` (se muestran ${out.length})` : ""}` : "Sin coincidencias";
+  box.innerHTML = out.map(mo => `<div class="res" data-id="${esc(mo.id)}"><div class="n">${esc(mo.name)}</div><div class="t"><span>${esc(mo.type)}</span><code>${esc(guidOf(mo.originalSystemId || mo.id))}</code></div></div>`).join("");
+  toggleResBtns();
+}
+function toggleResBtns() { $("#btnSelResults").disabled = $("#btnIsoResults").disabled = !searchIds.length; }
+$("#q").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 200); });
+$("#results").addEventListener("click", e => {
+  const r = e.target.closest(".res"); if (!r) return;
+  const ent = scene.objects[r.dataset.id]; if (!ent) return;
+  selectEntity(ent, e.ctrlKey || e.metaKey);
+  fitIds([ent.id]);
+});
+$("#btnSelResults").onclick = () => { scene.setObjectsSelected(scene.selectedObjectIds, false); scene.setObjectsSelected(searchIds, true); afterSelectionChange(null, { title: `Búsqueda: ${$("#q").value}`, n: searchIds.length }); };
+$("#btnIsoResults").onclick = () => isolateIds(searchIds);
+
+
+/* ============ Tema claro / oscuro ============ */
+const ICON_SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+const ICON_MOON = '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>';
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem("visorIfcTheme", t); } catch (e) {}
+  applySceneTheme(t);
+  try { distPlugin.defaultColor = THEME_MATERIALS[t].measure; } catch (e) {}
+  // En tema claro se ofrece pasar a oscuro (luna) y viceversa (sol)
+  $("#themeIcon").innerHTML = t === "dark" ? ICON_SUN : ICON_MOON;
+  $("#btnTheme").title = t === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro";
+}
+$("#btnTheme").onclick = () => setTheme(currentTheme() === "dark" ? "light" : "dark");
+setTheme(currentTheme());
+
+/* ============ Pestañas, paneles, ayuda ============ */
+$$(".tab").forEach(t => t.addEventListener("click", () => {
+  $$(".tab").forEach(x => x.classList.toggle("active", x === t));
+  $$(".pane").forEach(p => p.classList.toggle("active", p.id === "pane-" + t.dataset.tab));
+}));
+const narrow = () => matchMedia("(max-width:900px)").matches;
+$("#btnLeft").onclick = () => document.body.classList.toggle(narrow() ? "show-left" : "hide-left");
+$("#btnRight").onclick = () => document.body.classList.toggle(narrow() ? "show-right" : "hide-right");
+$("#btnHelp").onclick = () => $("#help").classList.toggle("show");
+document.addEventListener("mousedown", e => { if (!$("#help").contains(e.target) && !$("#btnHelp").contains(e.target)) $("#help").classList.remove("show"); });
+
+/* ============ Abrir archivos y arrastrar ============ */
+const fileInput = $("#fileInput");
+$("#btnOpen").onclick = $("#btnOpen2").onclick = () => fileInput.click();
+fileInput.addEventListener("change", () => { if (fileInput.files.length) loadFiles(fileInput.files); fileInput.value = ""; });
+let dragDepth = 0;
+window.addEventListener("dragenter", e => { if ([...e.dataTransfer.types].includes("Files")) { e.preventDefault(); dragDepth++; document.body.classList.add("dragging"); } });
+window.addEventListener("dragover", e => { if ([...e.dataTransfer.types].includes("Files")) e.preventDefault(); });
+window.addEventListener("dragleave", () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove("dragging"); } });
+window.addEventListener("drop", e => { e.preventDefault(); dragDepth = 0; document.body.classList.remove("dragging"); if (e.dataTransfer.files.length) loadFiles(e.dataTransfer.files); });
+
+/* ============ Teclado ============ */
+window.addEventListener("keydown", e => {
+  if (e.target.matches("input,select,textarea")) return;
+  const k = e.key.toLowerCase();
+  if (k === "escape") { closeCtx(); if (mode !== "select") setMode("select"); else clearSelection(); }
+  else if ((k === "delete" || k === "backspace") && hoverMeasure) deleteMeasure(hoverMeasure);
+  else if (k === "h" && e.shiftKey) showAll();
+  else if (k === "h") hideIds(targetIds());
+  else if (k === "i") isolateIds(targetIds());
+  else if (k === "t") xrayIds(targetIds());
+  else if (k === "f") fitIds(scene.selectedObjectIds);
+});
+
+/* ============ Utilidades ============ */
+let toastTimer = null;
+function toast(msg, err) {
+  const t = $("#toast"); t.textContent = msg; t.classList.toggle("err", !!err); t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), err ? 5000 : 2600);
+}
+async function copyText(text, okMsg) {
+  try { await navigator.clipboard.writeText(text); toast(okMsg || "Copiado"); }
+  catch (e) {
+    const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); toast(okMsg || "Copiado"); } catch (e2) { toast("No se pudo copiar", true); }
+    ta.remove();
+  }
+}
+window.__visor = { viewer, models, jobs, distPlugin, anglePlugin };   // para depurar desde la consola
+</script>
+</body>
+</html>
