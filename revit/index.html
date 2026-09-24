@@ -104,6 +104,35 @@ input[type=text],select{width:100%;padding:6px 9px;border:1px solid var(--line);
 #sectionPanel .btn{white-space:normal}
 .rng{display:grid;grid-template-columns:62px 1fr 1fr;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin:4px 0}
 .rng input{width:100%}
+#dimSvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+#dimSvg .halo{stroke:var(--panel);stroke-width:5;stroke-linecap:round;opacity:.85}
+#dimSvg .ln{stroke:var(--accent);stroke-width:2;stroke-linecap:round}
+#dimSvg .end{fill:var(--accent);stroke:var(--ink);stroke-width:1.5}
+#dimSvg g.hl .ln{stroke-width:3.5}
+#dimSvg g.rubber .ln{stroke-dasharray:6 4}
+#dimSvg .snap{fill:none;stroke:var(--ink);stroke-width:2}
+#dimSvg .ax{stroke-width:2;stroke-dasharray:5 3}
+#dimSvg .ax-x{stroke:#d6453d} #dimSvg .ax-y{stroke:#2f9a48} #dimSvg .ax-z{stroke:#2f6fd6}
+#dimSvg .axhalo{stroke:var(--panel);stroke-width:4;opacity:.7}
+.dim-ax{position:absolute;transform:translate(-50%,-50%);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:4px;color:#fff;white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:none;opacity:.95}
+.dim-ax.x{background:#d6453d} .dim-ax.y{background:#2f9a48} .dim-ax.z{background:#2f6fd6}
+#dimAxesChk{margin:0 0 6px}
+#dimLabels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.dim-label{position:absolute;transform:translate(-50%,-50%);background:var(--ink);color:var(--panel);font-size:13px;font-weight:600;padding:2px 7px;border-radius:5px;white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:auto;cursor:context-menu;user-select:none;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.dim-label.hl{background:var(--accent);color:var(--accent-ink)}
+.dim-label.live{pointer-events:none;cursor:default}
+#view.dimming canvas{cursor:crosshair}
+#dimMenu{position:fixed;z-index:50;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.18);min-width:180px}
+#dimMenu button{all:unset;display:flex;justify-content:space-between;gap:14px;width:calc(100% - 20px);padding:6px 10px;border-radius:5px;cursor:pointer;font-size:14px}
+#dimMenu button:hover{background:var(--soft)}
+#dimList li{border-bottom:1px solid var(--line);padding:5px 0}
+#dimList li:last-child{border-bottom:0}
+#dimList li.hl{background:color-mix(in srgb,var(--accent) 18%,transparent)}
+.dim-info{flex:1;min-width:0}
+.dim-val{font-weight:600;font-variant-numeric:tabular-nums}
+.dim-sub{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ibtn{all:unset;cursor:pointer;color:var(--muted);padding:2px 6px;border-radius:4px;font-size:14px;line-height:1}
+.ibtn:hover{color:var(--ink);background:var(--soft)}
 #toast{position:absolute;right:12px;bottom:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:13px;color:var(--muted)}
 
 .sel-title{font-size:18px;font-weight:700;margin:0}
@@ -180,6 +209,11 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
       <h2>Modelos</h2>
       <ul class="models" id="models"><li class="muted">Añade el .dae y el .xlsx de cada modelo. Se colocan solos por sus coordenadas.</li></ul>
     </section>
+    <section id="dimSection" hidden>
+      <div class="row" style="margin-bottom:6px"><h2 style="margin:0">Cotas <span class="count" id="dimCount"></span></h2><button class="btn small" id="dimClear" style="flex:none">Borrar todas</button></div>
+      <label class="check" id="dimAxesChk"><input type="checkbox" id="dimAxes" checked> Mostrar componentes X, Y, Z en cotas oblicuas</label>
+      <ul class="list" id="dimList"></ul>
+    </section>
     <section>
       <h2>Buscar elementos</h2>
       <div class="row"><select id="searchCol" aria-label="Parámetro donde buscar"><option value="">Cualquier parámetro</option></select></div>
@@ -237,6 +271,7 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
       <span class="sep"></span>
       <button class="btn" id="showAllBtn" title="Quitar ocultos y aislamiento">Mostrar todo</button>
       <span class="sep"></span>
+      <button class="btn" id="dimBtn" aria-pressed="false" title="Medir la distancia entre dos puntos, con imán a vértices y aristas (D)">Distancia</button>
       <button class="btn" id="measureBtn" aria-pressed="false">Medición</button>
     </div>
     <div id="clipPanels">
@@ -268,6 +303,8 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
       </div>
     </div>
     </div>
+    <svg id="dimSvg"></svg>
+    <div id="dimLabels"></div>
     <div id="toast" hidden></div>
   </div>
   </div>
@@ -275,7 +312,7 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
   <aside class="right">
     <section>
       <h2>Propiedades</h2>
-      <p class="muted" id="selHint">Haz clic en un elemento para ver sus parámetros.<br><kbd>H</kbd> ocultar, <kbd>I</kbd> aislar, <kbd>F</kbd> encuadrar, <kbd>Esc</kbd> deseleccionar.</p>
+      <p class="muted" id="selHint">Haz clic en un elemento para ver sus parámetros.<br><kbd>H</kbd> ocultar, <kbd>I</kbd> aislar, <kbd>F</kbd> encuadrar, <kbd>D</kbd> distancia, <kbd>Esc</kbd> deseleccionar.</p>
       <div id="selContent" hidden>
         <p class="sel-title" id="selTitle"></p>
         <p class="sel-sub" id="selSub"></p>
@@ -636,7 +673,7 @@ function workerMain(){
   function requestRender(){
     if (pending) return;
     pending = true;
-    requestAnimationFrame(() => { pending = false; renderer.render(scene, camera); });
+    requestAnimationFrame(() => { pending = false; renderer.render(scene, camera); updateDims(); });
   }
   controls.addEventListener("change", requestRender);
 
@@ -1189,6 +1226,7 @@ function workerMain(){
     const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
     down = null;
     if (moved > 5 || !S.models.some(m => m.ready)) return;
+    if (DIM.on){ dimClick(e.clientX, e.clientY); return; }
     const hit = pick(e.clientX, e.clientY);
     if (CUT.picking){
       if (hit) setCutFromFace(hit.point, hit.normal); else toast("No has tocado ninguna cara. Prueba otra vez.");
@@ -1332,6 +1370,7 @@ function workerMain(){
     syncClipping();
   }
   function startCutPick(){
+    if (DIM.on) setDim(false);
     CUT.picking = true;
     view.classList.add("picking");
     $("cutPanel").hidden = false;
@@ -1352,6 +1391,235 @@ function workerMain(){
     if (camera !== ortho) setOrtho(true);
     fitTo(visibleBox(), CUT.normal.clone().negate());   // desde el lado cortado, mirando la sección
   }
+
+
+  // ---------- Cotas de distancia ----------
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const DIM = { on:false, a:null, hover:null, list:[], seq:0, hl:null, raf:0 };
+  const fmtM = v => v.toLocaleString("es-ES", { minimumFractionDigits:2, maximumFractionDigits:3 });
+  const _v = new THREE.Vector3();
+
+  // Imán: vértices y aristas del elemento tocado (las aristas "reales", no las diagonales de los triángulos)
+  function snapPick(clientX, clientY){
+    const hit = pick(clientX, clientY);
+    if (!hit) return null;
+    const r = renderer.domElement.getBoundingClientRect();
+    const mx = clientX - r.left, my = clientY - r.top;
+    const m = hit.m, e = hit.e, c = m.chunks[m.elC[e]], P = c.pos, E = c.fullEdge, off = m.group.position;
+    const e0 = m.elE[e] * 2, en = m.elEN[e] * 2;
+    const scr = (x, y, z) => { _v.set(x + off.x, y + off.y, z + off.z).project(camera); return [(_v.x + 1) / 2 * r.width, (1 - _v.y) / 2 * r.height]; };
+    let bestV = null, bestVd = 12, bestE = null, bestEd = 8;
+    for (let i = e0; i < e0 + en; i += 2){
+      const a = E[i] * 3, b = E[i + 1] * 3;
+      const sa = scr(P[a], P[a+1], P[a+2]), sb = scr(P[b], P[b+1], P[b+2]);
+      for (const [s, k] of [[sa, a], [sb, b]]){
+        const d = Math.hypot(s[0] - mx, s[1] - my);
+        if (d < bestVd){ bestVd = d; bestV = k; }
+      }
+      if (!bestV){
+        const dx = sb[0] - sa[0], dy = sb[1] - sa[1], L2 = dx*dx + dy*dy;
+        if (L2 < 1) continue;
+        let t = ((mx - sa[0]) * dx + (my - sa[1]) * dy) / L2; t = Math.max(0, Math.min(1, t));
+        const d = Math.hypot(sa[0] + t*dx - mx, sa[1] + t*dy - my);
+        if (d < bestEd){ bestEd = d; bestE = [a, b]; }
+      }
+    }
+    if (bestV !== null)
+      return { point:new THREE.Vector3(P[bestV] + off.x, P[bestV+1] + off.y, P[bestV+2] + off.z), kind:"vertex" };
+    if (bestE){
+      // punto de la arista más cercano al rayo del ratón (exacto en 3D)
+      const A = new THREE.Vector3(P[bestE[0]] + off.x, P[bestE[0]+1] + off.y, P[bestE[0]+2] + off.z);
+      const B = new THREE.Vector3(P[bestE[1]] + off.x, P[bestE[1]+1] + off.y, P[bestE[1]+2] + off.z);
+      const q = new THREE.Vector3();
+      ray.ray.distanceSqToSegment(A, B, null, q);
+      return { point:q, kind:"edge" };
+    }
+    return { point:hit.point.clone(), kind:"face" };
+  }
+
+  function setDim(on){
+    if (on && !S.models.some(m => m.ready)){ toast("Carga primero un modelo."); return; }
+    if (on && CUT.picking && !CUT.on) setCut(false);
+    else if (on && CUT.picking){ CUT.picking = false; view.classList.remove("picking"); }
+    const wasOn = DIM.on;
+    DIM.on = on; DIM.a = null; DIM.hover = null;
+    view.classList.toggle("dimming", on);
+    $("dimBtn").setAttribute("aria-pressed", String(on));
+    if (on) toast("Clic en el primer punto y clic en el segundo. Se ajusta a vértices y aristas. Esc para salir.");
+    else if (wasOn && DIM.list.length) toast("Las cotas se quedan en pantalla. Bórralas con clic derecho sobre la cifra, con Supr o en el panel Cotas.");
+    requestRender();
+  }
+  function dimClick(x, y){
+    const s = snapPick(x, y);
+    if (!s){ toast("No has tocado el modelo. Prueba otra vez."); return; }
+    if (!DIM.a){ DIM.a = s.point; DIM.hover = s; requestRender(); return; }
+    if (s.point.distanceTo(DIM.a) < 1e-6) return;
+    DIM.list.push({ id:++DIM.seq, a:DIM.a, b:s.point, visible:true, els:null });
+    DIM.a = null;
+    renderDimList(); requestRender();
+  }
+  renderer.domElement.addEventListener("pointermove", e => {
+    if (!DIM.on || e.buttons) return;
+    const x = e.clientX, y = e.clientY;
+    cancelAnimationFrame(DIM.raf);
+    DIM.raf = requestAnimationFrame(() => { DIM.hover = snapPick(x, y); requestRender(); });
+  });
+  renderer.domElement.addEventListener("pointerleave", () => { if (DIM.on){ DIM.hover = null; requestRender(); } });
+
+  function dimParts(d){
+    // en coordenadas del proyecto: X (E-O), Y (N-S), Z (altura)
+    const dx = d.b.x - d.a.x, dy = -(d.b.z - d.a.z), dz = d.b.y - d.a.y;
+    return { total:Math.hypot(dx, dy, dz), horiz:Math.hypot(dx, dy), dx, dy, dz };
+  }
+  function makeDimEls(cls){
+    const g = document.createElementNS(SVGNS, "g");
+    if (cls) g.setAttribute("class", cls);
+    g.innerHTML = '<g class="axes">' +
+      ["x", "y", "z"].map(k => `<line class="axhalo"/><line class="ax ax-${k}"/>`).join("") +
+      '</g><line class="halo"/><line class="ln"/><circle class="end" r="4"/><circle class="end" r="4"/>';
+    $("dimSvg").appendChild(g);
+    const axLabels = ["x", "y", "z"].map(k => { const d = document.createElement("div"); d.className = "dim-ax " + k; $("dimLabels").appendChild(d); return d; });
+    const label = document.createElement("div");
+    label.className = "dim-label" + (cls === "rubber" ? " live" : "");
+    $("dimLabels").appendChild(label);
+    return { g, label, axLabels };
+  }
+  function dropEls(els){ els.g.remove(); els.label.remove(); els.axLabels.forEach(l => l.remove()); }
+  function removeDimEls(d){ if (d.els){ dropEls(d.els); d.els = null; } }
+  function toScr(p, w, h){
+    _v.copy(p).project(camera);
+    if (_v.z > 1 || _v.z < -1) return null;
+    return [(_v.x + 1) / 2 * w, (1 - _v.y) / 2 * h];
+  }
+  const AX_MIN = 0.001;   // por debajo de 1 mm la componente no se dibuja
+  function placeAxes(els, a, b, w, h, show){
+    const axG = els.g.firstChild, lines = axG.children;
+    // Recorrido A -> X (E-O) -> Y (N-S) -> Z (altura) -> B, en coordenadas de la escena
+    const p1 = new THREE.Vector3(b.x, a.y, a.z), p2 = new THREE.Vector3(b.x, a.y, b.z);
+    const legs = [[a, p1, Math.abs(b.x - a.x)], [p1, p2, Math.abs(b.z - a.z)], [p2, b, Math.abs(b.y - a.y)]];
+    const oblique = legs.filter(l => l[2] >= AX_MIN).length >= 2;
+    const on = show && oblique && $("dimAxes").checked;
+    axG.style.display = on ? "" : "none";
+    legs.forEach(([u, v, len], i) => {
+      const lab = els.axLabels[i];
+      const su = on && len >= AX_MIN ? toScr(u, w, h) : null, sv = su ? toScr(v, w, h) : null;
+      const vis = !!(su && sv);
+      lines[2*i].style.display = lines[2*i+1].style.display = vis ? "" : "none";
+      lab.style.display = vis ? "" : "none";
+      if (!vis) return;
+      for (const l of [lines[2*i], lines[2*i+1]]){ l.setAttribute("x1", su[0]); l.setAttribute("y1", su[1]); l.setAttribute("x2", sv[0]); l.setAttribute("y2", sv[1]); }
+      lab.style.left = (su[0] + sv[0]) / 2 + "px"; lab.style.top = (su[1] + sv[1]) / 2 + "px";
+      const t = "XYZ"[i] + " " + fmtM(len);
+      if (lab.textContent !== t) lab.textContent = t;
+    });
+  }
+  function placeDim(els, a, b, w, h, text){
+    const sa = toScr(a, w, h), sb = toScr(b, w, h);
+    const show = !!(sa && sb);
+    els.g.style.display = show ? "" : "none";
+    els.label.style.display = show ? "" : "none";
+    placeAxes(els, a, b, w, h, show);
+    if (!show) return;
+    const [, l1, l2, c1, c2] = els.g.children;
+    for (const l of [l1, l2]){ l.setAttribute("x1", sa[0]); l.setAttribute("y1", sa[1]); l.setAttribute("x2", sb[0]); l.setAttribute("y2", sb[1]); }
+    c1.setAttribute("cx", sa[0]); c1.setAttribute("cy", sa[1]);
+    c2.setAttribute("cx", sb[0]); c2.setAttribute("cy", sb[1]);
+    els.label.style.left = (sa[0] + sb[0]) / 2 + "px";
+    els.label.style.top = (sa[1] + sb[1]) / 2 + "px";
+    if (els.label.textContent !== text) els.label.textContent = text;
+  }
+  let rubber = null, snapMark = null;
+  function updateDims(){
+    const w = view.clientWidth, h = view.clientHeight;
+    for (const d of DIM.list){
+      if (!d.els){
+        d.els = makeDimEls("");
+        const lb = d.els.label;
+        lb.addEventListener("mouseenter", () => setDimHl(d));
+        lb.addEventListener("mouseleave", () => setDimHl(null));
+        lb.addEventListener("contextmenu", ev => { ev.preventDefault(); openDimMenu(ev.clientX, ev.clientY, d); });
+        lb.title = "Clic derecho para borrar";
+      }
+      if (!d.visible){ d.els.g.style.display = "none"; d.els.label.style.display = "none"; d.els.axLabels.forEach(l => l.style.display = "none"); continue; }
+      placeDim(d.els, d.a, d.b, w, h, fmtM(dimParts(d).total) + " m");
+      d.els.g.classList.toggle("hl", DIM.hl === d);
+      d.els.label.classList.toggle("hl", DIM.hl === d);
+    }
+    // cota en curso
+    const live = DIM.on && DIM.a && DIM.hover;
+    if (live){
+      if (!rubber) rubber = makeDimEls("rubber");
+      placeDim(rubber, DIM.a, DIM.hover.point, w, h, fmtM(DIM.a.distanceTo(DIM.hover.point)) + " m");
+    } else if (rubber){ dropEls(rubber); rubber = null; }
+    // marca del imán
+    if (DIM.on && DIM.hover){
+      const sp = toScr(DIM.hover.point, w, h);
+      if (!snapMark){ snapMark = document.createElementNS(SVGNS, "g"); $("dimSvg").appendChild(snapMark); }
+      if (sp){
+        const k = DIM.hover.kind, x = sp[0], y = sp[1];
+        snapMark.innerHTML = k === "vertex" ? `<rect class="snap" x="${x-6}" y="${y-6}" width="12" height="12"/>`
+          : k === "edge" ? `<path class="snap" d="M${x} ${y-7}L${x+7} ${y}L${x} ${y+7}L${x-7} ${y}Z"/>`
+          : `<circle class="snap" cx="${x}" cy="${y}" r="5"/>`;
+      } else snapMark.innerHTML = "";
+    } else if (snapMark){ snapMark.remove(); snapMark = null; }
+  }
+  function setDimHl(d){
+    DIM.hl = d;
+    document.querySelectorAll("#dimList li").forEach(li => li.classList.toggle("hl", !!d && +li.dataset.id === d.id));
+    requestRender();
+  }
+  function deleteDim(d){
+    const i = DIM.list.indexOf(d); if (i < 0) return;
+    removeDimEls(d); DIM.list.splice(i, 1);
+    if (DIM.hl === d) DIM.hl = null;
+    renderDimList(); requestRender();
+  }
+  function clearDims(){
+    DIM.list.forEach(removeDimEls); DIM.list.length = 0; DIM.hl = null; DIM.a = null;
+    renderDimList(); requestRender();
+  }
+  function renderDimList(){
+    $("dimSection").hidden = !DIM.list.length;
+    $("dimCount").textContent = DIM.list.length ? "(" + DIM.list.length + ")" : "";
+    const ul = $("dimList"); ul.innerHTML = "";
+    DIM.list.forEach(d => {
+      const p = dimParts(d);
+      const li = document.createElement("li"); li.dataset.id = d.id;
+      li.innerHTML = `<div class="dim-info"><div><span class="dim-val">${fmtM(p.total)} m</span> <span class="count">Cota ${d.id}</span></div>
+        <div class="dim-sub">Horizontal ${fmtM(p.horiz)} m · Vertical ${fmtM(Math.abs(p.dz))} m</div>
+        <div class="dim-sub">X ${fmtM(Math.abs(p.dx))} · Y ${fmtM(Math.abs(p.dy))} · Z ${fmtM(Math.abs(p.dz))} m</div></div>
+        <button class="ibtn" data-a="vis" title="${d.visible ? "Ocultar" : "Mostrar"}">${d.visible ? "👁" : "◌"}</button>
+        <button class="ibtn" data-a="del" title="Borrar cota">✕</button>`;
+      li.addEventListener("mouseenter", () => setDimHl(d));
+      li.addEventListener("mouseleave", () => setDimHl(null));
+      li.addEventListener("click", ev => {
+        const b = ev.target.closest("[data-a]"); if (!b) return;
+        if (b.dataset.a === "del") deleteDim(d);
+        else { d.visible = !d.visible; renderDimList(); requestRender(); }
+      });
+      ul.appendChild(li);
+    });
+  }
+  let dimMenu = null;
+  function openDimMenu(x, y, d){
+    closeDimMenu();
+    dimMenu = document.createElement("div"); dimMenu.id = "dimMenu";
+    dimMenu.innerHTML = '<button data-a="del">Borrar esta cota <kbd>Supr</kbd></button><button data-a="all">Borrar todas las cotas</button>';
+    document.body.appendChild(dimMenu);
+    dimMenu.style.left = Math.min(x, innerWidth - dimMenu.offsetWidth - 6) + "px";
+    dimMenu.style.top = Math.min(y, innerHeight - dimMenu.offsetHeight - 6) + "px";
+    dimMenu.addEventListener("click", ev => {
+      const b = ev.target.closest("[data-a]"); if (!b) return;
+      b.dataset.a === "del" ? deleteDim(d) : clearDims();
+      closeDimMenu();
+    });
+  }
+  function closeDimMenu(){ if (dimMenu){ dimMenu.remove(); dimMenu = null; } }
+  document.addEventListener("pointerdown", e => { if (dimMenu && !dimMenu.contains(e.target)) closeDimMenu(); });
+  $("dimBtn").addEventListener("click", () => setDim(!DIM.on));
+  $("dimClear").addEventListener("click", clearDims);
+  $("dimAxes").addEventListener("change", () => { savePref("visorDimAxes", $("dimAxes").checked ? "1" : "0"); requestRender(); });
+  $("dimAxes").checked = loadPref("visorDimAxes", "1") === "1";
 
   // ---------- Sección ----------
   function setSection(on){
@@ -2094,6 +2362,9 @@ function workerMain(){
   window.addEventListener("keydown", e => {
     if (e.target.matches("input, select, textarea")) return;
     const k = e.key.toLowerCase();
+    if (k === "escape" && (DIM.on || dimMenu)){ closeDimMenu(); if (DIM.a){ DIM.a = null; requestRender(); } else if (DIM.on) setDim(false); return; }
+    if ((k === "delete" || k === "backspace") && DIM.hl){ deleteDim(DIM.hl); return; }
+    if (k === "d"){ setDim(!DIM.on); return; }
     if (k === "escape"){ if (CUT.picking && !CUT.on) setCut(false); else if (CUT.picking){ CUT.picking = false; view.classList.remove("picking"); } else select(null); }
     else if (k === "h") hideSelected();
     else if (k === "i") isolateSelected();
@@ -2102,7 +2373,7 @@ function workerMain(){
 
   applyTheme();
   resize();
-  window.__visor = { CUT, MS, S, handleFiles, pick, select, setView, setSection, fitAll, renderer, get camera(){ return camera; } };
+  window.__visor = { CUT, MS, S, DIM, snapPick, setDim, handleFiles, pick, select, setView, setSection, fitAll, renderer, get camera(){ return camera; } };
 })();
 </script>
 </body>
