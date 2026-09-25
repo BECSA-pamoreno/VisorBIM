@@ -34,6 +34,12 @@ Funciones:
 - Colorear por categoría, por modelo o por cualquier parámetro.
 - Caja de sección y plano de corte alineado a una cara del modelo, vistas en planta y alzados, proyección ortogonal, rayos X, aristas.
 - Ocultar (H), aislar (I), encuadrar (F), deseleccionar (Esc).
+- Selección múltiple: Ctrl+clic añade o quita; Ctrl+arrastrar hace ventana (hacia la derecha, elementos enteros dentro;
+  hacia la izquierda, los que toque; con Mayús quita). Resumen por tipo con nº de elementos, longitud, área, volumen y peso,
+  y botones para aislar, ocultar, medir solo la selección o exportarla a Excel.
+- Cotas de distancia entre dos puntos (D), con imán a vértices y aristas; muestran distancia total, horizontal y vertical,
+  y en las cotas oblicuas dibujan las componentes X, Y, Z (se pueden ocultar).
+  Se borran con clic derecho sobre la cifra, con Supr o desde el panel Cotas.
 - Medición por tipo o por código de montaje, con cantidad, coste unitario e importe.
   Toma el código de montaje, la descripción y el coste del modelo; lo que falte se puede
   añadir a mano (se guarda en el navegador). Exporta a Excel y CSV.

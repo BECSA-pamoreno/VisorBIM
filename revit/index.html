@@ -137,6 +137,24 @@ input[type=text],select{width:100%;padding:6px 9px;border:1px solid var(--line);
 
 .sel-title{font-size:18px;font-weight:700;margin:0}
 .sel-sub{color:var(--muted);margin:2px 0 0;font-size:14px}
+#selBox{position:absolute;border:1.5px solid var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);pointer-events:none;z-index:4}
+#selBox.cross{border-style:dashed;border-color:#2f9a48;background:color-mix(in srgb,#2f9a48 10%,transparent)}
+#selBox.minus{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,transparent)}
+.ms-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.ms-btns .btn{width:100%;padding-left:4px;padding-right:4px}
+.ms-total{margin:8px 0 0;font-size:13.5px;font-variant-numeric:tabular-nums}
+.ms-total b{font-weight:700}
+.ms-list{list-style:none;margin:10px 0 0;padding:0;max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.ms-list li{display:flex;gap:6px;align-items:flex-start;padding:7px 8px;border-bottom:1px solid var(--line);cursor:pointer}
+.ms-list li:last-child{border-bottom:0}
+.ms-list li:hover{background:var(--soft)}
+.ms-main{flex:1;min-width:0}
+.ms-name{font-weight:600;font-size:13.5px}
+.ms-n{font-variant-numeric:tabular-nums;font-weight:700;font-size:13.5px;white-space:nowrap}
+.ms-q{font-size:12.5px;font-variant-numeric:tabular-nums;margin-top:2px}
+.ms-cat{font-size:12px;color:var(--muted)}
+.ms-help{font-size:12.5px;margin:6px 0 0}
+.ms-last{font-size:13px;color:var(--muted);font-weight:600;margin:16px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
 .coords{font-size:13px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
 table{width:100%;border-collapse:collapse;font-size:14px}
 td{padding:5px 0;border-bottom:1px solid var(--line);vertical-align:top}
@@ -312,12 +330,28 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
   <aside class="right">
     <section>
       <h2>Propiedades</h2>
-      <p class="muted" id="selHint">Haz clic en un elemento para ver sus parámetros.<br><kbd>H</kbd> ocultar, <kbd>I</kbd> aislar, <kbd>F</kbd> encuadrar, <kbd>D</kbd> distancia, <kbd>Esc</kbd> deseleccionar.</p>
+      <p class="muted" id="selHint">Haz clic en un elemento para ver sus parámetros.<br><kbd>Ctrl</kbd>+clic: añadir o quitar de la selección. <kbd>Ctrl</kbd>+arrastrar: ventana (hacia la derecha, elementos enteros dentro; hacia la izquierda, los que toque; con <kbd>Mayús</kbd> quita).<br><kbd>H</kbd> ocultar, <kbd>I</kbd> aislar, <kbd>F</kbd> encuadrar, <kbd>D</kbd> distancia, <kbd>Esc</kbd> deseleccionar.</p>
+      <div id="multiSel" hidden>
+        <p class="sel-title"><span id="msCount"></span> elementos seleccionados</p>
+        <p class="sel-sub" id="msSub"></p>
+        <p class="ms-total" id="msTotal"></p>
+        <div class="ms-btns">
+          <button class="btn small" id="msFit">Encuadrar</button>
+          <button class="btn small" id="msHide">Ocultar</button>
+          <button class="btn small" id="msIso">Aislar</button>
+          <button class="btn small" id="msMeasure" title="Abrir la medición solo con los elementos seleccionados">Medir selección</button>
+          <button class="btn small" id="msXlsx" title="Resumen por tipo y lista de elementos">Excel</button>
+          <button class="btn small" id="msClear">Deseleccionar</button>
+        </div>
+        <ul class="ms-list" id="msList"></ul>
+        <p class="muted ms-help">Clic en una fila para quedarte solo con ese tipo. <kbd>Ctrl</kbd>+clic en el modelo para añadir o quitar elementos.</p>
+        <h3 id="lastHdr" class="ms-last">Último elemento seleccionado</h3>
+      </div>
       <div id="selContent" hidden>
         <p class="sel-title" id="selTitle"></p>
         <p class="sel-sub" id="selSub"></p>
         <p class="coords" id="selCoords"></p>
-        <div class="row" style="margin-top:10px">
+        <div class="row" style="margin-top:10px" id="singleBtns">
           <button class="btn small" id="zoomSel">Encuadrar</button>
           <button class="btn small" id="hideSel">Ocultar</button>
           <button class="btn small" id="isoSel">Aislar</button>
@@ -334,6 +368,7 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
         <option value="all">Todos los modelos</option>
         <option value="visible">Solo lo visible</option>
         <option value="search">Resultados de búsqueda</option>
+        <option value="sel">Selección (0)</option>
       </select>
       <select id="mMode" aria-label="Agrupar">
         <option value="type">Por tipo</option>
@@ -691,7 +726,8 @@ function workerMain(){
   const S = {
     models: [], sceneOrigin: null, nextModelId: 1,
     cats: [], catIndex: new Map(),       // categorías globales
-    sel: null,                            // {m, e, point}
+    sel: null,                            // {m, e, point}: último elemento seleccionado (el que muestra propiedades)
+    selSet: new Map(),                    // Map(modelId -> Set(e)): toda la selección
     isolate: null,                        // Map(modelId -> Set(e))
     search: false, ghostOn: true,
     edges: true, xray: false,
@@ -839,6 +875,7 @@ function workerMain(){
     }
     m.chunks = null; m.data = null; m.group = null;
     if (S.sel && S.sel.m === m) S.sel = null;
+    S.selSet.delete(m.id);
     if (S.isolate) S.isolate.delete(m.id);
     if (!S.models.some(mm => mm.ready)) S.sceneOrigin = null;
     onModelsChanged(false);
@@ -901,7 +938,7 @@ function workerMain(){
     const cat = S.cats[m.catIdx[e]];
     if (cat && !cat.visible) return 0;
     if (S.isolate){ const set = S.isolate.get(m.id); if (!set || !set.has(e)) return 0; }
-    if (S.sel && S.sel.m === m && S.sel.e === e) return 3;
+    if (isSel(m, e)) return 3;
     if (S.search && S.ghostOn && !m.match[e]) return 2;
     return 1;
   }
@@ -912,7 +949,8 @@ function workerMain(){
       if (only && !only.has(ci)) return;
       const mainA = c.main.geometry.index, ghostA = c.ghost.geometry.index, edgeA = c.edges.geometry.index;
       const MI = mainA.array, GI = ghostA.array, EI = edgeA.array, F = c.full, FE = c.fullEdge;
-      let nm = 0, ng = 0, ne = 0, selRange = null;
+      let nm = 0, ng = 0, ne = 0, selN = 0;
+      const selR = [];
       for (let e = c.elFirst; e < c.elEnd; e++){
         const st = stateOf(m, e);
         if (!st) continue;
@@ -922,20 +960,20 @@ function workerMain(){
           const e0 = m.elE[e] * 2, en = m.elEN[e] * 2;
           if (en){ EI.set(FE.subarray(e0, e0 + en), ne); ne += en; }
         } else if (st === 2){ GI.set(F.subarray(t0, t0 + tn), ng); ng += tn; }
-        else if (st === 3){ selRange = [t0, tn]; }
+        else if (st === 3){ selR.push(t0, tn); selN += tn; }
       }
       setDraw(c.main, mainA, nm);
       setDraw(c.ghost, ghostA, ng);
       setDraw(c.edges, edgeA, ne);
       c.edges.visible = S.edges && ne > 0;
-      if (selRange){
+      if (selN){
         let sa = c.sel.geometry.index;
-        if (sa.array.length < selRange[1]){
-          c.sel.geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(selRange[1]), 1));
+        if (sa.array.length < selN){
+          c.sel.geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(Math.max(selN, sa.array.length * 2)), 1));
           sa = c.sel.geometry.index; sa.setUsage(THREE.DynamicDrawUsage);
         }
-        sa.array.set(F.subarray(selRange[0], selRange[0] + selRange[1]), 0);
-        setDraw(c.sel, sa, selRange[1]);
+        for (let k = 0, o = 0; k < selR.length; k += 2){ sa.array.set(F.subarray(selR[k], selR[k] + selR[k + 1]), o); o += selR[k + 1]; }
+        setDraw(c.sel, sa, selN);
       } else c.sel.visible = false;
     });
   }
@@ -960,7 +998,7 @@ function workerMain(){
     if (fit) fitAll();
     showProps();
     refreshMeasure();
-    $("sectionSel").disabled = !S.sel;
+    $("sectionSel").disabled = !selCount();
   }
 
   function computeBounds(){
@@ -1123,10 +1161,15 @@ function workerMain(){
     requestRender();
   }
   function fitAll(){ fitTo(visibleBox()); }
+  function selBox3(){
+    const box = new THREE.Box3(), a = new THREE.Vector3(), b = new THREE.Vector3();
+    eachSel((m, e) => { const B = m.bbox, i = e * 6, o = m.group.position;
+      box.union(new THREE.Box3(a.set(B[i] + o.x, B[i+1] + o.y, B[i+2] + o.z), b.set(B[i+3] + o.x, B[i+4] + o.y, B[i+5] + o.z))); });
+    return box;
+  }
   function fitSelection(){
-    if (!S.sel) return fitAll();
-    const m = S.sel.m, e = S.sel.e, B = m.bbox, i = e * 6, o = m.group.position;
-    fitTo(new THREE.Box3(new THREE.Vector3(B[i] + o.x, B[i+1] + o.y, B[i+2] + o.z), new THREE.Vector3(B[i+3] + o.x, B[i+4] + o.y, B[i+5] + o.z)));
+    if (!selCount()) return fitAll();
+    fitTo(selBox3());
   }
   const VIEWS = {
     iso: new THREE.Vector3(1, 0.75, 1), top: new THREE.Vector3(0, 1, 0.0001),
@@ -1232,6 +1275,7 @@ function workerMain(){
       if (hit) setCutFromFace(hit.point, hit.normal); else toast("No has tocado ninguna cara. Prueba otra vez.");
       return;
     }
+    if (e.ctrlKey || e.metaKey){ if (hit) toggleSel(hit); return; }
     select(hit ? { m:hit.m, e:hit.e, point:hit.point } : null);
   });
 
@@ -1242,12 +1286,149 @@ function workerMain(){
     byModel.forEach((set, m) => rebuild(m, set));
     requestRender();
   }
-  function select(sel){
-    const prev = S.sel;
+  // ---------- Selección múltiple ----------
+  function isSel(m, e){ const s = S.selSet.get(m.id); return !!s && s.has(e); }
+  function selCount(){ let n = 0; S.selSet.forEach(s => n += s.size); return n; }
+  function eachSel(fn){ S.models.forEach(m => { const s = S.selSet.get(m.id); if (s && m.ready) s.forEach(e => fn(m, e)); }); }
+  function lastSel(){ let r = null; eachSel((m, e) => { r = { m, e, point:null }; }); return r; }
+  function select(sel){                       // clic normal: sustituye la selección
+    const prev = [];
+    if (selCount() < 5000) eachSel((m, e) => prev.push({ m, e }));
+    const many = selCount() >= 5000;
+    S.selSet = new Map();
+    if (sel) S.selSet.set(sel.m.id, new Set([sel.e]));
     S.sel = sel;
-    refreshElements([prev, sel]);
+    if (many) rebuildAll(); else refreshElements(prev.concat([sel]));
+    afterSelChange();
+  }
+  function toggleSel(hit){                    // Ctrl + clic: añade o quita
+    if (!hit) return;
+    let s = S.selSet.get(hit.m.id);
+    if (!s){ s = new Set(); S.selSet.set(hit.m.id, s); }
+    if (s.has(hit.e)){
+      s.delete(hit.e);
+      if (S.sel && S.sel.m === hit.m && S.sel.e === hit.e) S.sel = lastSel();
+    } else { s.add(hit.e); S.sel = { m:hit.m, e:hit.e, point:hit.point }; }
+    refreshElements([hit]);
+    afterSelChange();
+  }
+  function changeSelection(list, remove){      // list = [m, e, m, e, ...]
+    for (let i = 0; i < list.length; i += 2){
+      const m = list[i], e = list[i + 1];
+      let s = S.selSet.get(m.id);
+      if (remove){ if (s) s.delete(e); continue; }
+      if (!s){ s = new Set(); S.selSet.set(m.id, s); }
+      s.add(e);
+    }
+    if (remove){ if (S.sel && !isSel(S.sel.m, S.sel.e)) S.sel = lastSel(); }
+    else if (list.length) S.sel = { m:list[list.length - 2], e:list[list.length - 1], point:null };
+    rebuildAll();
+    afterSelChange();
+  }
+  function afterSelChange(){
+    const n = selCount();
+    if (!n) S.sel = null;
+    $("sectionSel").disabled = !n;
+    const opt = $("mScope").querySelector('option[value="sel"]');
+    if (opt) opt.textContent = "Selección (" + fmtInt(n) + ")";
     showProps();
-    $("sectionSel").disabled = !sel;
+    if (MS.open && $("mScope").value === "sel") refreshMeasure();
+  }
+
+  // Ventana: Ctrl + arrastrar. De izquierda a derecha = elementos enteros dentro; de derecha a izquierda = los que toque.
+  // Con Mayús además, se quitan de la selección.
+  const selBoxEl = document.createElement("div"); selBoxEl.id = "selBox"; selBoxEl.hidden = true;
+  view.append(selBoxEl);
+  let sbox = null;
+  view.addEventListener("pointerdown", e => {
+    if (e.button !== 0 || !(e.ctrlKey || e.metaKey) || e.target !== renderer.domElement) return;
+    if (DIM.on || CUT.picking || !S.models.some(m => m.ready)) return;
+    e.stopPropagation(); e.preventDefault();            // que no orbite ni desplace la cámara
+    sbox = { x0:e.clientX, y0:e.clientY, x1:e.clientX, y1:e.clientY, remove:e.shiftKey };
+  }, true);
+  window.addEventListener("pointermove", e => {
+    if (!sbox) return;
+    sbox.x1 = e.clientX; sbox.y1 = e.clientY;
+    const r = view.getBoundingClientRect();
+    const w = Math.abs(sbox.x1 - sbox.x0), h = Math.abs(sbox.y1 - sbox.y0);
+    if (w < 4 && h < 4){ selBoxEl.hidden = true; return; }
+    selBoxEl.hidden = false;
+    selBoxEl.classList.toggle("cross", sbox.x1 < sbox.x0);
+    selBoxEl.classList.toggle("minus", sbox.remove);
+    Object.assign(selBoxEl.style, { left:(Math.min(sbox.x0, sbox.x1) - r.left) + "px", top:(Math.min(sbox.y0, sbox.y1) - r.top) + "px", width:w + "px", height:h + "px" });
+  });
+  window.addEventListener("pointerup", e => {
+    if (!sbox) return;
+    const b = sbox; sbox = null; selBoxEl.hidden = true;
+    if (Math.abs(b.x1 - b.x0) < 5 && Math.abs(b.y1 - b.y0) < 5){ toggleSel(pick(e.clientX, e.clientY)); return; }
+    const found = boxSelect(b);
+    const n = found.length / 2;
+    changeSelection(found, b.remove);
+    toast(n ? (b.remove ? "Quitados " : "Añadidos ") + fmtInt(n) + " elementos (" + (b.x1 < b.x0 ? "los que toca la ventana" : "enteros dentro de la ventana") + "). Seleccionados: " + fmtInt(selCount()) + "."
+            : "La ventana no " + (b.x1 < b.x0 ? "toca" : "contiene entero") + " ningún elemento visible.");
+  });
+
+  function boxSelect(b){
+    const rr = renderer.domElement.getBoundingClientRect(), W = rr.width, H = rr.height;
+    const X0 = Math.min(b.x0, b.x1) - rr.left, X1 = Math.max(b.x0, b.x1) - rr.left;
+    const Y0 = Math.min(b.y0, b.y1) - rr.top, Y1 = Math.max(b.y0, b.y1) - rr.top;
+    const crossing = b.x1 < b.x0;
+    const v = new THREE.Vector3(), eb = new THREE.Box3(), c3 = new THREE.Vector3();
+    const found = [];
+    S.models.forEach(m => {
+      if (!m.ready || !m.visible) return;
+      const B = m.bbox, o = m.group.position;
+      for (let e = 0; e < m.n; e++){
+        const st = stateOf(m, e);
+        if (st !== 1 && st !== 3) continue;
+        const i = e * 6;
+        eb.min.set(B[i] + o.x, B[i+1] + o.y, B[i+2] + o.z); eb.max.set(B[i+3] + o.x, B[i+4] + o.y, B[i+5] + o.z);
+        if (S.section && !S.sectionBox.intersectsBox(eb)) continue;              // recortado por la caja de sección
+        if (CUT.on){ let any = false; for (let k = 0; k < 8 && !any; k++){ c3.set(k & 1 ? eb.max.x : eb.min.x, k & 2 ? eb.max.y : eb.min.y, k & 4 ? eb.max.z : eb.min.z); any = CUT.plane.distanceToPoint(c3) >= 0; } if (!any) continue; }
+        let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity, behind = false;
+        for (let k = 0; k < 8; k++){
+          v.set(k & 1 ? eb.max.x : eb.min.x, k & 2 ? eb.max.y : eb.min.y, k & 4 ? eb.max.z : eb.min.z).project(camera);
+          if (v.z > 1 || v.z < -1){ behind = true; continue; }
+          const sx = (v.x + 1) / 2 * W, sy = (1 - v.y) / 2 * H;
+          if (sx < minx) minx = sx; if (sx > maxx) maxx = sx; if (sy < miny) miny = sy; if (sy > maxy) maxy = sy;
+        }
+        if (minx === Infinity) continue;
+        const inside = !behind && minx >= X0 && maxx <= X1 && miny >= Y0 && maxy <= Y1;
+        if (!crossing){ if (inside) found.push(m, e); continue; }
+        if (maxx < X0 || minx > X1 || maxy < Y0 || miny > Y1) continue;
+        if (inside || touchesRect(m, e, X0, X1, Y0, Y1, W, H)) found.push(m, e);
+      }
+    });
+    return found;
+  }
+  // ¿Algún triángulo del elemento toca el rectángulo en pantalla? (separación de ejes en 2D)
+  function touchesRect(m, e, X0, X1, Y0, Y1, W, H){
+    const c = m.chunks[m.elC[e]], P = c.pos, F = c.full, o = m.group.position, v = new THREE.Vector3();
+    const t0 = m.elT[e] * 3, t1 = t0 + m.elTN[e] * 3;
+    const sx = [0, 0, 0], sy = [0, 0, 0];
+    const rx = [X0, X1, X1, X0], ry = [Y0, Y0, Y1, Y1];
+    for (let t = t0; t < t1; t += 3){
+      let bad = false;
+      for (let k = 0; k < 3; k++){
+        const a = F[t + k] * 3;
+        v.set(P[a] + o.x, P[a+1] + o.y, P[a+2] + o.z).project(camera);
+        if (v.z > 1 || v.z < -1){ bad = true; break; }
+        sx[k] = (v.x + 1) / 2 * W; sy[k] = (1 - v.y) / 2 * H;
+        if (sx[k] >= X0 && sx[k] <= X1 && sy[k] >= Y0 && sy[k] <= Y1) return true;
+      }
+      if (bad) continue;
+      if (Math.max(sx[0], sx[1], sx[2]) < X0 || Math.min(sx[0], sx[1], sx[2]) > X1 || Math.max(sy[0], sy[1], sy[2]) < Y0 || Math.min(sy[0], sy[1], sy[2]) > Y1) continue;
+      let sep = false;
+      for (let k = 0; k < 3 && !sep; k++){
+        const nx = -(sy[(k + 1) % 3] - sy[k]), ny = sx[(k + 1) % 3] - sx[k];
+        let tmin = Infinity, tmax = -Infinity, rmin = Infinity, rmax = -Infinity;
+        for (let j = 0; j < 3; j++){ const d = sx[j] * nx + sy[j] * ny; if (d < tmin) tmin = d; if (d > tmax) tmax = d; }
+        for (let j = 0; j < 4; j++){ const d = rx[j] * nx + ry[j] * ny; if (d < rmin) rmin = d; if (d > rmax) rmax = d; }
+        if (rmax < tmin || rmin > tmax) sep = true;
+      }
+      if (!sep) return true;
+    }
+    return false;
   }
 
   function toShared(p){
@@ -1258,7 +1439,12 @@ function workerMain(){
 
   function showProps(){
     const content = $("selContent"), hint = $("selHint");
-    if (!S.sel){ content.hidden = true; hint.hidden = false; return; }
+    const n = selCount();
+    $("multiSel").hidden = n < 2;
+    $("singleBtns").hidden = n > 1;
+    $("lastHdr").hidden = n < 2;
+    if (n > 1) renderMultiSel();
+    if (!S.sel){ content.hidden = true; hint.hidden = n > 0; return; }
     const m = S.sel.m, e = S.sel.e, d = m.data;
     hint.hidden = true; content.hidden = false;
     const id = m.ids[e];
@@ -1297,14 +1483,96 @@ function workerMain(){
     tb.append(frag);
   }
 
+
+  // ---------- Resumen de la selección múltiple ----------
+  function elQty(m, e){
+    const d = m.data, q = { m:NaN, m2:NaN, m3:NaN, kg:NaN };
+    if (!d || d.rowOf[e] < 0) return q;
+    const row = d.rows[d.rowOf[e]], mc = d.mc;
+    ["m", "m2", "m3"].forEach(u => { if (mc[u] >= 0) q[u] = parseQty(row[mc[u]], u, mc.raw[u]); });
+    const gross = mc.m2b >= 0 ? parseQty(row[mc.m2b], "m2", true) : NaN;
+    if (MS.wallArea === "bruta" && gross > 0) q.m2 = gross;
+    let kg = mc.kg >= 0 ? parseQty(row[mc.kg], "kg", true) : NaN;
+    if ((isNaN(kg) || kg <= 0) && mc.w >= 0 && q.m > 0){ const w = parseQty(row[mc.w], "kgm", mc.raw.w); if (w > 0) kg = w * q.m; }
+    q.kg = kg;
+    return q;
+  }
+  const QCOLS = [["m", "Long. (m)"], ["m2", "Área (m²)"], ["m3", "Vol. (m³)"], ["kg", "Peso (kg)"]];
+  function selGroups(){
+    const groups = new Map(), tot = { n:0, m:0, m2:0, m3:0, kg:0 }, has = { m:false, m2:false, m3:false, kg:false };
+    eachSel((m, e) => {
+      const cat = catName(m, e), fam = String(cellOf(m, e, "Familia") || ""), tipo = String(cellOf(m, e, "Tipo") || "");
+      const k = cat + "\u0001" + fam + "\u0001" + tipo;
+      let g = groups.get(k);
+      if (!g){ g = { cat, fam, tipo, n:0, m:0, m2:0, m3:0, kg:0, els:[] }; groups.set(k, g); }
+      g.n++; tot.n++; g.els.push(m, e);
+      const q = elQty(m, e);
+      QCOLS.forEach(([u]) => { if (q[u] > 0){ g[u] += q[u]; tot[u] += q[u]; has[u] = true; } });
+    });
+    const list = [...groups.values()].sort((a, b) => a.cat.localeCompare(b.cat, "es") || a.tipo.localeCompare(b.tipo, "es", { numeric:true }));
+    return { list, tot, cols: QCOLS.filter(([u]) => has[u]) };
+  }
+  const fmtSelQ = v => v ? v.toLocaleString("es-ES", { minimumFractionDigits:2, maximumFractionDigits:2 }) : "";
+  function renderMultiSel(){
+    const { list, tot, cols } = selGroups();
+    const nModels = new Set(); eachSel(m => nModels.add(m.id));
+    const UN = { m:"m", m2:"m²", m3:"m³", kg:"kg" };
+    const qtxt = g => cols.filter(([u]) => g[u] > 0).map(([u]) => fmtSelQ(g[u]) + " " + UN[u]).join(" · ");
+    $("msCount").textContent = fmtInt(tot.n);
+    $("msSub").textContent = list.length + (list.length === 1 ? " tipo" : " tipos") + (nModels.size > 1 ? " en " + nModels.size + " modelos" : "");
+    const tq = qtxt(tot);
+    $("msTotal").innerHTML = "";
+    if (tq){ const b = document.createElement("b"); b.textContent = "Total: "; $("msTotal").append(b, document.createTextNode(tq)); }
+    const ul = $("msList"); ul.innerHTML = "";
+    list.forEach(g => {
+      const li = document.createElement("li"); li.title = "Clic: dejar seleccionado solo este tipo";
+      const main = document.createElement("div"); main.className = "ms-main";
+      const nm = document.createElement("div"); nm.className = "ms-name"; nm.textContent = g.tipo || g.fam || "(sin tipo)";
+      const ct = document.createElement("div"); ct.className = "ms-cat"; ct.textContent = g.cat + (g.fam && g.fam !== g.tipo ? ", " + g.fam : "");
+      main.append(nm, ct);
+      const q = qtxt(g); if (q){ const qd = document.createElement("div"); qd.className = "ms-q"; qd.textContent = q; main.append(qd); }
+      const n = document.createElement("span"); n.className = "ms-n"; n.textContent = fmtInt(g.n) + " ud";
+      const xb = document.createElement("button"); xb.className = "ibtn"; xb.textContent = "✕"; xb.title = "Quitar este tipo de la selección";
+      xb.addEventListener("click", ev => { ev.stopPropagation(); changeSelection(g.els, true); });
+      li.addEventListener("click", () => { S.selSet = new Map(); changeSelection(g.els, false); });
+      li.append(main, n, xb); ul.append(li);
+    });
+  }
+  function exportSelXlsx(){
+    if (!selCount()) return;
+    loadXlsxLib().then(X => {
+      const { list, tot, cols } = selGroups();
+      const head = ["Categoría", "Familia", "Tipo", "Nº elementos"].concat(cols.map(c => c[1]));
+      const body = list.map(g => [g.cat, g.fam, g.tipo, g.n].concat(cols.map(([u]) => round(g[u], 3))));
+      body.push(["TOTAL", "", "", tot.n].concat(cols.map(([u]) => round(tot[u], 3))));
+      const wb = X.utils.book_new();
+      const ws1 = X.utils.aoa_to_sheet([head].concat(body)); ws1["!cols"] = head.map((h, i) => ({ wch: i < 3 ? 28 : 13 }));
+      X.utils.book_append_sheet(wb, ws1, "Resumen");
+      const eh = ["Modelo", "ElementId", "Categoría", "Familia", "Tipo", "Nivel"].concat(cols.map(c => c[1]));
+      const rows = [eh];
+      eachSel((m, e) => { const q = elQty(m, e); rows.push([m.name, m.ids[e], catName(m, e), cellOf(m, e, "Familia"), cellOf(m, e, "Tipo"), cellOf(m, e, "Nivel")].concat(cols.map(([u]) => q[u] > 0 ? round(q[u], 3) : ""))); });
+      const ws2 = X.utils.aoa_to_sheet(rows); ws2["!autofilter"] = { ref: ws2["!ref"] };
+      X.utils.book_append_sheet(wb, ws2, "Elementos");
+      X.writeFile(wb, "Seleccion_" + stamp() + ".xlsx");
+    }).catch(err => toast(err.message));
+  }
+  $("msFit").addEventListener("click", fitSelection);
+  $("msHide").addEventListener("click", hideSelected);
+  $("msIso").addEventListener("click", isolateSelected);
+  $("msMeasure").addEventListener("click", () => { $("mScope").value = "sel"; if (MS.open) refreshMeasure(); else setMeasure(true); });
+  $("msXlsx").addEventListener("click", exportSelXlsx);
+  $("msClear").addEventListener("click", () => select(null));
+
   function hideSelected(){
-    if (!S.sel) return;
-    S.sel.m.hidden[S.sel.e] = 1;
-    select(null);
+    if (!selCount()) return;
+    eachSel((m, e) => { m.hidden[e] = 1; });
+    S.selSet = new Map(); S.sel = null;
+    rebuildAll(); afterSelChange();
   }
   function isolateSelected(){
-    if (!S.sel) return;
-    S.isolate = new Map([[S.sel.m.id, new Set([S.sel.e])]]);
+    if (!selCount()) return;
+    S.isolate = new Map();
+    eachSel((m, e) => { if (!S.isolate.has(m.id)) S.isolate.set(m.id, new Set()); S.isolate.get(m.id).add(e); });
     rebuildAll();
     fitSelection();
   }
@@ -1654,8 +1922,8 @@ function workerMain(){
     syncClipping();
   }
   function sectionToSelection(){
-    if (!S.sel || S.bounds.isEmpty()) return;
-    const m = S.sel.m, i = S.sel.e * 6, B = m.bbox, o = m.group.position, R = S.bounds, pad = 0.5;
+    if (!selCount() || S.bounds.isEmpty()) return;
+    const SB = selBox3(), B = [SB.min.x, SB.min.y, SB.min.z, SB.max.x, SB.max.y, SB.max.z], i = 0, o = { x:0, y:0, z:0 }, R = S.bounds, pad = 0.5;
     const X0 = R.min.x - 0.01, X1 = R.max.x + 0.01, Y0 = -R.max.z - 0.01, Y1 = -R.min.z + 0.01, Z0 = R.min.y - 0.01, Z1 = R.max.y + 0.01;
     const t = (v, a, b) => Math.round(Math.min(1, Math.max(0, (v - a) / (b - a))) * 1000);
     $("sx0").value = t(B[i] + o.x - pad, X0, X1); $("sx1").value = t(B[i+3] + o.x + pad, X0, X1);
@@ -1879,6 +2147,7 @@ function workerMain(){
         if (r < 0) continue;
         if (scope === "visible" && stateOf(m, e) === 0) continue;
         if (scope === "search" && (!S.search || !m.match[e])) continue;
+        if (scope === "sel" && !isSel(m, e)) continue;
         const row = d.rows[r];
         const cat = d.catCol >= 0 ? String(row[d.catCol] || "") : "";
         const fam = mc.fam >= 0 ? String(row[mc.fam] || "") : "";
@@ -2370,6 +2639,7 @@ function workerMain(){
     else if (k === "i") isolateSelected();
     else if (k === "f") fitSelection();
   });
+
 
   applyTheme();
   resize();
