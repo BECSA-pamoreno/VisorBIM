@@ -84,7 +84,7 @@ input[type=text],select{width:100%;padding:6px 9px;border:1px solid var(--line);
 #view{position:relative;background:var(--viewport);min-height:0;overflow:hidden}
 #view canvas{display:block;width:100%;height:100%;touch-action:none}
 #empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;pointer-events:none}
-#empty .box{pointer-events:auto;max-width:440px;text-align:center;border:2px dashed var(--line);border-radius:12px;padding:28px;background:color-mix(in srgb,var(--panel) 75%,transparent)}
+#empty .box{pointer-events:auto;max-width:520px;text-align:center;border:2px dashed var(--line);border-radius:12px;padding:28px;background:color-mix(in srgb,var(--panel) 75%,transparent)}
 #view.drag #empty .box{border-color:var(--accent)}
 #view.drag::after{content:"";position:absolute;inset:8px;border:2px dashed var(--accent);border-radius:12px;pointer-events:none}
 #empty p{margin:8px 0 16px;color:var(--muted)}
@@ -164,42 +164,151 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
 
 #center{display:flex;flex-direction:column;min-height:0;min-width:0}
 #center #view{flex:1}
-#measure{grid-column:1 / -1;grid-row:2;height:42vh;min-height:240px;display:flex;flex-direction:column;background:var(--panel);border-top:1px solid var(--line)}
+#measure{grid-column:1 / -1;grid-row:2;height:44vh;min-height:260px;display:flex;flex-direction:column;background:var(--panel);border-top:1px solid var(--line)}
+#measure.big{height:78vh}
 .mh{display:flex;align-items:center;gap:8px;padding:8px 12px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
 .mh h2{margin:0 6px 0 0}
 .mh select,.mh input[type=text]{width:auto;padding:4px 8px;font-size:14px}
-.mh .check{margin:0}
-.mtotal{font-weight:700;font-variant-numeric:tabular-nums;font-size:16px}
-#mInfo{padding:6px 12px;font-size:13px}
+.mh .check{margin:0;font-size:13px;white-space:nowrap}
+.mtools{padding:6px 12px}
+.mtools #mFilter{min-width:180px;flex:0 1 260px}
+.kpi{display:inline-flex;flex-direction:column;line-height:1.15;padding:2px 10px;border-left:1px solid var(--line);font-variant-numeric:tabular-nums}
+.kpi b{font-size:15px;font-weight:700}
+.kpi span{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.ktotal{display:inline-flex;flex-direction:column;line-height:1.1;padding:4px 14px 5px;border-radius:7px;border-left:5px solid var(--accent);background:color-mix(in srgb,var(--accent) 16%,var(--panel));font-variant-numeric:tabular-nums}
+.ktotal .klbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.ktotal b{font-size:24px;font-weight:700;letter-spacing:-.01em}
+.ktotal span:last-child{font-size:11.5px;color:var(--muted);white-space:nowrap}
+#kAsig{background:linear-gradient(to right,color-mix(in srgb,#2E9E5B 16%,transparent) var(--p,0%),transparent var(--p,0%));border-radius:4px}
+#bc3Info{font-size:13px;color:var(--muted);max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mtable{flex:1;overflow:auto;min-height:0}
-#mTable{font-size:13px}
-#mTable.fixed{table-layout:fixed}
-#mTable.fixed td{overflow:hidden;text-overflow:ellipsis}
-.col-rs{position:absolute;top:0;right:-4px;width:9px;height:100%;cursor:col-resize;z-index:2;touch-action:none}
-.col-rs::after{content:"";position:absolute;top:20%;bottom:20%;left:4px;width:1px;background:var(--line)}
-.col-rs:hover::after,.col-rs.drag::after{background:var(--accent);width:3px;left:3px}
-#mTable th{position:sticky;top:0;background:var(--soft);text-align:left;font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;z-index:1}
-#mTable td{padding:3px 8px;border-bottom:1px solid var(--line);vertical-align:middle;width:auto;color:var(--ink)}
+.mtable:focus-visible{outline-offset:-2px}
+#mTable{font-size:13px;border-collapse:separate;border-spacing:0;table-layout:fixed}
+#mTable th{position:sticky;top:0;background:var(--soft);text-align:left;font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);border-right:1px solid color-mix(in srgb,var(--line) 60%,transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2;user-select:none}
+#mTable .col-rs{position:absolute;top:0;right:-1px;width:9px;height:100%;cursor:col-resize;z-index:3;touch-action:none}
+#mTable .col-rs::after{content:"";position:absolute;top:0;bottom:0;right:0;width:2px;background:transparent}
+#mTable .col-rs:hover::after,#mTable .col-rs.drag::after{background:var(--accent);width:3px}
+body.col-resizing,body.col-resizing *{cursor:col-resize !important;user-select:none}
+#mTable th[data-sort]{cursor:pointer}
+#mTable th[data-sort]:hover{color:var(--ink);background:color-mix(in srgb,var(--accent) 14%,var(--soft))}
+#mTable td{padding:2px 6px;border-bottom:1px solid var(--line);vertical-align:middle;width:auto;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mTable td:first-child{width:auto;padding-right:2px}
+#mTable th.c-imp,#mTable td.c-imp{position:sticky;right:0;box-shadow:inset 1px 0 0 var(--line),-6px 0 8px -6px rgba(0,0,0,.18)}
+#mTable td.c-imp{background:var(--panel);z-index:1}
+#mTable th.c-imp{z-index:3}
+#mTable tbody tr:hover td.c-imp{background:var(--soft)}
+#mTable tbody tr.sel td.c-imp{background:color-mix(in srgb,var(--accent) 22%,var(--panel))}
+#mTable td.c-btn,#mTable td.c-est{padding:2px 4px;text-overflow:clip;text-align:center}
 #mTable td.num,#mTable th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-#mTable tbody tr{cursor:pointer}
+#mTable td.c-cat{font-size:12.5px}
+#mTable tbody tr{cursor:default}
 #mTable tbody tr:hover{background:var(--soft)}
-#mTable tbody tr.active{background:color-mix(in srgb,var(--accent) 18%,transparent)}
-#mTable tfoot td{font-weight:700;position:sticky;bottom:0;background:var(--panel);border-top:2px solid var(--line)}
-#mTable input,#mTable select{width:100%;min-width:60px;padding:3px 6px;border:1px solid transparent;border-radius:4px;background:transparent;font-size:13px}
+#mTable tbody tr.sel{background:color-mix(in srgb,var(--accent) 22%,transparent)}
+#mTable input,#mTable select{width:100%;min-width:0;padding:3px 6px;border:1px solid transparent;border-radius:4px;background:transparent;font-size:13px}
 #mTable input:hover,#mTable select:hover{border-color:var(--line)}
 #mTable input:focus,#mTable select:focus{border-color:var(--accent);background:var(--panel);outline:none}
-#mTable input.manual,#mTable select.manual{background:color-mix(in srgb,var(--accent) 22%,transparent)}
-#mTable input.cost{text-align:right;width:90px}
-.tag-area{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-right:6px;vertical-align:1px}
-#mTable select{min-width:128px}
-#mTable input.code{width:90px}
-#mTable input.desc{min-width:170px}
-#mTable td.ft{min-width:220px}
-#mTable td.sz{white-space:nowrap;font-variant-numeric:tabular-nums}
-.warn-dot{color:var(--warn);cursor:help;margin-left:4px}
-.reset{all:unset;cursor:pointer;color:var(--muted);padding:0 4px}
-.reset:hover{color:var(--ink)}
-.chip-manual{display:inline-block;width:10px;height:10px;border-radius:2px;background:color-mix(in srgb,var(--accent) 45%,transparent);vertical-align:-1px}
+#mTable input.code{font-weight:600}
+#mTable input.pre{text-align:right}
+#mTable input.tenue{color:var(--muted);font-style:italic}
+#mTable input.manual{background:color-mix(in srgb,#E67E22 14%,transparent)}
+#mTable select{text-align:right}
+#mTable select.elegida{color:#2563C9;font-weight:600}
+.est{display:inline-block;width:10px;height:10px;border-radius:50%;background:#B7C0C6;vertical-align:-1px}
+.est.e1{background:#2E9E5B}.est.e2{background:#E0A100}.est.e4{background:#2563C9}
+.est.camb{box-shadow:0 0 0 2px var(--panel),0 0 0 3.5px #E67E22}
+.lupa{all:unset;cursor:pointer;color:var(--muted);padding:3px 4px;border-radius:4px;display:inline-flex}
+.lupa:hover{color:var(--ink);background:var(--soft)}
+.fuerte{font-weight:600}
+.mfoot{display:flex;align-items:center;gap:8px;padding:6px 12px;border-top:1px solid var(--line);flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--soft);flex:none}
+.seg button{all:unset;cursor:pointer;padding:5px 13px;font-size:14px;color:var(--muted)}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel);font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+body[data-modo="sencillo"] .solo-tecnico{display:none !important}
+.projchip{all:unset;cursor:pointer;display:inline-flex;align-items:baseline;gap:8px;padding:5px 12px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:7px;background:var(--soft);max-width:340px;font-size:14px}
+.projchip:hover{background:color-mix(in srgb,var(--accent) 12%,var(--soft))}
+.projchip b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.projchip .mstatus{flex:none;font-size:12.5px}
+.modal.proj{width:min(1000px,calc(100vw - 24px));height:min(700px,calc(100vh - 24px))}
+.pj-scroll{flex:1;overflow:auto;min-height:0}
+.pj-scroll .pj-info{padding:8px 12px;margin:0}
+.pj-t tbody tr:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+#empty .or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:20px 0 4px}
+#empty .or::before,#empty .or::after{content:"";flex:1;border-top:1px solid var(--line)}
+#empty .row>*{flex:none}
+.mstatus{font-size:13px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 300px}
+.mstatus.n1{color:#2E9E5B}.mstatus.n2{color:var(--warn)}.mstatus.n3{color:#C0392B;font-weight:600}
+.mlegend{font-size:12px;color:var(--muted);display:flex;gap:10px;align-items:center;white-space:nowrap}
+.mlegend .est{margin-right:3px}
+.mmenu{position:relative}
+.mmenu .pop{position:absolute;bottom:calc(100% + 4px);left:0;z-index:20;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.18);min-width:220px}
+.mmenu .pop button{all:unset;display:block;width:calc(100% - 20px);padding:6px 10px;border-radius:5px;cursor:pointer;font-size:14px}
+.mmenu .pop button:hover{background:var(--soft)}
+/* Diálogos */
+.modal-back{position:fixed;inset:0;z-index:60;background:rgba(10,16,20,.45);display:flex;align-items:center;justify-content:center;padding:12px}
+.modal{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 18px 48px rgba(0,0,0,.3);display:flex;flex-direction:column;max-height:calc(100vh - 24px);max-width:100%}
+.modal.nav{width:min(1900px,calc(100vw - 24px));height:calc(100vh - 24px)}
+.modal.fx{width:min(1150px,calc(100vw - 24px));height:min(780px,calc(100vh - 24px))}
+.modal.exp{width:560px}
+.md-head{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.md-head>div{flex:1;min-width:0}
+.md-head h2{margin:0 0 2px}
+.md-sub{margin:0;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.md-foot{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid var(--line)}
+.modal .lbl{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:10px 0 4px}
+.modal .lbl:first-child{margin-top:0}
+.nav-tools{display:flex;gap:14px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.nav-tools .nav-q{flex:1 1 360px}
+.nav-tools .check{margin:0;white-space:nowrap}
+.nav-body{flex:1;min-height:0;display:grid;grid-template-columns:var(--navL,300px) 7px minmax(320px,1fr) 7px var(--navR,420px)}
+.nav-split{cursor:col-resize;background:var(--line);background-clip:content-box;padding:0 3px;touch-action:none}
+.nav-split:hover,.nav-split.drag{background:var(--accent);background-clip:padding-box;padding:0}
+.nav-tree,.nav-det{overflow:auto;padding:10px 12px;min-height:0}
+
+.nav-det{font-size:14px;display:flex;flex-direction:column}
+.nav-list{display:flex;flex-direction:column;min-height:0;min-width:0}
+.nav-info{padding:6px 12px;font-size:12.5px;border-bottom:1px solid var(--line)}
+.nav-scroll{flex:1;overflow:auto;min-height:0;outline:none}
+.nav-t,.d-desc table,.fx-lista table{width:100%;border-collapse:collapse;font-size:13px}
+.nav-t th,.d-desc th,.fx-lista th{position:sticky;top:0;background:var(--soft);text-align:left;font-weight:600;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.nav-t td,.d-desc td,.fx-lista td{padding:4px 8px;border-bottom:1px solid var(--line);vertical-align:top;width:auto;color:var(--ink);word-break:normal}
+.nav-t td:first-child,.d-desc td:first-child,.fx-lista td:first-child{color:var(--ink);width:auto;white-space:nowrap}
+.nav-t td.num,.nav-t th.num,.d-desc .num,.fx-lista .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.nav-t td.c{text-align:center;white-space:nowrap}
+.nav-t tbody tr{cursor:pointer}
+.nav-t tbody tr:hover{background:var(--soft)}
+.nav-t tbody tr.on{background:color-mix(in srgb,var(--accent) 30%,transparent)}
+.nav-t tbody tr.tenue td{color:var(--muted)}
+.tree,.tree ul{list-style:none;margin:0;padding:0}
+.tree ul{padding-left:14px;display:none}
+.tree li.open>ul{display:block}
+.tn{padding:3px 4px;border-radius:4px;cursor:pointer;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tn:hover{background:var(--soft)}
+.tn.on{background:color-mix(in srgb,var(--accent) 30%,transparent)}
+.tn .muted{font-size:13px}
+.tw{display:inline-block;width:14px;color:var(--muted)}
+.d-cod{font-weight:700;font-size:15px}
+.d-pre{font-weight:700;font-size:18px;margin:2px 0 6px}
+.d-res{font-weight:600;margin-bottom:6px}
+.d-ruta{font-size:12px;margin-bottom:4px}
+.d-texto{white-space:pre-wrap;font-size:13.5px;line-height:1.5;overflow:auto;background:var(--soft);border-radius:6px;padding:10px;flex:0 1 auto;min-height:60px;max-height:45vh}
+.d-texto:empty{display:none}
+.fx-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0}
+.fx-izq,.fx-der{padding:12px 16px;min-height:0;display:flex;flex-direction:column}
+.fx-izq{border-right:1px solid var(--line)}
+.fx-lista{flex:1;overflow:auto;min-height:0;margin-top:6px;border:1px solid var(--line);border-radius:6px}
+.fx-lista tbody tr{cursor:copy}
+.fx-lista tbody tr:hover{background:var(--soft)}
+.fx-lista tr.tipo td:first-child{color:#2563C9}
+.fx-f{width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--soft);font:13px/1.4 ui-monospace,Consolas,monospace;resize:vertical}
+.fx-ayuda{font-size:12px;margin:6px 0}
+.fx-ud{max-width:160px}
+.fx-prev{font-size:18px;font-weight:700;padding:6px 0;font-variant-numeric:tabular-nums}
+.fx-prev.ok{color:#2E9E5B}.fx-prev.err{color:#C0392B;font-size:13.5px;font-weight:600}.fx-prev.tenue{color:var(--muted)}
+.exp-body{padding:12px 16px}
+.exp-body .check{align-items:flex-start}
+@media (max-width:1000px){ .nav-body{grid-template-columns:1fr} .nav-split{display:none} .nav-tree,.nav-det{max-height:30vh;border:0;border-bottom:1px solid var(--line)} .fx-body{grid-template-columns:1fr} }
 @media (max-width:1000px){
   main{grid-template-columns:1fr;grid-template-rows:auto auto auto}
   #center{order:-1}
@@ -217,7 +326,13 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
   <h1>Visor de modelos</h1>
   <span id="stats"></span>
   <span class="spacer"></span>
-  <button class="btn primary" id="openBtn">Añadir modelos</button>
+  <button class="projchip" id="projChip" hidden><b></b><span class="mstatus"></span></button>
+  <div class="seg" id="modoSeg" role="group" aria-label="Modo de uso">
+    <button type="button" data-modo="sencillo" title="Lo esencial: navegar, buscar, plano de corte, cotas y consultar la medición">Sencillo</button>
+    <button type="button" data-modo="tecnico" title="Todas las herramientas: sección, rayos X, abrir BC3, asignar partidas, fórmulas y exportar a BC3">Avanzado</button>
+  </div>
+  <button class="btn primary" id="projBtn" title="Abrir un proyecto de la carpeta de proyectos">Proyectos</button>
+  <button class="btn" id="openBtn">Añadir modelos</button>
   <input type="file" id="fileInput" accept=".dae,.xlsx,.xls,.csv" multiple hidden>
 </header>
 
@@ -262,10 +377,16 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
   <div id="view">
     <div id="empty">
       <div class="box">
-        <h2>Arrastra aquí los modelos</h2>
-        <p>Un .dae y un .xlsx por modelo, con el mismo nombre. Se leen en tu navegador: no se suben a ningún sitio.</p>
+        <h2>Abrir un proyecto</h2>
+        <p id="projStartTxt"></p>
         <div class="row" style="justify-content:center">
-          <button class="btn primary" id="openBtn2">Añadir modelos</button>
+          <button class="btn primary" id="projLast" hidden></button>
+          <button class="btn primary" id="projOpen">Elegir carpeta...</button>
+        </div>
+        <div class="or">o bien</div>
+        <p>Arrastra aquí el .dae y el .xlsx de cada modelo, con el mismo nombre. Se leen en tu navegador: no se suben a ningún sitio.</p>
+        <div class="row" style="justify-content:center">
+          <button class="btn" id="openBtn2">Añadir modelos</button>
           <button class="btn" id="demoBtn">Probar con el ejemplo</button>
         </div>
       </div>
@@ -282,9 +403,9 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
       <button class="btn" id="orthoBtn" aria-pressed="false" title="Proyección ortogonal">Ortogonal</button>
       <button class="btn" id="fitBtn" title="Encuadrar lo visible (F)">Encuadrar</button>
       <span class="sep"></span>
-      <button class="btn" id="sectionBtn" aria-pressed="false">Sección</button>
+      <button class="btn solo-tecnico" id="sectionBtn" aria-pressed="false">Sección</button>
       <button class="btn" id="cutBtn" aria-pressed="false" title="Corte alineado a una cara del modelo">Plano de corte</button>
-      <button class="btn" id="xrayBtn" aria-pressed="false">Rayos X</button>
+      <button class="btn solo-tecnico" id="xrayBtn" aria-pressed="false">Rayos X</button>
       <button class="btn" id="edgesBtn" aria-pressed="true">Aristas</button>
       <span class="sep"></span>
       <button class="btn" id="showAllBtn" title="Quitar ocultos y aislamiento">Mostrar todo</button>
@@ -370,25 +491,51 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
         <option value="search">Resultados de búsqueda</option>
         <option value="sel">Selección (0)</option>
       </select>
-      <select id="mMode" aria-label="Agrupar">
-        <option value="type">Por tipo</option>
-        <option value="code">Por código de montaje</option>
-      </select>
-      <select id="mWallArea" aria-label="Criterio de área de muros" title="Cómo se miden los muros en m²">
-        <option value="bruta">Muros: área bruta</option>
-        <option value="neta">Muros: área neta</option>
-      </select>
-      <input type="text" id="mFilter" placeholder="Filtrar" aria-label="Filtrar filas">
-      <label class="check"><input type="checkbox" id="mMissing"> Sin código o sin coste</label>
+      <span class="ktotal" id="kPresu"></span>
+      <span class="kpi" id="kAsig"></span>
+      <span class="kpi" id="kElem"></span>
       <span class="spacer"></span>
-      <span class="mtotal" id="mTotal"></span>
-      <button class="btn small" id="mRefresh" title="Volver a medir con lo que hay ahora en el visor">Actualizar</button>
-      <button class="btn small" id="mCsv">CSV</button>
-      <button class="btn small primary" id="mXlsx">Excel</button>
+      <span id="bc3Info">Sin BC3 cargado</span>
+      <button class="btn small" id="bc3Explore" title="Ver capítulos y partidas del banco de precios">Ver BC3</button>
+      <button class="btn small solo-tecnico" id="bc3Load" title="Abrir un banco de precios FIEBDC-3 (.bc3)">Abrir BC3...</button>
+      <input type="file" id="bc3Input" accept=".bc3,.BC3" hidden>
+      <button class="btn small" id="mBig" aria-pressed="false" title="Más alto">Ampliar</button>
       <button class="btn small" id="mClose" aria-label="Cerrar medición">Cerrar</button>
     </div>
-    <div id="mInfo" class="muted"></div>
-    <div class="mtable"><table id="mTable"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+    <div class="mh mtools">
+      <select id="mCat" aria-label="Categoría"><option value="">Todas las categorías</option></select>
+      <input type="text" id="mFilter" placeholder="Filtrar familia, tipo, código..." aria-label="Filtrar filas">
+      <label class="check"><input type="checkbox" id="mSinPartida"> Solo sin partida</label>
+      <span class="spacer"></span>
+      <button class="btn small solo-tecnico" id="mSync" title="Traer resumen, precio y unidad del BC3 a las filas seleccionadas">Actualizar desde BC3</button>
+      <button class="btn small solo-tecnico" id="mQuitar" title="Quitar la partida de las filas seleccionadas (Supr)">Quitar partida</button>
+      <button class="btn small primary solo-tecnico" id="mAsignar" title="Buscar y asignar una partida del BC3 a las filas seleccionadas (Ctrl+Enter)">Asignar partida BC3</button>
+    </div>
+    <div class="mtable" tabindex="0"><table id="mTable"><thead></thead><tbody></tbody></table></div>
+    <div class="mfoot">
+      <span class="mlegend" title="Estado de cada fila">
+        <span><span class="est e1"></span>correcta</span>
+        <span><span class="est e2"></span>incompleta</span>
+        <span><span class="est e4"></span>propia / modificada</span>
+        <span><span class="est"></span>sin partida</span>
+        <span><span class="est camb"></span>cambiada en el visor</span>
+      </span>
+      <span class="mstatus" id="mStatus">Selecciona filas (Ctrl / Mayús para varias) y asigna partida. Doble clic en una fila la muestra en el modelo.</span>
+      <span class="mmenu solo-tecnico">
+        <button class="btn small" id="mShare" aria-haspopup="true" aria-expanded="false" title="Compartir códigos, medidas y fórmulas con otra persona">Datos ▾</button>
+        <div class="pop" id="mSharePop" hidden>
+          <button data-a="exp">Exportar datos de medición (.json)</button>
+          <button data-a="imp">Importar datos de medición...</button>
+          <button data-a="colw">Restablecer ancho de columnas</button>
+        </div>
+      </span>
+      <input type="file" id="boqInput" accept=".json,application/json" hidden>
+      <button class="btn small" id="mVer" title="Resaltar en el modelo los elementos de las filas seleccionadas">Ver en el modelo</button>
+      <button class="btn small" id="mCsv">CSV</button>
+      <button class="btn small" id="mXlsx">Excel</button>
+      <button class="btn small primary solo-tecnico" id="mBc3" title="Presupuesto con mediciones para Presto, Arquímedes...">Exportar BC3</button>
+    </div>
+    <datalist id="bc3List"></datalist>
   </div>
 </main>
 
@@ -879,7 +1026,7 @@ function workerMain(){
     if (S.isolate) S.isolate.delete(m.id);
     if (!S.models.some(mm => mm.ready)) S.sceneOrigin = null;
     onModelsChanged(false);
-    if (!S.models.length){ $("empty").hidden = false; $("toolbar").hidden = true; setSection(false); setCut(false); }
+    if (!S.models.length){ $("empty").hidden = false; $("toolbar").hidden = true; setSection(false); setCut(false); cerrarProyecto(); pintarInicio(); }
   }
 
   // ---------- Categorías, colores y dibujo ----------
@@ -1490,8 +1637,6 @@ function workerMain(){
     if (!d || d.rowOf[e] < 0) return q;
     const row = d.rows[d.rowOf[e]], mc = d.mc;
     ["m", "m2", "m3"].forEach(u => { if (mc[u] >= 0) q[u] = parseQty(row[mc[u]], u, mc.raw[u]); });
-    const gross = mc.m2b >= 0 ? parseQty(row[mc.m2b], "m2", true) : NaN;
-    if (MS.wallArea === "bruta" && gross > 0) q.m2 = gross;
     let kg = mc.kg >= 0 ? parseQty(row[mc.kg], "kg", true) : NaN;
     if ((isNaN(kg) || kg <= 0) && mc.w >= 0 && q.m > 0){ const w = parseQty(row[mc.w], "kgm", mc.raw.w); if (w > 0) kg = w * q.m; }
     q.kg = kg;
@@ -2050,26 +2195,26 @@ function workerMain(){
     $("sumTotal").title = "Suma de " + fmtInt(n) + " elementos";
   }
 
-  // ---------- Medición ----------
-  const M_KEY = "visor-bim-medicion-v1";
-  const UNITS = { m:"m", m2:"m²", m3:"m³", kg:"kg", ud:"ud" };
-  const UNIT_LABELS = { m:"m lineal", m2:"m² superficie", m3:"m³ volumen", kg:"kg (W × longitud)", ud:"ud" };
-  const UNIT_RULES = [
-    [/accesorio|union|fitting|terminal|equipo|aparato|luminaria|puerta|ventana|mobiliario|door|window|equipment|fixture/, "ud"],
-    [/^(muros|suelos|cubiertas|techos|suelos estructurales|paneles de muro cortina|walls|floors|roofs|ceilings|curtain panels)$/, "m2"],
-    [/pilares estructurales|armazon estructural|cimentacion estructural|structural columns|structural framing|structural foundations|^escaleras$|^stairs$/, "m3"],
-    [/tuberia|conducto|bandeja|tubo|barandilla|aislamiento|pipe|duct|cable tray|conduit|railing|insulation/, "m"]
-  ];
-  // Instalaciones: el tamaño es de ejemplar, así que cada tamaño va en su propia línea
-  const SIZE_CATS = /tuberia|conducto|bandeja|tubo|aislamiento|accesorio|union|revestimiento|pipe|duct|cable tray|conduit|insulation|fitting|lining/;
-  const plain = s => String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
-  const MS = { open:false, rows:[], active:null, ov:loadOverrides(), wallArea:loadPref("visor-bim-area-muros", "bruta") };
+  // ---------- Medición (lógica de la macro BECSA BoQ v2.9, adaptada al visor) ----------
+  // Las partidas, medidas elegidas y fórmulas se guardan en este navegador (no se escriben en Revit).
+  const plain = s => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, " ").trim();
   function loadPref(k, d){ try{ return localStorage.getItem(k) || d; } catch(e){ return d; } }
   function savePref(k, v){ try{ localStorage.setItem(k, v); } catch(e){} }
+  const BQ_KEY = "visor-bim-boq-v2";
+  const MS = (() => {
+    let st = {};
+    try{ st = JSON.parse(localStorage.getItem(BQ_KEY) || "{}") || {}; } catch(e){ st = {}; }
+    let old = {};
+    try{ old = JSON.parse(localStorage.getItem("visor-bim-medicion-v1") || "{}") || {}; } catch(e){ old = {}; }
+    return { open:false, big:false, rows:[], filtered:[], sel:new Set(), anchor:null, sort:null, bc3:null, bc3Tried:false,
+             ov:st.ov || {}, medidas:st.medidas || {}, formulas:st.formulas || {}, oldOv:old, desc:"" };
+  })();
+  function saveBoq(){
+    guardarLocal();
+    if (PJ.dir){ PJ.sucio = true; programarSync(); pintarChip(); }   // y en la carpeta del proyecto, si hay uno abierto
+  }
 
-  function loadOverrides(){ try{ return JSON.parse(localStorage.getItem(M_KEY) || "{}") || {}; } catch(e){ return {}; } }
-  function saveOverrides(){ try{ localStorage.setItem(M_KEY, JSON.stringify(MS.ov)); } catch(e){ toast("No se pudieron guardar los cambios en este navegador."); } }
-
+  // Columnas del .xlsx que usa la medición
   function measureColumns(H){
     const typeless = h => plain(h).replace(/^tipo:\s*/, "");
     const find = names => {
@@ -2078,20 +2223,21 @@ function workerMain(){
       return best;
     };
     const exact = names => H.findIndex(h => names.includes(plain(h)));
+    const lower = new Map();
+    H.forEach((h, i) => { const k = String(h).trim().toLowerCase(); if (!lower.has(k)) lower.set(k, i); });
     return {
       code: find(["codigo de montaje", "assembly code"]),
-      desc: find(["descripcion de montaje", "assembly description"]),
-      desc2: find(["descripcion", "description"]),   // descripción del tipo, como hace el add-in
+      res: find(["descripcion", "description"]),                       // ALL_MODEL_DESCRIPTION, como la macro
+      res2: find(["descripcion de montaje", "assembly description"]),
       cost: find(["coste", "cost"]),
       fam: exact(["familia", "family"]), tipo: exact(["tipo", "type"]),
       size: exact(["tamano", "size"]),
       mepSize: exact(["tamano mep"]),
+      lower,
       ...qtyCols(exact)
     };
   }
-
   // Longitud (m), Área (m²), Volumen (m³) vienen en valor interno de Revit: exactas en cualquier proyecto.
-  // Si no están (exportación antigua), se usa el parámetro formateado y se convierte su unidad.
   function qtyCols(exact){
     const pick = (rawNames, fmtNames) => { const r = exact(rawNames); return r >= 0 ? { i:r, raw:true } : { i:exact(fmtNames), raw:false }; };
     const m = pick(["longitud (m)"], ["longitud", "length"]);
@@ -2115,8 +2261,8 @@ function workerMain(){
     const m = s.replace(/(\d)\s+(?=\d)/g, "$1").match(/^(-?[\d.,]+)\s*([^\s]*)/);
     if (!m) return NaN;
     let num = m[1];
-    if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(num)) num = num.replace(/\./g, "").replace(",", ".");   // 12.500 o 12.500,5
-    else if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(num)) num = num.replace(/,/g, "");                   // 12,500.5
+    if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(num)) num = num.replace(/\./g, "").replace(",", ".");
+    else if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(num)) num = num.replace(/,/g, "");
     else num = num.replace(",", ".");
     let x = parseFloat(num);
     const f = UNIT_FACTORS[kind] && UNIT_FACTORS[kind][m[2].toLowerCase()];
@@ -2124,367 +2270,1345 @@ function workerMain(){
     return x;
   }
 
-  function defaultUnit(cat, row){
-    const c = plain(cat);
-    // Vigas y pilares con W (acero): por peso
-    if (/pilares estructurales|armazon estructural|structural columns|structural framing/.test(c) && row.miss.kg < row.n) return "kg";
-    let u = "ud";
-    for (const [re, unit] of UNIT_RULES){ if (re.test(c)){ u = unit; break; } }
-    if (u !== "ud" && row.miss[u] === row.n){
-      u = ["m2", "m3", "m"].find(k => row.miss[k] < row.n) || "ud";
+  // Valor numérico de un parámetro exportado: m, m², m³ en unidades de obra; el resto tal cual (como la macro)
+  const LEN_F = { mm:1e-3, cm:1e-2, dm:1e-1, m:1, km:1e3, ft:0.3048, "'":0.3048, in:0.0254, '"':0.0254 };
+  const AREA_F = { "mm²":1e-6, "cm²":1e-4, "dm²":1e-2, "m²":1, "mm2":1e-6, "cm2":1e-4, "dm2":1e-2, "m2":1, "ft²":0.09290304, "sf":0.09290304 };
+  const VOL_F = { "mm³":1e-9, "cm³":1e-6, "dm³":1e-3, "m³":1, "mm3":1e-9, "cm3":1e-6, "dm3":1e-3, "m3":1, "l":1e-3, "ft³":0.028316846592, "cf":0.028316846592 };
+  const RAW_HDR = /\((m|m²|m2|m³|m3|kg|kg\/m)\)\s*$/i;
+  function numVal(raw, header){
+    if (raw === null || raw === undefined) return null;
+    const s0 = String(raw).trim();
+    if (!s0) return null;
+    const rh = String(header || "").match(RAW_HDR);
+    if (rh){
+      const v = parseFloat(s0.replace(",", "."));
+      if (isNaN(v)) return null;
+      return { v, ud: rh[1].replace("m2", "m²").replace("m3", "m³") };
     }
-    return u;
+    const mm = s0.match(/^([-+]?\d[\d.,\s]*)(.*)$/);
+    if (!mm) return null;
+    let t = mm[1].replace(/\s/g, "");
+    const rest = mm[2].trim();
+    if (/\d/.test(rest) || rest.length > 14) return null;
+    const hc = t.includes(","), hd = t.includes(".");
+    if (hc && hd){ t = t.lastIndexOf(",") > t.lastIndexOf(".") ? t.replace(/\./g, "").replace(",", ".") : t.replace(/,/g, ""); }
+    else if (hc){ t = /^\d{1,3}(,\d{3}){2,}$/.test(t) ? t.replace(/,/g, "") : t.replace(",", "."); }
+    else if (hd && /^-?\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, "");   // 18.000 mm (separador de miles)
+    let v = parseFloat(t);
+    if (isNaN(v)) return null;
+    const u = rest.replace(/[øØ⌀]/g, "").trim(), ul = u.toLowerCase();
+    if (LEN_F[ul] !== undefined) return { v: v * LEN_F[ul], ud:"m" };
+    if (AREA_F[ul] !== undefined) return { v: v * AREA_F[ul], ud:"m²" };
+    if (VOL_F[ul] !== undefined) return { v: v * VOL_F[ul], ud:"m³" };
+    return { v, ud:u };
   }
 
-  function computeMeasure(){
+  // ---- Unidades (mismos códigos que la macro: ud, ml, m2, m2b, m3, kg, t, fx) ----
+  function NormUd(u){
+    if (u == null) return "";
+    let s = String(u).trim().toLowerCase().replace(/\./g, "").replace(/ /g, "").replace(/²/g, "2").replace(/³/g, "3");
+    if (["m2", "mt2", "mts2"].includes(s)) return "m2";
+    if (["m3", "mt3", "mts3"].includes(s)) return "m3";
+    if (["m", "ml", "mt", "mts", "mtl"].includes(s)) return "ml";
+    if (["kg", "kgs", "kgr"].includes(s)) return "kg";
+    if (["t", "tn", "tm"].includes(s)) return "t";
+    if (["u", "ud", "uds", "un", "und", "unid", "uni"].includes(s)) return "ud";
+    return "";
+  }
+  function TextoUd(n){ return n === "m2" ? "m²" : n === "m3" ? "m³" : n === "ml" ? "m" : n === "m2b" ? "m² bruta" : n; }
+  const ORDEN_UD = ["ud", "ml", "m2", "m2b", "m3", "kg", "t", "fx"];
+  const ACCION_FX = "accion_fx";
+  function MedicionEnUd(f, n){
+    if (n === "ud") return f.n;
+    if (n === "ml") return f.has.ml ? f.sums.ml : NaN;
+    if (n === "m2") return f.has.m2 ? f.sums.m2 : NaN;
+    if (n === "m3") return f.has.m3 ? f.sums.m3 : NaN;
+    if (n === "kg") return f.has.kg ? f.sums.kg : NaN;
+    if (n === "t") return f.has.kg ? f.sums.kg / 1000 : NaN;
+    if (n === "m2b") return f.has.m2b ? f.sums.m2b : NaN;
+    if (n === "fx") return f.TieneFormula ? f.SumFormula : NaN;
+    return NaN;
+  }
+  function UnidadesDisponibles(f){
+    const h = new Set(["ud"]);
+    if (f.has.ml) h.add("ml");
+    if (f.has.m2) h.add("m2");
+    if (f.has.m3) h.add("m3");
+    if (f.has.kg){ h.add("kg"); h.add("t"); }
+    if (f.has.m2b) h.add("m2b");
+    if (f.TieneFormula){ h.add("fx"); const nf = NormUd(f.UdFormula); if (nf) h.add(nf); }
+    return h;
+  }
+  const UdNatural = f => f.Ref ? f.Ref.UdNorm : f.udDef;
+  const UdEfectiva = f => f.UdSel || UdNatural(f);
+  const Medicion = f => { const u = UdEfectiva(f); return u ? MedicionEnUd(f, u) : NaN; };
+  const TienePartida = f => f.Codigo !== "" || f.TienePrecio;
+  const Importe = f => { const m = Medicion(f); return (isNaN(m) || !f.TienePrecio) ? NaN : m * f.Precio; };
+  const DifiereBC3 = f => !!f.Ref && (f.Resumen !== f.Ref.Resumen || !f.TienePrecio || Math.abs(f.Precio - f.Ref.Precio) > 0.004 ||
+                                       (f.UdSel !== "" && f.UdSel !== f.Ref.UdNorm));
+  // 0 sin partida, 1 correcta, 2 incompleta, 4 propia o modificada respecto al BC3
+  function Estado(f){
+    if (!TienePartida(f)) return 0;
+    if (!f.Codigo || !f.TienePrecio || isNaN(Medicion(f))) return 2;
+    if (MS.bc3 && (!f.Ref || DifiereBC3(f))) return 4;
+    return 1;
+  }
+  const Cambiado = f => { const o = MS.ov[f.key]; return !!o && ("code" in o || "res" in o || "price" in o); };
+  const TipoVisible = f => f.size ? f.tipo + " - " + f.size : f.tipo;
+
+  // Códigos de montaje Uniformat que traen las familias (B2010, D5020.10...) no son partidas del BC3
+  function PareceUniformat(c){
+    if (!c || c.length < 3) return false;
+    const l = c[0].toUpperCase();
+    if (l < "A" || l > "G") return false;
+    const partes = c.slice(1).split(".");
+    for (let i = 0; i < partes.length; i++){
+      const p = partes[i], min = i === 0 ? 2 : 1;
+      if (p.length < min || p.length > 4 || !/^\d+$/.test(p)) return false;
+    }
+    return true;
+  }
+
+  // Medida automática por categoría (misma regla que la macro)
+  const CAT_SUP = /^(muros|suelos|cubiertas|techos|sistemas de muro cortina|paneles de muro cortina|regiones de emplazamiento|walls|floors|roofs|ceilings|curtain systems|curtain panels|site regions?)$/;
+  const CAT_LIN = /^(tuberias|tuberias flexibles|conductos|conductos flexibles|bandejas de cables|tubos|barandillas|barandillas de escalera|montantes de muro cortina|armazon estructural|pipes|flex pipes|ducts|flex ducts|cable trays|conduits|railings|stair railings|curtain wall mullions|structural framing)$/;
+  const CAT_VOL = /^(cimentacion estructural|structural foundations)$/;
+  const CAT_DUCT = /^(conductos|conductos flexibles|ducts|flex ducts)$/;
+  function udDefecto(g){
+    const c = plain(g.cat);
+    const ductoRect = CAT_DUCT.test(c) && !/[øØ⌀]/.test(g.size);
+    if (g.has.kg) return "kg";
+    if (ductoRect && g.has.m2) return "m2";
+    if (CAT_SUP.test(c) && g.has.m2) return "m2";
+    if (CAT_LIN.test(c) && g.has.ml) return "ml";
+    if (CAT_VOL.test(c) && g.has.m3) return "m3";
+    return "ud";
+  }
+
+  // Valor de [Nombre] en un elemento: busca en el ejemplar y después en el tipo; [Tipo: Nombre] solo en el tipo
+  function ValorVariable(m, e, nombre){
+    const d = m.data, row = d.rows[d.rowOf[e]], L = d.mc.lower;
+    let n = nombre, soloTipo = /^tipo:/i.test(n);
+    if (soloTipo) n = n.slice(5).trim();
+    let ci = soloTipo ? undefined : L.get(n.toLowerCase());
+    let raw = ci !== undefined ? row[ci] : "";
+    let hdr = ci !== undefined ? d.header[ci] : "";
+    if (ci === undefined || raw === "" || raw == null){
+      const ct = L.get(("tipo: " + n).toLowerCase());
+      if (ct !== undefined){ ci = ct; raw = row[ct]; hdr = d.header[ct]; }
+    }
+    if (ci === undefined) throw new Error("No existe el parámetro [" + nombre + "]");
+    const r = numVal(raw, hdr);
+    if (!r) throw new Error("[" + nombre + "] no es numérico o está vacío");
+    return r.v;
+  }
+  function EvaluarFormulaFila(f){
+    f.SumFormula = 0; f.TieneFormula = false; f.ErroresFormula = 0;
+    if (!f.Formula) return;
+    for (let i = 0; i < f.els.length; i += 2){
+      const m = f.els[i], e = f.els[i + 1];
+      try{ f.SumFormula += Evaluar(f.Formula, n => ValorVariable(m, e, n)); f.TieneFormula = true; }
+      catch(err){ f.ErroresFormula++; }
+    }
+  }
+  function ParametrosNumericos(m, e){
+    const d = m.data, row = d.rows[d.rowOf[e]], l = [], seen = new Set();
+    d.header.forEach((h, i) => {
+      if (/^(elementid|uniqueid)$/i.test(h)) return;
+      const r = numVal(row[i], h);
+      if (!r) return;
+      const name = String(h), k = name.toLowerCase();
+      if (seen.has(k)) return;
+      seen.add(k);
+      l.push({ Nombre:name, Valor:r.v, Ud:r.ud, EsTipo:/^tipo:/i.test(name) });
+    });
+    l.sort((a, b) => (a.EsTipo !== b.EsTipo) ? (a.EsTipo ? 1 : -1) : a.Nombre.localeCompare(b.Nombre, "es"));
+    return l;
+  }
+
+  // Evaluador: + - * / ^ ( ), [Parametro], números con coma o punto, abs sqrt min max round, pi
+  function Evaluar(src, variables){
+    const s = src == null ? "" : String(src);
+    let i = 0;
+    const esp = () => { while (i < s.length && /\s/.test(s[i])) i++; };
+    const toca = c => { esp(); if (i < s.length && s[i] === c){ i++; return true; } return false; };
+    function expr(){ let v = term(); for (;;){ if (toca("+")) v += term(); else if (toca("-")) v -= term(); else return v; } }
+    function term(){
+      let v = pot();
+      for (;;){
+        if (toca("*")) v *= pot();
+        else if (toca("/")){ const d = pot(); if (d === 0) throw new Error("División por cero."); v /= d; }
+        else return v;
+      }
+    }
+    function pot(){ const b = unario(); if (toca("^")) return Math.pow(b, pot()); return b; }
+    function unario(){ if (toca("-")) return -unario(); if (toca("+")) return unario(); return primario(); }
+    function primario(){
+      esp();
+      if (i >= s.length) throw new Error("La fórmula termina antes de tiempo.");
+      const c = s[i];
+      if (c === "("){ i++; const v = expr(); if (!toca(")")) throw new Error("Falta cerrar un paréntesis."); return v; }
+      if (c === "["){
+        const b = s.indexOf("]", i + 1);
+        if (b < 0) throw new Error("Falta cerrar un corchete ].");
+        const n = s.slice(i + 1, b).trim(); i = b + 1;
+        return variables(n);
+      }
+      if (/[\d.,]/.test(c)){
+        const a = i;
+        while (i < s.length && /[\d.,]/.test(s[i])) i++;
+        const t = s.slice(a, i).replace(/,/g, ".");
+        if (!/^\d*\.?\d+$|^\d+\.$/.test(t)) throw new Error("Número no válido: " + t);
+        return parseFloat(t);
+      }
+      if (/\p{L}/u.test(c)){
+        const a = i;
+        while (i < s.length && /[\p{L}\d]/u.test(s[i])) i++;
+        const fn = s.slice(a, i).toLowerCase();
+        if (fn === "pi") return Math.PI;
+        if (!toca("(")) throw new Error("'" + fn + "' no es una función. Los parámetros van entre corchetes: [" + fn + "]");
+        const args = [];
+        if (!toca(")")){
+          args.push(expr());
+          while (toca(";")) args.push(expr());
+          if (!toca(")")) throw new Error("Falta cerrar el paréntesis de " + fn + "(...). Separa argumentos con ;");
+        }
+        if (fn === "abs" && args.length === 1) return Math.abs(args[0]);
+        if (fn === "sqrt" && args.length === 1) return Math.sqrt(args[0]);
+        if (fn === "min" && args.length >= 1) return Math.min(...args);
+        if (fn === "max" && args.length >= 1) return Math.max(...args);
+        if (fn === "round" && args.length >= 1){ const p = Math.pow(10, args.length > 1 ? Math.trunc(args[1]) : 0); return Math.sign(args[0]) * Math.round(Math.abs(args[0]) * p) / p; }
+        throw new Error("Función desconocida: " + fn + "(). Disponibles: abs, sqrt, min, max, round");
+      }
+      throw new Error("Carácter inesperado: '" + c + "'");
+    }
+    esp();
+    if (i >= s.length) throw new Error("La fórmula está vacía.");
+    const v = expr();
+    esp();
+    if (i < s.length) throw new Error("Sobra texto a partir de '" + s.slice(i) + "'.");
+    if (!isFinite(v)) throw new Error("Resultado no válido (¿división por cero?).");
+    return v;
+  }
+
+  // ---- BC3 (FIEBDC-3) ----
+  const CP850 = "ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜø£Ø×ƒáíóúñÑªº¿®¬½¼¡«»░▒▓│┤ÁÂÀ©╣║╗╝¢¥┐└┴┬├─┼ãÃ╚╔╩╦╠═╬¤ðÐÊËÈıÍÎÏ┘┌█▄¦Ì▀ÓßÔÒõÕµþÞÚÛÙýÝ¯´­±‗¾¶§÷¸°¨·¹³²■ ";
+  const CP437 = "ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜ¢£¥₧ƒáíóúñÑªº¿⌐¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■ ";
+  function decodeOEM(bytes, table){
+    const out = new Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++){ const b = bytes[i]; out[i] = b < 128 ? String.fromCharCode(b) : table[b - 128]; }
+    return out.join("");
+  }
+  function parseBC3(buf, nombre){
+    const bytes = new Uint8Array(buf);
+    let txt = null, cod = "";
+    try{ txt = new TextDecoder("utf-8", { fatal:true }).decode(bytes); cod = "UTF-8"; } catch(e){ txt = null; }
+    if (txt === null){
+      const cab = String.fromCharCode.apply(null, bytes.subarray(0, Math.min(bytes.length, 4000)));
+      let jc = "";
+      const iv = cab.indexOf("~V|");
+      if (iv >= 0){ const fin = cab.indexOf("~", iv + 1); const fv = (fin > iv ? cab.slice(iv, fin) : cab.slice(iv)).split("|"); jc = (fv[5] || "").trim().toUpperCase(); }
+      if (jc === "ANSI"){ txt = new TextDecoder("windows-1252").decode(bytes); cod = "ANSI"; }
+      else if (jc === "437"){ txt = decodeOEM(bytes, CP437); cod = "437"; }
+      else { txt = decodeOEM(bytes, CP850); cod = "850"; }
+    }
+    if (txt.charCodeAt(0) === 0xFEFF) txt = txt.slice(1);
+
+    const b = { conceptos:new Map(), orden:[], partidas:[], raiz:null, nombre, codificacion:cod, numCapitulos:0, conTexto:0 };
+    const obtener = c => { const k = c.toUpperCase(); let x = b.conceptos.get(k); if (!x){ x = { Codigo:c, Ud:"", Resumen:"", Texto:"", Precio:0, TipoC:0, EsCapitulo:false, Padre:null, hraw:[], fraw:[], rraw:[], Hijos:[], Descomp:[], Clave:"", UdNorm:"" }; b.conceptos.set(k, x); b.orden.push(x); } return x; };
+    const limpia = s => (s == null ? "" : String(s)).replace(/[\r\n]+/g, " ").trim();
+    const num = s => { const v = parseFloat(String(s == null ? "" : s).trim()); return isNaN(v) ? 0 : v; };
+    const primero = s => { s = s == null ? "" : String(s); const i = s.indexOf("\\"); return i >= 0 ? s.slice(0, i) : s; };
+    for (const r of txt.split("~")){
+      if (r.length < 3 || r[1] !== "|") continue;
+      const t = r[0];
+      if (t !== "C" && t !== "D" && t !== "T") continue;
+      const f = r.split("|");
+      if (f.length < 3) continue;
+      if (t === "C"){
+        const c0 = primero(f[1]).trim(); if (!c0) continue;
+        const c = obtener(c0);
+        c.Ud = limpia(f[2]); c.Resumen = f.length > 3 ? limpia(f[3]) : ""; c.Precio = f.length > 4 ? num(primero(f[4])) : 0;
+        c.TipoC = f.length > 6 ? (parseInt(f[6], 10) || 0) : 0;
+      } else if (t === "D"){
+        const p0 = f[1].trim(); if (!p0) continue;
+        const c = obtener(p0), partes = f[2].split("\\");
+        for (let i = 0; i < partes.length; i += 3){
+          const h = partes[i].trim(); if (!h) continue;
+          c.hraw.push(h);
+          c.fraw.push(i + 1 < partes.length && partes[i + 1].trim() !== "" ? num(partes[i + 1]) : 1);
+          c.rraw.push(i + 2 < partes.length && partes[i + 2].trim() !== "" ? num(partes[i + 2]) : 1);
+        }
+      } else {
+        const c0 = f[1].trim(); if (!c0) continue;
+        obtener(c0).Texto = f[2].replace(/\r\n|\r/g, "\n").trim();
+      }
+    }
+    b.resolver = cod => { if (!cod) return null; const k = cod.toUpperCase(); return b.conceptos.get(k) || b.conceptos.get(k + "#") || b.conceptos.get(k + "##") || null; };
+    b.buscarPartida = cod => { if (cod == null) return null; const c = b.conceptos.get(String(cod).trim().toUpperCase()); return c && !c.EsCapitulo ? c : null; };
+    for (const c of b.orden){
+      c.EsCapitulo = c.Codigo.endsWith("#");
+      for (let i = 0; i < c.hraw.length; i++){
+        const h = b.resolver(c.hraw[i]);
+        if (!h || h === c) continue;
+        if (c.EsCapitulo){ c.Hijos.push(h); if (!h.Padre) h.Padre = c; }
+        else c.Descomp.push({ Concepto:h, Factor:c.fraw[i], Rendimiento:c.rraw[i] });
+      }
+      c.hraw = c.fraw = c.rraw = null;
+    }
+    for (const c of b.orden){
+      if (c.EsCapitulo){ b.numCapitulos++; if (!b.raiz && c.Codigo.endsWith("##")) b.raiz = c; }
+      else {
+        c.UdNorm = NormUd(c.Ud);
+        c.Clave = plain(c.Codigo.replace(/#+$/, "") + " " + c.Resumen);
+        if (c.Texto) b.conTexto++;
+        if (c.Resumen || c.Precio) b.partidas.push(c);
+      }
+    }
+    if (!b.raiz){
+      const raiz = { Codigo:"RAIZ##", Resumen:nombre, EsCapitulo:true, Hijos:[], Padre:null, Descomp:[] };
+      for (const c of b.orden) if (c.EsCapitulo && !c.Padre){ raiz.Hijos.push(c); c.Padre = raiz; }
+      b.raiz = raiz;
+    }
+    return b;
+  }
+  const CodVis = c => c.Codigo.replace(/#+$/, "");
+  function RutaCapitulos(c){
+    const partes = []; let p = c ? c.Padre : null, g = 0;
+    while (p && g < 30){ if (!p.Codigo.endsWith("##")) partes.unshift(CodVis(p) + " " + p.Resumen); p = p.Padre; g++; }
+    return partes.join("   ›   ");
+  }
+  function PartidasDe(cap, max){
+    const res = [], vistos = new Set();
+    (function rec(c, prof){
+      if (!c || prof > 40 || res.length >= max) return;
+      for (const h of c.Hijos){
+        if (res.length >= max) return;
+        if (vistos.has(h)) continue;
+        vistos.add(h);
+        if (h.EsCapitulo) rec(h, prof + 1); else res.push(h);
+      }
+    })(cap, 0);
+    return res;
+  }
+
+  // Último BC3 usado: se guarda en el navegador para no tener que volver a abrirlo
+  function idbOpen(){ return new Promise((res, rej) => { const r = indexedDB.open("visor-bim", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+  async function idbSet(k, v){ const db = await idbOpen(); return new Promise((res, rej) => { const tx = db.transaction("kv", "readwrite"); tx.objectStore("kv").put(v, k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); }
+  async function idbGet(k){ const db = await idbOpen(); return new Promise((res, rej) => { const rq = db.transaction("kv").objectStore("kv").get(k); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); }); }
+
+  function loadBC3Buffer(buf, nombre, guardar){
+    const t0 = performance.now();
+    const b = parseBC3(buf, nombre);
+    MS.bc3 = b;
+    if (guardar) idbSet("ultimoBC3", { nombre, buf }).catch(() => {});
+    MostrarEstado("BC3 cargado: " + fmtInt(b.partidas.length) + " partidas en " + ((performance.now() - t0) / 1000).toLocaleString("es-ES", { maximumFractionDigits:1 }) + " s (" + b.codificacion + ").", 1);
+    PrepararBC3(true);
+    ActualizarCabeceraBC3();
+    renderMeasure();
+  }
+  function cargarBC3Fichero(file){
+    MostrarEstado("Leyendo " + file.name + "...", 0);
+    file.arrayBuffer().then(buf => {
+      try{ loadBC3Buffer(buf, file.name.replace(/\.[^.]+$/, ""), true); bc3EnProyecto(file); }
+      catch(err){ MostrarEstado("No se pudo leer el BC3: " + err.message, 3); }
+    });
+  }
+  function recuperarUltimoBC3(){
+    if (MS.bc3Tried || MS.bc3) return;
+    MS.bc3Tried = true;
+    try{
+      idbGet("ultimoBC3").then(v => {
+        if (!v || !v.buf || MS.bc3) return;
+        try{ loadBC3Buffer(v.buf, v.nombre || "BC3", false); MostrarEstado("Recuperado el último BC3 usado: " + (v.nombre || ""), 1); }
+        catch(e){}
+      }).catch(() => {});
+    } catch(e){}
+  }
+
+  // ---- Filas: Modelo | Categoría | Familia | Tipo | Tamaño ----
+  const CAT_LABEL = { all:"todos los modelos", visible:"lo visible", search:"los resultados de búsqueda", sel:"la selección" };
+  function computeRows(){
     const scope = $("mScope").value;
     const byKey = new Map();
     S.models.forEach(m => {
       if (!m.ready || !m.data) return;
       const d = m.data, mc = d.mc;
       for (let e = 0; e < m.n; e++){
-        const r = d.rowOf[e];
-        if (r < 0) continue;
+        const ri = d.rowOf[e];
+        if (ri < 0) continue;
         if (scope === "visible" && stateOf(m, e) === 0) continue;
         if (scope === "search" && (!S.search || !m.match[e])) continue;
         if (scope === "sel" && !isSel(m, e)) continue;
-        const row = d.rows[r];
+        const row = d.rows[ri];
         const cat = d.catCol >= 0 ? String(row[d.catCol] || "") : "";
         const fam = mc.fam >= 0 ? String(row[mc.fam] || "") : "";
         const tipo = mc.tipo >= 0 ? String(row[mc.tipo] || "") : "";
-        const size = mc.mepSize >= 0
-          ? String(row[mc.mepSize] || "").trim()                                            // macro nueva: tamaño o espesor
-          : (mc.size >= 0 && SIZE_CATS.test(plain(cat)) ? String(row[mc.size] || "").trim() : "");
-        const key = cat + "|" + fam + "|" + tipo + (size ? "|" + size : "");
-        let it = byKey.get(key);
-        if (!it){
-          it = { key, cat, fam, tipo, size, n:0, sums:{ m2:0, m3:0, m:0, m2b:0, kg:0 }, miss:{ m2:0, m3:0, m:0, m2b:0, kg:0 }, model:{ code:"", desc:"", cost:null }, els:[] };
-          byKey.set(key, it);
+        const size = mc.mepSize >= 0 ? String(row[mc.mepSize] || "").trim() : "";
+        const tkey = m.name + "|" + cat + "|" + fam + "|" + tipo;
+        const key = tkey + "|" + size;
+        let g = byKey.get(key);
+        if (!g){
+          g = { key, tkey, oldKey: cat + "|" + fam + "|" + tipo + (size ? "|" + size : ""), model:m.name, cat, fam, tipo, size, n:0, els:[],
+                sums:{ ml:0, m2:0, m3:0, kg:0, m2b:0 }, has:{ ml:false, m2:false, m3:false, kg:false, m2b:false },
+                mCode:"", mRes:"", mRes2:"", mPrecio:null };
+          byKey.set(key, g);
         }
-        it.n++;
-        it.els.push(m, e);
-        ["m2", "m3", "m"].forEach(u => {
-          const v = mc[u] >= 0 ? parseQty(row[mc[u]], u, mc.raw[u]) : NaN;
-          if (isNaN(v) || v <= 0) it.miss[u]++; else it.sums[u] += v;
-        });
-        // kg: peso calculado por la macro; si no está, W x longitud
+        g.n++; g.els.push(m, e);
+        const add = (u, v) => { if (v > 0){ g.sums[u] += v; g.has[u] = true; } };
+        const L = mc.m >= 0 ? parseQty(row[mc.m], "m", mc.raw.m) : NaN;
+        add("ml", L);
+        add("m2", mc.m2 >= 0 ? parseQty(row[mc.m2], "m2", mc.raw.m2) : NaN);
+        add("m3", mc.m3 >= 0 ? parseQty(row[mc.m3], "m3", mc.raw.m3) : NaN);
+        add("m2b", mc.m2b >= 0 ? parseQty(row[mc.m2b], "m2", true) : NaN);
         let kg = mc.kg >= 0 ? parseQty(row[mc.kg], "kg", true) : NaN;
-        if ((isNaN(kg) || kg <= 0) && mc.w >= 0 && mc.m >= 0){
-          const w = parseQty(row[mc.w], "kgm", mc.raw.w), l = parseQty(row[mc.m], "m", mc.raw.m);
-          if (w > 0 && l > 0) kg = w * l;
-        }
-        if (isNaN(kg) || kg <= 0) it.miss.kg++; else it.sums.kg += kg;
-        const vb = mc.m2b >= 0 ? parseQty(row[mc.m2b], "m2", true) : NaN;
-        if (isNaN(vb) || vb <= 0) it.miss.m2b++; else { it.sums.m2b += vb; it.hasGross = true; }
-        if (!it.model.code && mc.code >= 0 && row[mc.code]) it.model.code = String(row[mc.code]).trim();
-        if (!it.model.desc && mc.desc >= 0 && row[mc.desc]) it.model.desc = String(row[mc.desc]).trim();
-        if (!it.model.desc2 && mc.desc2 >= 0 && row[mc.desc2]) it.model.desc2 = String(row[mc.desc2]).trim();
-        if (it.model.cost === null && mc.cost >= 0){
-          const c = parseNum(row[mc.cost]);
-          if (!isNaN(c) && c !== 0) it.model.cost = c;   // coste 0 se trata como vacío
-        }
+        if ((isNaN(kg) || kg <= 0) && mc.w >= 0 && L > 0){ const w = parseQty(row[mc.w], "kgm", mc.raw.w); if (w > 0) kg = w * L; }
+        add("kg", kg);
+        if (!g.mCode && mc.code >= 0 && row[mc.code]) g.mCode = String(row[mc.code]).trim();
+        if (!g.mRes && mc.res >= 0 && row[mc.res]) g.mRes = String(row[mc.res]).trim();
+        if (!g.mRes2 && mc.res2 >= 0 && row[mc.res2]) g.mRes2 = String(row[mc.res2]).trim();
+        if (g.mPrecio === null && mc.cost >= 0){ const c = parseNum(row[mc.cost]); if (!isNaN(c) && c > 0) g.mPrecio = c; }
       }
     });
     MS.rows = Array.from(byKey.values());
-    MS.rows.forEach(r => { if (!r.model.desc && r.model.desc2) r.model.desc = r.model.desc2; });
-    MS.rows.forEach(r => r.defUnit = defaultUnit(r.cat, r));
-    MS.rows.sort((a, b) => {
-      const ca = eff(a, "code"), cb = eff(b, "code");
-      if (!!ca !== !!cb) return ca ? -1 : 1;
-      return ca.localeCompare(cb, "es", { numeric:true }) || a.cat.localeCompare(b.cat, "es") || (a.fam + a.tipo).localeCompare(b.fam + b.tipo, "es") || cmpSize(a.size, b.size);
+    let migradas = 0;
+    MS.rows.forEach(g => {
+      g.udDef = udDefecto(g);
+      // Datos de la medición anterior del visor (antes de esta versión)
+      const o = MS.oldOv[g.oldKey];
+      if (o && !MS.ov[g.key]){
+        const n = {};
+        if ("code" in o) n.code = o.code;
+        if ("desc" in o) n.res = o.desc;
+        if ("cost" in o) n.price = o.cost;
+        if (Object.keys(n).length){ MS.ov[g.key] = n; migradas++; }
+        if (o.unit){ const u = { m:"ml", m2:"m2", m3:"m3", kg:"kg", ud:"ud" }[o.unit]; const cod = n.code ?? g.mCode; if (u && u !== g.udDef) MS.medidas[g.key + "|" + cod] = u; }
+      }
+      aplicarEstado(g);
     });
+    if (migradas) saveBoq();
+    MS.rows.sort((a, b) => a.model.localeCompare(b.model, "es") || a.cat.localeCompare(b.cat, "es") || a.fam.localeCompare(b.fam, "es") ||
+                           a.tipo.localeCompare(b.tipo, "es") || cmpSize(a.size, b.size));
+    const nm = new Set(MS.rows.map(r => r.model)).size;
+    MS.multiModel = nm > 1;
+    MS.desc = CAT_LABEL[scope] || "";
+    const keys = new Set(MS.rows.map(r => r.key));
+    MS.sel.forEach(k => { if (!keys.has(k)) MS.sel.delete(k); });
+    if (MS.bc3) PrepararBC3(false);
   }
 
-  // Orden natural de tamaños: 15 mm, 22 mm, 28 mm... y 300x200 antes que 400x300
+  // Valores efectivos de la fila: lo que se ha puesto en el visor manda sobre lo que trae el modelo
+  function aplicarEstado(f){
+    const o = MS.ov[f.key] || {};
+    f.CodigoIgnorado = "";
+    if ("code" in o) f.Codigo = o.code;
+    else {
+      f.Codigo = f.mCode;
+      if (f.Codigo && PareceUniformat(f.Codigo) && !(MS.bc3 && MS.bc3.buscarPartida(f.Codigo))){ f.CodigoIgnorado = f.Codigo; f.Codigo = ""; }
+    }
+    f.Resumen = "res" in o ? o.res : (f.mRes || (f.CodigoIgnorado ? "" : f.mRes2));
+    const p = "price" in o ? o.price : f.mPrecio;
+    f.TienePrecio = p !== null && p !== undefined && !isNaN(p);
+    f.Precio = f.TienePrecio ? p : 0;
+    f.Ref = (MS.bc3 && f.Codigo) ? MS.bc3.buscarPartida(f.Codigo) : null;
+    f.UdSel = MS.medidas[f.key + "|" + f.Codigo] || "";
+    const fx = MS.formulas[f.tkey];
+    f.Formula = fx ? fx[0] : ""; f.UdFormula = fx ? fx[1] : "";
+    EvaluarFormulaFila(f);
+  }
+  function setOv(f, campo, valor){
+    const o = MS.ov[f.key] || {};
+    const modelo = campo === "code" ? f.mCode : campo === "res" ? (f.mRes || f.mRes2) : f.mPrecio;
+    const igual = campo === "price" ? (valor === null ? modelo === null : (modelo !== null && Math.abs(valor - modelo) < 1e-9)) : valor === modelo;
+    if (igual) delete o[campo]; else o[campo] = valor;
+    if (Object.keys(o).length) MS.ov[f.key] = o; else delete MS.ov[f.key];
+  }
+  function FijarMedida(f, ud){
+    f.UdSel = (ud === UdNatural(f)) ? "" : ud;
+    const k = f.key + "|" + f.Codigo;
+    if (f.UdSel) MS.medidas[k] = f.UdSel; else delete MS.medidas[k];
+  }
+  function AsignarConcepto(f, c){
+    setOv(f, "code", c.Codigo); setOv(f, "res", c.Resumen); setOv(f, "price", c.Precio);
+    aplicarEstado(f);
+    // Si el tipo tiene fórmula en la misma unidad que la partida, se mide con la fórmula
+    if (!f.UdSel && f.TieneFormula && c.UdNorm && NormUd(f.UdFormula) === c.UdNorm) FijarMedida(f, "fx");
+  }
+  // Al abrir el BC3: se completa la descripción o el precio que falte en el modelo
+  function PrepararBC3(avisar){
+    let completadas = 0, difieren = 0;
+    MS.rows.forEach(f => {
+      aplicarEstado(f);
+      if (!f.Ref) return;
+      let cambio = false;
+      if (f.Resumen === ""){ setOv(f, "res", f.Ref.Resumen); cambio = true; }
+      if (!f.TienePrecio){ setOv(f, "price", f.Ref.Precio); cambio = true; }
+      if (cambio){ aplicarEstado(f); completadas++; }
+      if (DifiereBC3(f)) difieren++;
+    });
+    if (completadas) saveBoq();
+    if (!avisar) return;
+    let msg = "";
+    if (completadas) msg = completadas + " partida(s) completadas con el BC3. ";
+    if (difieren) msg += difieren + " difieren del BC3 (en azul): 'Actualizar desde BC3' para traer sus valores.";
+    if (msg) MostrarEstado(msg, 2);
+  }
+
+  // ---- Tabla ----
+  const fmt2 = v => v.toLocaleString("es-ES", { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const fmtEur = v => fmt2(v) + " €";
   function cmpSize(a, b){
     const na = (a.match(/\d+(?:[.,]\d+)?/g) || []).map(v => parseFloat(v.replace(",", ".")));
     const nb = (b.match(/\d+(?:[.,]\d+)?/g) || []).map(v => parseFloat(v.replace(",", ".")));
-    for (let i = 0; i < Math.max(na.length, nb.length); i++){
-      const x = na[i] ?? -1, y = nb[i] ?? -1;
-      if (x !== y) return x - y;
-    }
+    for (let i = 0; i < Math.max(na.length, nb.length); i++){ const x = na[i] ?? -1, y = nb[i] ?? -1; if (x !== y) return x - y; }
     return a.localeCompare(b, "es");
   }
-
-  // Valor efectivo: lo que has puesto a mano manda sobre el modelo
-  function eff(r, f){
-    const o = MS.ov[r.key];
-    if (o && Object.prototype.hasOwnProperty.call(o, f)) return o[f];
-    if (f === "unit") return r.defUnit;
-    if (f === "cost") return r.model.cost;
-    return r.model[f] || "";
+  function TextoMedida(f, u){
+    const v = MedicionEnUd(f, u);
+    if (isNaN(v)) return "";
+    if (u === "fx") return "ƒx  " + fmt2(v) + " " + (f.UdFormula || "ud");
+    const t = (u === "ud" ? fmtInt(v) : v.toLocaleString("es-ES", { minimumFractionDigits:u === "m3" ? 3 : 2, maximumFractionDigits:u === "m3" ? 3 : 2 })) + " " + TextoUd(u);
+    return (u === "m2" && f.has.m2b) ? t + " neta" : t;
   }
-  const isManual = (r, f) => !!(MS.ov[r.key] && Object.prototype.hasOwnProperty.call(MS.ov[r.key], f));
-  // Muros en m²: bruta (longitud x altura, como el add-in) o neta (Área de Revit, descontando huecos)
-  const useGross = r => MS.wallArea === "bruta" && r.hasGross;
-  const qtyOf = r => { const u = eff(r, "unit"); return u === "ud" ? r.n : (u === "m2" && useGross(r) ? r.sums.m2b : r.sums[u]); };
-  const missOf = r => { const u = eff(r, "unit"); return u === "ud" ? 0 : (u === "m2" && useGross(r) ? r.miss.m2b : r.miss[u]); };
-  const amountOf = r => { const c = eff(r, "cost"); return (c === null || c === "" || isNaN(c)) ? null : c * qtyOf(r); };
-  const incomplete = r => !eff(r, "code") || amountOf(r) === null;
-
-  function setOverride(r, f, v){
-    const o = MS.ov[r.key] || (MS.ov[r.key] = {});
-    let modelVal = f === "unit" ? r.defUnit : f === "cost" ? r.model.cost : (r.model[f] || "");
-    if (v === modelVal || (f === "cost" && v !== null && modelVal !== null && Math.abs(v - modelVal) < 1e-9)) delete o[f];
-    else o[f] = v;
-    if (!Object.keys(o).length) delete MS.ov[r.key];
-    saveOverrides();
+  function TextoEstado(f){
+    let s;
+    switch (Estado(f)){
+      case 1: s = "Partida correcta"; break;
+      case 2: s = !f.Codigo ? "Incompleta: tiene precio pero falta el código de partida" + (f.CodigoIgnorado ? " (" + f.CodigoIgnorado + " es Uniformat, no del BC3)" : "") : !f.TienePrecio ? "Incompleta: falta el precio" : "Incompleta: la medida '" + (f.Ref ? f.Ref.Ud : TextoUd(UdEfectiva(f))) + "' no existe en este tipo. Elige otra en Medición"; break;
+      case 4: s = !f.Ref ? "Partida propia (no está en el BC3)" : "Modificada a mano respecto al BC3"; break;
+      default: s = "Sin partida";
+    }
+    if (Cambiado(f)) s += "  ·  cambiada en el visor (no está en Revit)";
+    return s;
   }
 
-  const fmt2 = v => v.toLocaleString("es-ES", { minimumFractionDigits:2, maximumFractionDigits:2 });
-  const fmtQ = v => v.toLocaleString("es-ES", { minimumFractionDigits:2, maximumFractionDigits:3 });
-  const fmtEur = v => v.toLocaleString("es-ES", { minimumFractionDigits:2, maximumFractionDigits:2 }) + " €";
-
-  function codeGroups(rows){
-    const g = new Map();
-    rows.forEach(r => {
-      const code = eff(r, "code");
-      const k = code || "";
-      if (!g.has(k)) g.set(k, { code, desc:"", units:new Set(), qty:0, amount:0, priced:0, rows:[], n:0 });
-      const it = g.get(k);
-      if (!it.desc) it.desc = eff(r, "desc");
-      it.units.add(eff(r, "unit")); it.qty += qtyOf(r); it.n += r.n; it.rows.push(r);
-      const a = amountOf(r); if (a !== null){ it.amount += a; it.priced++; }
+  function RellenarCategorias(){
+    const sel = $("mCat"), prev = sel.value;
+    const cats = Array.from(new Set(MS.rows.map(r => r.cat))).sort((a, b) => a.localeCompare(b, "es"));
+    sel.innerHTML = "";
+    const o0 = document.createElement("option"); o0.value = ""; o0.textContent = "Todas las categorías"; sel.append(o0);
+    cats.forEach(c => { const o = document.createElement("option"); o.value = c; o.textContent = c || "Sin categoría"; sel.append(o); });
+    sel.value = cats.includes(prev) ? prev : "";
+  }
+  function AplicarFiltros(){
+    const cat = $("mCat").value, sinP = $("mSinPartida").checked;
+    const pal = plain($("mFilter").value).split(" ").filter(Boolean);
+    MS.filtered = MS.rows.filter(f => {
+      if (cat && f.cat !== cat) return false;
+      if (sinP && TienePartida(f)) return false;
+      if (pal.length){ const k = plain([f.model, f.cat, f.fam, f.tipo, f.size, f.Codigo, f.Resumen].join(" ")); if (!pal.every(p => k.includes(p))) return false; }
+      return true;
     });
-    return Array.from(g.values()).sort((a, b) => (!!a.code === !!b.code) ? a.code.localeCompare(b.code, "es", { numeric:true }) : (a.code ? -1 : 1));
+    if (MS.sort){
+      const { col, dir } = MS.sort;
+      const val = f => col === "est" ? Estado(f) : col === "model" ? f.model : col === "cat" ? f.cat : col === "fam" ? f.fam : col === "tipo" ? TipoVisible(f) :
+        col === "n" ? f.n : col === "code" ? f.Codigo : col === "res" ? f.Resumen : col === "med" ? Medicion(f) : col === "pre" ? (f.TienePrecio ? f.Precio : NaN) : col === "imp" ? Importe(f) : "";
+      MS.filtered.sort((a, b) => {
+        const x = val(a), y = val(b);
+        if (typeof x === "number" || typeof y === "number"){ const xa = isNaN(x) ? -Infinity : x, ya = isNaN(y) ? -Infinity : y; return (xa - ya) * dir || (col === "tipo" ? 0 : 0); }
+        return (String(x).localeCompare(String(y), "es", { numeric:true }) || (col === "tipo" ? cmpSize(a.size, b.size) : 0)) * dir;
+      });
+    }
   }
 
-  function filteredRows(){
-    const f = plain($("mFilter").value);
-    const onlyMissing = $("mMissing").checked;
-    return MS.rows.filter(r => {
-      if (onlyMissing && !incomplete(r)) return false;
-      if (!f) return true;
-      return plain([eff(r, "code"), eff(r, "desc"), r.cat, r.fam, r.tipo, r.size].join(" ")).includes(f);
-    });
+  const COLS = [
+    ["est", "", ""], ["model", "Modelo", ""], ["cat", "Categoría", ""], ["fam", "Familia", ""], ["tipo", "Tipo", ""], ["n", "Cant.", "num"],
+    ["code", "Código", ""], ["btn", "", ""], ["res", "Resumen", ""],
+    ["med", "Medición", "num"], ["pre", "Precio", "num"], ["imp", "Importe", "num"]
+  ];
+  function colVisible(c){
+    if (c === "model") return MS.multiModel;
+    if (c === "btn") return MS.modo === "tecnico";
+    return true;
   }
+  // Ancho de columnas como en Excel: arrastrar el borde de la cabecera, doble clic para ajustar al contenido
+  const COLW_KEY = "visor-bim-boq-colw";
+  const COLW_DEF = { est:30, model:110, cat:150, fam:180, tipo:210, n:58, code:110, btn:34, res:300, med:170, pre:95, imp:125 };
+  const COLW_MIN = { est:24, btn:30 };
+  try{ MS.colW = JSON.parse(localStorage.getItem(COLW_KEY) || "{}") || {}; } catch(e){ MS.colW = {}; }
+  const anchoCol = c => MS.colW[c] || COLW_DEF[c] || 100;
+  function guardarAnchos(){ try{ localStorage.setItem(COLW_KEY, JSON.stringify(MS.colW)); } catch(e){} }
+  function ajustarAnchoTabla(){
+    const t = $("mTable"); let w = 0;
+    t.querySelectorAll("colgroup col").forEach(c => w += parseFloat(c.style.width) || 0);
+    t.style.width = w + "px";
+  }
+  function iniciarResize(e){
+    const h = e.target.closest(".col-rs"); if (!h || e.button !== 0) return;
+    e.preventDefault(); e.stopPropagation();
+    const c = h.parentElement.dataset.c, t = $("mTable"), col = t.querySelector('col[data-c="' + c + '"]');
+    const x0 = e.clientX, w0 = parseFloat(col.style.width) || anchoCol(c);
+    h.classList.add("drag"); document.body.classList.add("col-resizing");
+    try{ h.setPointerCapture(e.pointerId); } catch(err){}
+    const mv = ev => { const w = Math.max(COLW_MIN[c] || 40, Math.round(w0 + ev.clientX - x0)); col.style.width = w + "px"; MS.colW[c] = w; ajustarAnchoTabla(); };
+    const up = () => {
+      h.classList.remove("drag"); document.body.classList.remove("col-resizing");
+      h.removeEventListener("pointermove", mv); h.removeEventListener("pointerup", up); h.removeEventListener("pointercancel", up);
+      MS.resizing = Date.now(); guardarAnchos();
+    };
+    h.addEventListener("pointermove", mv); h.addEventListener("pointerup", up); h.addEventListener("pointercancel", up);
+  }
+  let medidor = null;
+  function autoAjustarColumna(c){
+    const t = $("mTable"), col = t.querySelector('col[data-c="' + c + '"]'); if (!col) return;
+    if (!medidor) medidor = document.createElement("canvas").getContext("2d");
+    const fam = getComputedStyle(t).fontFamily;
+    let max = 0;
+    medidor.font = "600 13px " + fam;
+    const th = t.tHead.querySelector('th[data-c="' + c + '"]');
+    if (th) max = medidor.measureText(th.textContent).width + 18;
+    t.tBodies[0].querySelectorAll("td.c-" + c).forEach(td => {
+      const inp = td.querySelector("input"), sel = td.querySelector("select");
+      let txt, extra = 14;
+      if (inp){ txt = inp.value || inp.placeholder; extra = 30; medidor.font = (inp.classList.contains("code") ? "600 " : "") + "13px " + fam; }
+      else if (sel){ txt = sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex].text : ""; extra = 62; medidor.font = "13px " + fam; }
+      else { txt = td.textContent; medidor.font = (td.classList.contains("fuerte") ? "600 " : "") + "13px " + fam; }
+      max = Math.max(max, medidor.measureText(txt).width + extra);
+    });
+    const w = Math.min(800, Math.max(COLW_MIN[c] || 40, Math.ceil(max)));
+    col.style.width = w + "px"; MS.colW[c] = w; ajustarAnchoTabla(); guardarAnchos();
+  }
+  function restablecerAnchos(){ MS.colW = {}; guardarAnchos(); renderMeasure(); MostrarEstado("Ancho de columnas restablecido.", 1); }
 
   function renderMeasure(){
-    const mode = $("mMode").value;
-    const thead = $("mTable").tHead, tbody = $("mTable").tBodies[0], tfoot = $("mTable").tFoot;
-    const rows = filteredRows();
-    tbody.innerHTML = ""; tfoot.innerHTML = "";
+    if (!MS.open) return;
+    AplicarFiltros();
+    const t = $("mTable"), thead = t.tHead, tbody = t.tBodies[0];
+    thead.innerHTML = "";
+    const cg0 = t.querySelector("colgroup"); if (cg0) cg0.remove();
+    const cg = document.createElement("colgroup");
+    const hr = thead.insertRow();
+    MS.visCols = [];
+    COLS.forEach(([c, label, cls]) => {
+      if (!colVisible(c)) return;
+      MS.visCols.push(c);
+      const col = document.createElement("col"); col.dataset.c = c; col.style.width = anchoCol(c) + "px"; cg.append(col);
+      const th = document.createElement("th"); th.textContent = label; th.className = "c-" + c + (cls ? " " + cls : ""); th.dataset.c = c;
+      if (c !== "btn"){
+        th.dataset.sort = c; th.title = (label || "Estado") + " · clic para ordenar · arrastra el borde para cambiar el ancho (doble clic: ajustar)";
+        if (MS.sort && MS.sort.col === c) th.textContent += MS.sort.dir > 0 ? " ▲" : " ▼";
+      }
+      const rs = document.createElement("span"); rs.className = "col-rs"; rs.title = "Arrastra para cambiar el ancho · doble clic para ajustar al contenido"; th.append(rs);
+      hr.append(th);
+    });
+    t.insertBefore(cg, thead);
+    ajustarAnchoTabla();
+    tbody.innerHTML = "";
     const frag = document.createDocumentFragment();
-    if (mode === "type"){
-      thead.innerHTML = "<tr><th>Código de montaje</th><th>Categoría</th><th>Familia y tipo</th><th>Tamaño</th><th>Descripción</th><th class='num'>Nº</th><th>Ud</th><th class='num'>Cantidad</th><th class='num'>Coste unitario</th><th class='num'>Importe</th><th></th></tr>";
-      rows.forEach(r => frag.append(typeRow(r)));
-    } else {
-      thead.innerHTML = "<tr><th>Código de montaje</th><th>Descripción</th><th class='num'>Tipos</th><th class='num'>Nº</th><th>Ud</th><th class='num'>Cantidad</th><th class='num'>Precio medio</th><th class='num'>Importe</th></tr>";
-      codeGroups(rows).forEach(g => {
-        const tr = document.createElement("tr");
-        tr.dataset.code = g.code;
-        const unit = g.units.size === 1 ? Array.from(g.units)[0] : null;
-        const cells = [
-          g.code || "(sin código)", g.desc || "", fmtInt(g.rows.length), fmtInt(g.n),
-          unit ? UNITS[unit] : "varias", unit ? fmtQ(g.qty) : "", unit && g.priced && g.qty ? fmt2(g.amount / g.qty) : "",
-          g.priced ? fmtEur(g.amount) + (g.priced < g.rows.length ? " *" : "") : ""
-        ];
-        cells.forEach((c, i) => { const td = document.createElement("td"); td.textContent = c; if (i >= 2 && i !== 4) td.className = "num"; tr.append(td); });
-        if (g.priced < g.rows.length) tr.title = "Hay tipos sin coste en este código: el importe es parcial.";
-        if (!unit) tr.title = "Este código mezcla unidades distintas; revisa la vista por tipo.";
-        frag.append(tr);
-      });
-    }
+    MS.filtered.forEach(f => frag.append(filaTr(f)));
     tbody.append(frag);
-    applyColWidths();
-    updateMeasureTotals();
-    if (MS.active) markActive();
+    ActualizarKpis();
+    ActualizarBotones();
   }
-
-  function typeRow(r){
+  function filaTr(f){
     const tr = document.createElement("tr");
-    tr.dataset.key = r.key;
-    const td = html => { const c = document.createElement("td"); if (html) c.append(html); tr.append(c); return c; };
-    const inp = (f, cls, val, ph) => {
-      const i = document.createElement("input"); i.type = "text"; i.dataset.f = f; i.className = cls + (isManual(r, f) ? " manual" : "");
-      i.value = val; i.placeholder = ph; i.setAttribute("aria-label", ph); return i;
-    };
-    td(inp("code", "code", eff(r, "code"), "Código"));
-    td(document.createTextNode(r.cat || "Sin categoría"));
-    td(document.createTextNode([r.fam, r.tipo].filter(Boolean).join(": ") || "Sin tipo")).className = "ft";
-    td(document.createTextNode(r.size || "")).className = "sz";
-    td(inp("desc", "desc", eff(r, "desc"), "Descripción"));
-    td(document.createTextNode(fmtInt(r.n))).className = "num";
-    const sel = document.createElement("select"); sel.dataset.f = "unit"; sel.setAttribute("aria-label", "Unidad de medida");
-    Object.keys(UNITS).forEach(u => { const o = document.createElement("option"); o.value = u; o.textContent = UNIT_LABELS[u]; sel.append(o); });
-    sel.value = eff(r, "unit"); if (isManual(r, "unit")) sel.className = "manual";
-    td(sel);
-    const q = td(null); q.className = "num q";
-    const c = eff(r, "cost");
-    td(inp("cost", "cost", c === null || c === "" ? "" : fmt2(c), "Coste")).className = "num";
-    const a = td(null); a.className = "num a";
-    const rs = document.createElement("button"); rs.className = "reset"; rs.textContent = "↺"; rs.title = "Volver a los valores del modelo"; rs.setAttribute("aria-label", "Volver a los valores del modelo");
-    td(rs);
-    fillCalc(tr, r);
+    tr.dataset.key = f.key;
+    if (MS.sel.has(f.key)) tr.classList.add("sel");
+    pintarFila(tr, f);
     return tr;
   }
-
-  const u2 = r => eff(r, "unit");
-  function fillCalc(tr, r){
-    const q = tr.querySelector("td.q"), a = tr.querySelector("td.a");
-    q.textContent = fmtQ(qtyOf(r));
-    if (u2(r) === "m2" && r.hasGross){
-      const t = document.createElement("span"); t.className = "tag-area"; t.textContent = useGross(r) ? "bruta" : "neta";
-      t.title = useGross(r) ? "Longitud x altura, sin descontar huecos" : "Área de Revit, descontando huecos";
-      q.prepend(t);
-    }
-    const miss = missOf(r);
-    if (miss){ const w = document.createElement("span"); w.className = "warn-dot"; w.textContent = "!"; w.title = miss + " elementos sin valor de " + UNITS[eff(r, "unit")] + ": no suman."; q.append(w); }
-    const am = amountOf(r);
-    a.textContent = am === null ? "" : fmtEur(am);
-    tr.querySelector(".reset").hidden = !MS.ov[r.key];
-  }
-
-  function updateMeasureTotals(){
-    let total = 0, noCode = 0, noCost = 0, els = 0;
-    MS.rows.forEach(r => { const a = amountOf(r); if (a !== null) total += a; else noCost++; if (!eff(r, "code")) noCode++; els += r.n; });
-    $("mTotal").textContent = "Total " + fmtEur(total);
-    const parts = [fmtInt(MS.rows.length) + " tipos, " + fmtInt(els) + " elementos"];
-    if (noCode) parts.push(fmtInt(noCode) + " sin código");
-    if (noCost) parts.push(fmtInt(noCost) + " sin coste (no suman al total)");
-    $("mInfo").innerHTML = "";
-    $("mInfo").append(document.createTextNode(parts.join(". ") + ". "));
-    const legend = document.createElement("span"); legend.innerHTML = '<span class="chip-manual"></span> valor añadido a mano (se guarda en este navegador). Haz clic en una fila para verla en el modelo.';
-    $("mInfo").append(legend);
-    const tf = $("mTable").tFoot; tf.innerHTML = "";
-    const tr = document.createElement("tr");
-    const cols = $("mMode").value === "type" ? 11 : 8;
-    const t1 = document.createElement("td"); t1.colSpan = cols - ($("mMode").value === "type" ? 2 : 1); t1.textContent = "Total";
-    const t2 = document.createElement("td"); t2.className = "num"; t2.textContent = fmtEur(total);
-    tr.append(t1, t2); if ($("mMode").value === "type") tr.append(document.createElement("td"));
-    tf.append(tr);
-  }
-
-  function rowByKey(k){ return MS.rows.find(r => r.key === k); }
-
-  function onMeasureEdit(e){
-    const el = e.target, tr = el.closest("tr");
-    if (!tr || !tr.dataset.key || !el.dataset.f) return;
-    const r = rowByKey(tr.dataset.key), f = el.dataset.f;
-    if (!r) return;
-    if (f === "cost"){
-      const raw = el.value.trim();
-      const v = raw === "" ? null : parseNum(raw);
-      if (raw !== "" && isNaN(v)){ el.value = eff(r, "cost") == null ? "" : fmt2(eff(r, "cost")); toast("El coste tiene que ser un número."); return; }
-      setOverride(r, "cost", v);
-      el.value = v === null ? "" : fmt2(v);
-    } else setOverride(r, f, el.value.trim());
-    el.classList.toggle("manual", isManual(r, f));
-    fillCalc(tr, r);
-    updateMeasureTotals();
-  }
-
-  function onMeasureClick(e){
-    if (e.target.closest("input, select")) return;
-    const tr = e.target.closest("tbody tr");
-    if (!tr) return;
-    if (e.target.closest(".reset")){
-      const r = rowByKey(tr.dataset.key);
-      if (r){ delete MS.ov[r.key]; saveOverrides(); tr.replaceWith(typeRow(r)); updateMeasureTotals(); }
+  function pintarFila(tr, f){
+    tr.innerHTML = "";
+    const td = (cls, txt) => { const c = document.createElement("td"); if (cls) c.className = cls; if (txt !== undefined && txt !== null) c.textContent = txt; tr.append(c); return c; };
+    const est = Estado(f), camb = Cambiado(f);
+    const e = td("c-est");
+    const dot = document.createElement("span"); dot.className = "est e" + est + (camb ? " camb" : ""); e.append(dot); e.title = TextoEstado(f);
+    if (MS.multiModel) td("c-model", f.model);
+    td("c-cat muted", f.cat || "Sin categoría");
+    td("c-fam", f.fam);
+    td("c-tipo", TipoVisible(f));
+    td("c-n num", fmtInt(f.n));
+    if (MS.modo !== "tecnico"){   // modo sencillo: solo consulta
+      td("c-code fuerte", f.Codigo || "—");
+      const r = td("c-res" + (TienePartida(f) ? "" : " muted"), f.Resumen || "—"); r.title = f.Resumen;
+      const ef = UdEfectiva(f), tm = ef ? TextoMedida(f, ef) : "";
+      const cm = td("c-med num", tm || "—"); if (f.Formula) cm.title = "Fórmula: " + f.Formula;
+      td("c-pre num", f.TienePrecio ? fmt2(f.Precio) : "—");
+      const im = Importe(f);
+      td("c-imp num fuerte", isNaN(im) ? "—" : fmtEur(im));
       return;
     }
-    let rows;
-    if (tr.dataset.key){ const r = rowByKey(tr.dataset.key); rows = r ? [r] : []; MS.active = { key:tr.dataset.key }; }
-    else { const code = tr.dataset.code || ""; rows = MS.rows.filter(r => (eff(r, "code") || "") === code); MS.active = { code }; }
-    markActive();
-    highlightRows(rows);
-  }
-  function markActive(){
-    $("mTable").querySelectorAll("tbody tr").forEach(tr => {
-      const on = MS.active && ((MS.active.key !== undefined && tr.dataset.key === MS.active.key) || (MS.active.code !== undefined && tr.dataset.code === MS.active.code && !tr.dataset.key));
-      tr.classList.toggle("active", !!on);
+    const cCod = td("c-code");
+    const ic = document.createElement("input"); ic.type = "text"; ic.dataset.f = "code"; ic.value = f.Codigo; ic.className = "code" + (camb ? " manual" : "");
+    ic.setAttribute("list", "bc3List"); ic.placeholder = "—"; ic.setAttribute("aria-label", "Código de partida");
+    ic.title = f.CodigoIgnorado ? "Código de montaje actual: " + f.CodigoIgnorado + " (Uniformat, no es del BC3; se mantiene si no asignas partida)"
+             : (f.Codigo && MS.bc3 && !f.Ref ? "Partida propia: no está en " + MS.bc3.nombre : "Escribe el código o usa la lupa para buscarlo en el BC3");
+    cCod.append(ic);
+    const cb = td("c-btn");
+    const bb = document.createElement("button"); bb.className = "lupa"; bb.dataset.a = "nav"; bb.title = "Buscar partida en el BC3"; bb.setAttribute("aria-label", "Buscar partida en el BC3");
+    bb.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.4 10.4 14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+    cb.append(bb);
+    const cRes = td("c-res");
+    const ir = document.createElement("input"); ir.type = "text"; ir.dataset.f = "res"; ir.value = f.Resumen; ir.className = "res" + (camb ? " manual" : "") + (TienePartida(f) ? "" : " tenue");
+    ir.placeholder = "—"; ir.setAttribute("aria-label", "Resumen");
+    ir.title = (f.Ref && f.Resumen !== f.Ref.Resumen) ? "Resumen en el BC3: " + f.Ref.Resumen : (!TienePartida(f) && f.Resumen ? "Descripción actual del tipo en Revit" : "");
+    cRes.append(ir);
+    // Medición: desplegable con las medidas disponibles del tipo
+    const cMed = td("c-med num");
+    const sel = document.createElement("select"); sel.dataset.f = "med"; sel.setAttribute("aria-label", "Medida");
+    const ef = UdEfectiva(f);
+    let valor = null;
+    if (ef === "" || isNaN(MedicionEnUd(f, ef))){
+      const udTxt = (ef === "" && f.Ref) ? f.Ref.Ud : TextoUd(ef);
+      const o = document.createElement("option"); o.value = ""; o.textContent = "—  " + udTxt + " no medible"; sel.append(o); valor = "";
+    }
+    ORDEN_UD.forEach(u => {
+      const t = TextoMedida(f, u); if (!t) return;
+      const o = document.createElement("option"); o.value = u; o.textContent = t; sel.append(o);
+      if (u === ef) valor = u;
     });
+    const ox = document.createElement("option"); ox.value = ACCION_FX; ox.textContent = f.Formula ? "ƒx  Editar fórmula..." : "ƒx  Fórmula personalizada..."; sel.append(ox);
+    sel.value = valor ?? "";
+    sel.dataset.prev = sel.value;
+    if (f.UdSel) sel.classList.add("elegida");
+    sel.title = f.UdSel ? "Medida elegida a mano" + (f.Ref ? " (la partida del BC3 está en " + f.Ref.Ud + ")" : "")
+                        : (f.Ref ? "Medida según la unidad de la partida (" + f.Ref.Ud + ")" : "Medida automática según la categoría");
+    if (f.Formula) sel.title += "\nFórmula: " + f.Formula + (f.ErroresFormula ? "\n" + f.ErroresFormula + " elemento(s) sin poder calcular" : "");
+    cMed.append(sel);
+    const cPre = td("c-pre num");
+    const ip = document.createElement("input"); ip.type = "text"; ip.dataset.f = "price"; ip.value = f.TienePrecio ? fmt2(f.Precio) : ""; ip.className = "pre" + (camb ? " manual" : "");
+    ip.placeholder = "—"; ip.setAttribute("aria-label", "Precio");
+    ip.title = (f.Ref && Math.abs(f.Precio - f.Ref.Precio) > 0.004) ? "Precio en el BC3: " + fmtEur(f.Ref.Precio) : "";
+    cPre.append(ip);
+    const imp = Importe(f);
+    td("c-imp num fuerte", isNaN(imp) ? "—" : fmtEur(imp));
   }
+  function refrescarFila(f){
+    const tr = $("mTable").tBodies[0].querySelector('tr[data-key="' + CSS.escape(f.key) + '"]');
+    if (tr) pintarFila(tr, f);
+  }
+  function RefrescarTodo(){ renderMeasure(); }
 
-  // Resalta en el visor los elementos de una partida (usa el mismo atenuado que la búsqueda)
-  function highlightRows(rows){
+  function ActualizarKpis(){
+    let total = 0, asig = 0, elem = 0, conImp = 0, avisos = 0;
+    const cats = new Set();
+    MS.filtered.forEach(f => {
+      elem += f.n; cats.add(f.cat);
+      if (TienePartida(f)) asig++;
+      const im = Importe(f); if (!isNaN(im)){ total += im; conImp++; }
+      if (Estado(f) === 2) avisos++;
+    });
+    const filt = MS.filtered.length !== MS.rows.length ? " · vista filtrada" : "";
+    const frac = MS.filtered.length ? asig / MS.filtered.length : 0;
+    $("kPresu").innerHTML = ""; $("kAsig").innerHTML = ""; $("kElem").innerHTML = "";
+    const kpi = (el, big, small) => { const b = document.createElement("b"); b.textContent = big; const s = document.createElement("span"); s.textContent = small; el.append(b, s); };
+    const lbl = document.createElement("span"); lbl.className = "klbl"; lbl.textContent = "Importe total" + (filt ? " (filtrado)" : "");
+    $("kPresu").append(lbl);
+    kpi($("kPresu"), fmtEur(total), conImp + " filas con importe");
+    kpi($("kAsig"), fmtInt(asig) + " / " + fmtInt(MS.filtered.length), Math.round(frac * 100) + " % con partida" + (avisos ? " · " + avisos + " incompletas" : ""));
+    kpi($("kElem"), fmtInt(elem), "elementos · " + fmtInt(MS.filtered.length) + " tipos en " + cats.size + " categorías");
+    $("kAsig").style.setProperty("--p", (frac * 100).toFixed(1) + "%");
+  }
+  function ActualizarBotones(){
+    const n = MS.sel.size;
+    $("mAsignar").textContent = n > 1 ? "Asignar partida (" + n + ")" : "Asignar partida BC3";
+    $("mAsignar").disabled = n === 0;
+    $("mQuitar").disabled = n === 0;
+    $("mSync").disabled = n === 0 || !MS.bc3;
+    $("mVer").disabled = n === 0;
+  }
+  function ActualizarCabeceraBC3(){
+    const b = MS.bc3;
+    $("bc3Info").textContent = b ? b.nombre + " · " + fmtInt(b.partidas.length) + " partidas · " + fmtInt(b.numCapitulos) + " capítulos" : "Sin BC3 cargado";
+    $("bc3Info").title = b ? "Banco de precios cargado (" + b.codificacion + ")" : "";
+    $("bc3Explore").disabled = !b;
+  }
+  // Nivel: 0 info, 1 ok, 2 aviso, 3 error
+  function MostrarEstado(msg, nivel){
+    const el = $("mStatus"); el.textContent = msg; el.className = "mstatus n" + (nivel || 0);
+  }
+  const FilasSeleccionadas = () => MS.rows.filter(f => MS.sel.has(f.key));
+
+  // ---- Edición en la tabla ----
+  function rowByKey(k){ return MS.rows.find(r => r.key === k); }
+  function onMeasureChange(e){
+    const el = e.target, tr = el.closest("tbody tr");
+    if (!tr || !el.dataset.f) return;
+    const f = rowByKey(tr.dataset.key); if (!f) return;
+    const campo = el.dataset.f;
+    if (campo === "med"){
+      const ud = el.value;
+      if (ud === ACCION_FX){ el.value = el.dataset.prev || ""; AbrirFormula(f); return; }
+      if (ud && ud !== UdEfectiva(f)){
+        FijarMedida(f, ud); saveBoq();
+        MostrarEstado(f.tipo + ": se mide en " + TextoUd(ud) + (f.UdSel ? " (elegido a mano, se recuerda en este navegador)" : ""), 1);
+      }
+    } else if (campo === "code"){
+      const cod = el.value.trim();
+      if (cod !== f.Codigo) EditarCodigo(f, cod);
+    } else if (campo === "res"){
+      const res = el.value.trim();
+      if (res !== f.Resumen){ setOv(f, "res", res); aplicarEstado(f); saveBoq(); MostrarEstado("Resumen escrito a mano.", 1); }
+    } else if (campo === "price"){
+      let s = el.value.replace(/€|eur/gi, "").replace(/\s/g, "").trim();
+      if (s === ""){ setOv(f, "price", null); aplicarEstado(f); saveBoq(); MostrarEstado("Precio borrado.", 1); }
+      else {
+        const v = s.includes(",") ? parseFloat(s.replace(/\./g, "").replace(",", ".")) : parseFloat(s);
+        if (isNaN(v) || v < 0){ MostrarEstado("Precio no válido: '" + s + "'.", 3); }
+        else { setOv(f, "price", v); aplicarEstado(f); saveBoq(); MostrarEstado("Precio escrito a mano: " + fmtEur(v) + ".", 1); }
+      }
+    }
+    refrescarFila(f); ActualizarKpis();
+  }
+  function EditarCodigo(f, cod){
+    if (cod === ""){
+      setOv(f, "code", ""); aplicarEstado(f); saveBoq();
+      MostrarEstado("Código borrado de " + f.tipo + ".", 2);
+      return;
+    }
+    const c = MS.bc3 ? MS.bc3.buscarPartida(cod) : null;
+    if (c){
+      AsignarConcepto(f, c); saveBoq();
+      const nm = isNaN(Medicion(f));
+      MostrarEstado(CodVis(c) + "  " + c.Resumen + (nm ? "  ·  Ojo: la unidad '" + c.Ud + "' no existe en este tipo, elige la medida." : ""), nm ? 2 : 1);
+    } else {
+      setOv(f, "code", cod); aplicarEstado(f); saveBoq();
+      MostrarEstado((MS.bc3 ? "No está en " + MS.bc3.nombre + ": " : "") + "partida propia. Escribe resumen y precio a mano.", 2);
+    }
+  }
+  function QuitarPartidaSeleccion(){
+    let n = 0;
+    FilasSeleccionadas().forEach(f => {
+      if (!TienePartida(f) && f.Resumen === "") return;
+      setOv(f, "code", ""); setOv(f, "res", ""); setOv(f, "price", null);
+      delete MS.medidas[f.key + "|" + f.Codigo];
+      aplicarEstado(f); n++;
+    });
+    saveBoq(); RefrescarTodo();
+    if (n) MostrarEstado(n + " partida(s) quitadas.", 2);
+  }
+  function ActualizarDesdeBC3(){
+    if (!MS.bc3){ MostrarEstado("Carga primero un BC3.", 2); return; }
+    let n = 0, noEsta = 0;
+    FilasSeleccionadas().forEach(f => {
+      if (!f.Codigo) return;
+      const c = MS.bc3.buscarPartida(f.Codigo);
+      if (!c){ noEsta++; return; }
+      const difiere = f.Ref !== c || DifiereBC3(f);
+      if (f.UdSel) FijarMedida(f, c.UdNorm);
+      if (difiere || f.Resumen !== c.Resumen || Math.abs(f.Precio - c.Precio) > 0.004){ AsignarConcepto(f, c); n++; }
+      else aplicarEstado(f);
+    });
+    saveBoq(); RefrescarTodo();
+    MostrarEstado(n + " partida(s) actualizadas con los datos del BC3." + (noEsta ? "  " + noEsta + " no están en el BC3 (partidas propias)." : ""), n ? 1 : 2);
+  }
+  function onMeasureClick(e){
+    if (e.target.closest(".col-rs") || Date.now() - (MS.resizing || 0) < 250) return;
+    const th = e.target.closest("thead th[data-sort]");
+    if (th){ const c = th.dataset.sort; MS.sort = MS.sort && MS.sort.col === c ? (MS.sort.dir > 0 ? { col:c, dir:-1 } : null) : { col:c, dir:1 }; renderMeasure(); return; }
+    const tr = e.target.closest("tbody tr"); if (!tr) return;
+    const f = rowByKey(tr.dataset.key); if (!f) return;
+    if (e.target.closest("[data-a=nav]")){
+      const filas = MS.sel.has(f.key) ? FilasSeleccionadas() : [f];
+      if (!MS.sel.has(f.key)){ MS.sel = new Set([f.key]); marcarSeleccion(); }
+      AbrirNavegador(filas);
+      return;
+    }
+    const enControl = !!e.target.closest("input, select, button");
+    const keys = MS.filtered.map(r => r.key);
+    if (e.shiftKey && MS.anchor && !enControl){
+      const a = keys.indexOf(MS.anchor), b = keys.indexOf(f.key);
+      if (a >= 0 && b >= 0){ if (!(e.ctrlKey || e.metaKey)) MS.sel = new Set(); for (let i = Math.min(a, b); i <= Math.max(a, b); i++) MS.sel.add(keys[i]); }
+    } else if ((e.ctrlKey || e.metaKey) && !enControl){
+      if (MS.sel.has(f.key)) MS.sel.delete(f.key); else MS.sel.add(f.key);
+      MS.anchor = f.key;
+    } else if (!(enControl && MS.sel.has(f.key))){
+      MS.sel = new Set([f.key]); MS.anchor = f.key;
+    }
+    marcarSeleccion();
+  }
+  function marcarSeleccion(){
+    $("mTable").tBodies[0].querySelectorAll("tr").forEach(tr => tr.classList.toggle("sel", MS.sel.has(tr.dataset.key)));
+    ActualizarBotones();
+  }
+  // Resalta en el visor los elementos de las filas (mismo atenuado que la búsqueda) y encuadra
+  function verEnModelo(filas){
+    if (!filas.length){ MostrarEstado("Selecciona filas de la tabla.", 2); return; }
     S.models.forEach(m => { if (m.ready) m.match.fill(0); });
     let n = 0;
-    rows.forEach(r => { for (let i = 0; i < r.els.length; i += 2){ r.els[i].match[r.els[i + 1]] = 1; n++; } });
+    const box = new THREE.Box3();
+    filas.forEach(r => { for (let i = 0; i < r.els.length; i += 2){ const m = r.els[i], e = r.els[i + 1]; m.match[e] = 1; n++;
+      const B = m.bbox, j = e * 6, o = m.group.position;
+      box.expandByPoint(tmpV.set(B[j] + o.x, B[j+1] + o.y, B[j+2] + o.z)); box.expandByPoint(tmpV.set(B[j+3] + o.x, B[j+4] + o.y, B[j+5] + o.z)); } });
     S.search = true;
-    $("searchInfo").textContent = "Partida de la medición: " + fmtInt(n) + " elementos.";
+    $("searchInfo").textContent = "Medición: " + fmtInt(n) + " elementos resaltados.";
     $("results").innerHTML = ""; $("sumBox").hidden = true;
     rebuildAll();
-    const box = new THREE.Box3();
-    rows.forEach(r => { for (let i = 0; i < r.els.length; i += 2){ const m = r.els[i], e = r.els[i + 1], B = m.bbox, j = e * 6, o = m.group.position;
-      box.expandByPoint(tmpV.set(B[j] + o.x, B[j+1] + o.y, B[j+2] + o.z)); box.expandByPoint(tmpV.set(B[j+3] + o.x, B[j+4] + o.y, B[j+5] + o.z)); } });
     if (!box.isEmpty()) fitTo(box);
+    MostrarEstado("Resaltados " + fmtInt(n) + " elemento(s) en el modelo.", 0);
   }
-
-  // Anchos de columna ajustables: arrastrar el borde; doble clic para volver a los de por defecto
-  const COLW_KEY = "visor-bim-anchos-columnas-v1";
-  let colW = (() => { try{ return JSON.parse(localStorage.getItem(COLW_KEY) || "{}") || {}; } catch(e){ return {}; } })();
-  function applyColWidths(){
-    const table = $("mTable"), mode = $("mMode").value, ths = Array.from(table.tHead.rows[0].cells);
-    const ws = colW[mode];
-    if (ws && ws.length === ths.length){
-      ths.forEach((th, i) => th.style.width = ws[i] + "px");
-      table.style.width = ws.reduce((a, b) => a + b, 0) + "px";
-      table.classList.add("fixed");
-    } else {
-      ths.forEach(th => th.style.width = "");
-      table.style.width = ""; table.classList.remove("fixed");
+  // Autocompletar códigos del BC3 mientras se escribe
+  function sugerirCodigos(el){
+    const dl = $("bc3List"); dl.innerHTML = "";
+    if (!MS.bc3) return;
+    const q = el.value.trim().toUpperCase();
+    if (q.length < 2) return;
+    let k = 0;
+    for (const c of MS.bc3.partidas){
+      if (c.Codigo.toUpperCase().startsWith(q)){ const o = document.createElement("option"); o.value = c.Codigo; o.label = c.Resumen; dl.append(o); if (++k >= 30) break; }
     }
-    ths.forEach((th, i) => {
-      const h = document.createElement("span"); h.className = "col-rs";
-      h.title = "Arrastra para cambiar el ancho. Doble clic: anchos por defecto";
-      h.addEventListener("pointerdown", e => startResize(e, i, h));
-      h.addEventListener("dblclick", e => { e.stopPropagation(); delete colW[mode]; saveColW(); applyColWidths(); });
-      th.append(h);
-    });
-  }
-  function saveColW(){ try{ localStorage.setItem(COLW_KEY, JSON.stringify(colW)); } catch(e){} }
-  function startResize(e, i, handle){
-    e.preventDefault(); e.stopPropagation();
-    const table = $("mTable"), mode = $("mMode").value, ths = Array.from(table.tHead.rows[0].cells);
-    const widths = ths.map(th => th.getBoundingClientRect().width);
-    ths.forEach((th, k) => th.style.width = widths[k] + "px");
-    table.style.width = widths.reduce((a, b) => a + b, 0) + "px";
-    table.classList.add("fixed");
-    const x0 = e.clientX, w0 = widths[i];
-    handle.classList.add("drag"); handle.setPointerCapture(e.pointerId);
-    const move = ev => {
-      widths[i] = Math.max(48, Math.round(w0 + ev.clientX - x0));
-      ths[i].style.width = widths[i] + "px";
-      table.style.width = widths.reduce((a, b) => a + b, 0) + "px";
-    };
-    const up = () => {
-      handle.classList.remove("drag");
-      handle.removeEventListener("pointermove", move); handle.removeEventListener("pointerup", up); handle.removeEventListener("pointercancel", up);
-      colW[mode] = widths.map(Math.round); saveColW();
-    };
-    handle.addEventListener("pointermove", move); handle.addEventListener("pointerup", up); handle.addEventListener("pointercancel", up);
   }
 
-  function refreshMeasure(){ if (!MS.open) return; computeMeasure(); renderMeasure(); }
-  function setMeasure(on){
-    MS.open = on;
-    $("measure").hidden = !on;
-    $("measureBtn").setAttribute("aria-pressed", String(on));
-    if (on) refreshMeasure();
-    resize();
+  // ---- Diálogos ----
+  function abrirModal(cls){
+    const back = document.createElement("div"); back.className = "modal-back";
+    const box = document.createElement("div"); box.className = "modal " + (cls || ""); box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true");
+    back.append(box); document.body.append(back);
+    const cerrar = () => { back.remove(); document.removeEventListener("keydown", esc, true); };
+    const esc = e => { if (e.key === "Escape"){ e.stopPropagation(); cerrar(); } };
+    document.addEventListener("keydown", esc, true);
+    back.addEventListener("mousedown", e => { if (e.target === back) cerrar(); });
+    return { back, box, cerrar };
   }
+  const el = (tag, cls, txt) => { const x = document.createElement(tag); if (cls) x.className = cls; if (txt !== undefined) x.textContent = txt; return x; };
 
-  // ---------- Exportar ----------
-  function tableData(mode){
-    if (mode === "type"){
-      const head = ["Código de montaje", "Categoría", "Familia", "Tipo", "Tamaño", "Descripción", "Nº elementos", "Ud", "Cantidad", "Coste unitario (€)", "Importe (€)", "Origen código", "Origen coste"];
-      const body = MS.rows.map(r => {
-        const c = eff(r, "cost"), a = amountOf(r);
-        return [eff(r, "code"), r.cat, r.fam, r.tipo, r.size, eff(r, "desc"), r.n, UNITS[eff(r, "unit")], round(qtyOf(r), 3),
-          c === null || c === "" ? "" : round(c, 2), a === null ? "" : round(a, 2),
-          eff(r, "code") ? (isManual(r, "code") ? "Manual" : "Modelo") : "", c === null || c === "" ? "" : (isManual(r, "cost") ? "Manual" : "Modelo")];
+  // Navegador de partidas del BC3
+  let ultimoCapitulo = "";
+  function AbrirNavegador(filas){
+    if (!MS.bc3){
+      if (confirm("No hay ningún BC3 cargado. ¿Quieres cargar uno ahora?")) $("bc3Input").click();
+      return;
+    }
+    const asignar = !!filas;
+    if (asignar && !filas.length){ MostrarEstado("Selecciona una o varias filas de la tabla para asignar partida.", 2); return; }
+    let uds = null, contexto = "", codInicial = "";
+    if (asignar){
+      filas.forEach(f => { const u = UnidadesDisponibles(f); if (!uds) uds = u; else uds = new Set([...uds].filter(x => u.has(x))); });
+      if (filas.length === 1){ contexto = filas[0].fam + "  ·  " + TipoVisible(filas[0]); codInicial = filas[0].Codigo; }
+      else contexto = filas.length + " tipos seleccionados";
+    }
+    const b = MS.bc3;
+    const M = abrirModal("nav");
+    const udsLista = () => ["ud", "ml", "m2", "m3", "kg", "t"].filter(u => uds && uds.has(u)).map(TextoUd).join(", ");
+    M.box.innerHTML = `
+      <div class="md-head"><div><h2></h2><p class="md-sub"></p></div><button class="ibtn md-x" aria-label="Cerrar">✕</button></div>
+      <div class="nav-tools">
+        <input type="text" class="nav-q" placeholder='Buscar en todo el banco:  "solado gres",  "acero vigas",  "05ACJ"...' aria-label="Buscar partida">
+        <label class="check"><input type="checkbox" class="nav-compat"> <span></span></label>
+        <label class="check"><input type="checkbox" class="nav-encap"> Buscar solo en el capítulo</label>
+      </div>
+      <div class="nav-body">
+        <div class="nav-tree"><div class="lbl">Capítulos</div><ul class="tree" role="tree"></ul></div>
+        <div class="nav-split" data-s="L" title="Arrastra para cambiar el ancho"></div>
+        <div class="nav-list"><div class="nav-info muted"></div><div class="nav-scroll"><table class="nav-t"><thead><tr><th>Código</th><th>Ud</th><th>Resumen</th><th class="num">Precio</th></tr></thead><tbody></tbody></table></div></div>
+        <div class="nav-split" data-s="R" title="Arrastra para cambiar el ancho"></div>
+        <div class="nav-det">
+          <div class="d-cod"></div><div class="d-pre"></div><div class="d-res"></div><div class="d-ruta muted"></div>
+          <div class="lbl">Texto</div><div class="d-texto"></div>
+          <div class="lbl d-desc-t">Descompuesto</div>
+          <div class="d-desc"><table><thead><tr><th>Código</th><th>Ud</th><th>Resumen</th><th class="num">Rend.</th><th class="num">Precio</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+      <div class="md-foot"><span class="spacer"></span><button class="btn small nav-cancel">${asignar ? "Cancelar" : "Cerrar"}</button>${asignar ? '<button class="btn small primary nav-ok">Asignar partida</button>' : ""}</div>`;
+    const q = s => M.box.querySelector(s);
+    q("h2").textContent = asignar ? "Asignar partida" : "Banco de precios";
+    // Paneles con ancho ajustable (se recuerda en este navegador)
+    const body = q(".nav-body");
+    let navW = {};
+    try{ navW = JSON.parse(localStorage.getItem("visor-bim-nav-w") || "{}") || {}; } catch(e){ navW = {}; }
+    const aplicarNavW = () => { if (navW.L) body.style.setProperty("--navL", navW.L + "px"); if (navW.R) body.style.setProperty("--navR", navW.R + "px"); };
+    aplicarNavW();
+    M.box.querySelectorAll(".nav-split").forEach(sp => {
+      sp.addEventListener("pointerdown", e => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        const lado = sp.dataset.s, panel = lado === "L" ? q(".nav-tree") : q(".nav-det");
+        const x0 = e.clientX, w0 = panel.getBoundingClientRect().width, max = body.getBoundingClientRect().width - 340 - (lado === "L" ? (navW.R || 420) : (navW.L || 300));
+        sp.classList.add("drag"); document.body.classList.add("col-resizing");
+        try{ sp.setPointerCapture(e.pointerId); } catch(err){}
+        const mv = ev => { const d = ev.clientX - x0; navW[lado] = Math.round(Math.min(Math.max(180, lado === "L" ? w0 + d : w0 - d), Math.max(180, max))); aplicarNavW(); };
+        const up = () => { sp.classList.remove("drag"); document.body.classList.remove("col-resizing"); sp.removeEventListener("pointermove", mv); sp.removeEventListener("pointerup", up); sp.removeEventListener("pointercancel", up); try{ localStorage.setItem("visor-bim-nav-w", JSON.stringify(navW)); } catch(err){} };
+        sp.addEventListener("pointermove", mv); sp.addEventListener("pointerup", up); sp.addEventListener("pointercancel", up);
       });
-      return { head, body, numCols:[6, 8, 9, 10] };
-    }
-    const head = ["Código de montaje", "Descripción", "Nº tipos", "Nº elementos", "Ud", "Cantidad", "Precio medio (€)", "Importe (€)", "Tipos sin coste"];
-    const body = codeGroups(MS.rows).map(g => {
-      const unit = g.units.size === 1 ? Array.from(g.units)[0] : null;
-      return [g.code || "(sin código)", g.desc, g.rows.length, g.n, unit ? UNITS[unit] : "varias", unit ? round(g.qty, 3) : "",
-        unit && g.priced && g.qty ? round(g.amount / g.qty, 2) : "", g.priced ? round(g.amount, 2) : "", g.rows.length - g.priced];
+      sp.addEventListener("dblclick", () => { delete navW[sp.dataset.s]; body.style.removeProperty(sp.dataset.s === "L" ? "--navL" : "--navR"); try{ localStorage.setItem("visor-bim-nav-w", JSON.stringify(navW)); } catch(err){} });
     });
-    return { head, body, numCols:[2, 3, 5, 6, 7, 8] };
+    q(".md-sub").textContent = (contexto ? contexto + "   ·   " : "") + b.nombre + "  (" + fmtInt(b.partidas.length) + " partidas)";
+    const chkCompat = q(".nav-compat"), chkEnCap = q(".nav-encap"), caja = q(".nav-q"), tree = q(".tree"), tbody = q(".nav-t tbody"), info = q(".nav-info");
+    q(".nav-compat + span").textContent = "Solo unidades medibles" + (uds ? " (" + udsLista() + ")" : "");
+    chkCompat.closest("label").hidden = !uds;
+    chkCompat.checked = !!uds;
+    let base = [], origen = "", lista = [], truncado = false, capActual = null, sel = null;
+    const okBtn = q(".nav-ok");
+
+    const nodo = c => {
+      const li = el("li"); li.setAttribute("role", "treeitem"); li._c = c;
+      const row = el("div", "tn"); row.tabIndex = -1;
+      const tieneCaps = c.Hijos.some(h => h.EsCapitulo);
+      const tw = el("span", "tw", tieneCaps ? "▸" : ""); row.append(tw, el("b", "", CodVis(c)), el("span", "muted", " " + c.Resumen));
+      row.title = c.Resumen;
+      li.append(row);
+      return li;
+    };
+    const poblar = li => {
+      if (li._poblado) return;
+      li._poblado = true;
+      const ul = el("ul");
+      li._c.Hijos.forEach(h => { if (h.EsCapitulo) ul.append(nodo(h)); });
+      if (ul.children.length) li.append(ul);
+    };
+    const expandir = (li, on) => { poblar(li); li.classList.toggle("open", on); const tw = li.querySelector(":scope > .tn > .tw"); if (tw.textContent) tw.textContent = on ? "▾" : "▸"; };
+    b.raiz.Hijos.forEach(h => { if (h.EsCapitulo) tree.append(nodo(h)); });
+    tree.addEventListener("click", e => {
+      const row = e.target.closest(".tn"); if (!row) return;
+      const li = row.parentElement;
+      if (e.target.classList.contains("tw")){ expandir(li, !li.classList.contains("open")); return; }
+      tree.querySelectorAll(".tn.on").forEach(x => x.classList.remove("on")); row.classList.add("on");
+      if (!li.classList.contains("open")) expandir(li, true);
+      capActual = li._c; ultimoCapitulo = li._c.Codigo;
+      if (caja.value.trim() && chkEnCap.checked){ buscar(); return; }
+      if (caja.value.trim()) caja.value = "";
+      mostrarCapitulo(li._c);
+    });
+    const irACapitulo = cap => {
+      const camino = []; let p = cap, g = 0;
+      while (p && p !== b.raiz && g < 40){ camino.unshift(p); p = p.Padre; g++; }
+      let nodos = tree, encontrado = null;
+      for (const c of camino){
+        encontrado = Array.from(nodos.children).find(li => li._c === c) || null;
+        if (!encontrado) break;
+        if (c !== cap) expandir(encontrado, true); else poblar(encontrado);
+        nodos = encontrado.querySelector(":scope > ul") || el("ul");
+      }
+      if (encontrado){
+        tree.querySelectorAll(".tn.on").forEach(x => x.classList.remove("on"));
+        const r = encontrado.querySelector(":scope > .tn"); r.classList.add("on"); r.scrollIntoView({ block:"nearest" });
+        capActual = cap; mostrarCapitulo(cap);
+      }
+    };
+    const mostrarCapitulo = c => { base = PartidasDe(c, 5000); origen = CodVis(c) + "  " + c.Resumen; truncado = false; refiltrar(); };
+    const refiltrar = () => {
+      let ocultas = 0;
+      lista = base.filter(c => { if (chkCompat.checked && uds && !uds.has(c.UdNorm)){ ocultas++; return false; } return true; });
+      tbody.innerHTML = "";
+      const frag = document.createDocumentFragment();
+      lista.forEach((c, i) => {
+        const tr = el("tr"); tr.dataset.i = i;
+        if (uds && !uds.has(c.UdNorm)) tr.className = "tenue";
+        tr.append(el("td", "fuerte", CodVis(c)), el("td", "c", c.Ud), el("td", "", c.Resumen), el("td", "num fuerte", fmtEur(c.Precio)));
+        frag.append(tr);
+      });
+      tbody.append(frag);
+      info.textContent = origen ? origen + "   ·   " + fmtInt(lista.length) + " partidas" + (truncado ? " (se muestran las primeras; afina la búsqueda)" : "") + (ocultas ? "   ·   " + fmtInt(ocultas) + " ocultas por unidad" : "")
+                                : "Elige un capítulo o escribe arriba para buscar en todo el banco.";
+      const idx = sel ? lista.indexOf(sel) : -1;
+      elegir(idx >= 0 ? idx : (lista.length ? 0 : -1));
+    };
+    const elegir = i => {
+      tbody.querySelectorAll("tr.on").forEach(t => t.classList.remove("on"));
+      sel = i >= 0 ? lista[i] : null;
+      if (sel){ const tr = tbody.children[i]; tr.classList.add("on"); tr.scrollIntoView({ block:"nearest" }); }
+      detalle();
+    };
+    const detalle = () => {
+      if (okBtn) okBtn.disabled = !sel;
+      const c = sel;
+      q(".d-cod").textContent = c ? CodVis(c) + (c.Ud ? "   [" + c.Ud + "]" : "") : "";
+      q(".d-pre").textContent = c ? fmtEur(c.Precio) + (c.Ud ? " / " + c.Ud : "") : "";
+      q(".d-res").textContent = c ? c.Resumen : "";
+      q(".d-ruta").textContent = c ? RutaCapitulos(c) : "";
+      let tx = c ? c.Texto : "";
+      if (c && uds && !uds.has(c.UdNorm)) tx = "⚠ La unidad '" + c.Ud + "' no se puede medir en el tipo seleccionado.\n\n" + tx;
+      q(".d-texto").textContent = c ? (tx || "(sin texto descriptivo)") : "";
+      const db = q(".d-desc tbody"); db.innerHTML = "";
+      if (c) c.Descomp.forEach(ld => {
+        const tr = el("tr");
+        tr.append(el("td", "fuerte", CodVis(ld.Concepto)), el("td", "c", ld.Concepto.Ud), el("td", "", ld.Concepto.Resumen),
+                  el("td", "num", (ld.Factor * ld.Rendimiento).toLocaleString("es-ES", { maximumFractionDigits:3 })), el("td", "num", fmt2(ld.Concepto.Precio)));
+        db.append(tr);
+      });
+      q(".d-desc-t").textContent = c ? (c.Descomp.length ? "Descompuesto (" + c.Descomp.length + ")" : "Descompuesto — partida sin descomposición") : "Descompuesto";
+      q(".d-desc").hidden = !(c && c.Descomp.length);
+    };
+    const buscar = () => {
+      const qq = plain(caja.value);
+      if (!qq){ if (capActual) mostrarCapitulo(capActual); else { base = []; origen = ""; refiltrar(); } return; }
+      const pal = qq.split(" ").filter(Boolean);
+      const fuente = chkEnCap.checked && capActual ? PartidasDe(capActual, 100000) : b.partidas;
+      const ambito = chkEnCap.checked && capActual ? CodVis(capActual) : "todo el banco";
+      const ex = [], res = [];
+      truncado = false;
+      for (const c of fuente){
+        if (!pal.every(p => c.Clave.includes(p))) continue;
+        if (c.Codigo.toLowerCase().startsWith(qq)) ex.push(c); else res.push(c);
+        if (ex.length + res.length >= 1500){ truncado = true; break; }
+      }
+      base = ex.concat(res); origen = 'Búsqueda "' + caja.value.trim() + '" en ' + ambito; refiltrar();
+    };
+    let timer = 0;
+    caja.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(buscar, 250); });
+    caja.addEventListener("keydown", e => {
+      if (e.key === "Enter"){ clearTimeout(timer); buscar(); e.preventDefault(); }
+      if (e.key === "ArrowDown" && lista.length){ e.preventDefault(); tbody.parentElement.parentElement.focus(); elegir(Math.max(0, lista.indexOf(sel))); }
+    });
+    chkCompat.addEventListener("change", refiltrar);
+    chkEnCap.addEventListener("change", () => { if (caja.value.trim()) buscar(); });
+    tbody.addEventListener("click", e => { const tr = e.target.closest("tr"); if (tr) elegir(+tr.dataset.i); });
+    tbody.addEventListener("dblclick", e => { const tr = e.target.closest("tr"); if (tr){ elegir(+tr.dataset.i); confirmar(); } });
+    const scroller = q(".nav-scroll"); scroller.tabIndex = 0;
+    scroller.addEventListener("keydown", e => {
+      const i = sel ? lista.indexOf(sel) : -1;
+      if (e.key === "ArrowDown"){ e.preventDefault(); elegir(Math.min(lista.length - 1, i + 1)); }
+      else if (e.key === "ArrowUp"){ e.preventDefault(); if (i <= 0) caja.focus(); else elegir(i - 1); }
+      else if (e.key === "Enter"){ e.preventDefault(); confirmar(); }
+    });
+    const confirmar = () => {
+      if (!asignar || !sel) return;
+      if (sel.Padre) ultimoCapitulo = sel.Padre.Codigo;
+      M.cerrar();
+      filas.forEach(f => AsignarConcepto(f, sel));
+      saveBoq(); RefrescarTodo();
+      MostrarEstado("Partida " + CodVis(sel) + " asignada a " + filas.length + " tipo(s).", 1);
+    };
+    q(".md-x").addEventListener("click", M.cerrar);
+    q(".nav-cancel").addEventListener("click", M.cerrar);
+    if (okBtn) okBtn.addEventListener("click", confirmar);
+    // Navegación inicial
+    const ini = codInicial ? b.buscarPartida(codInicial) : null;
+    if (ini){
+      if (ini.Padre && ini.Padre !== b.raiz) irACapitulo(ini.Padre);
+      if (!lista.includes(ini) && chkCompat.checked){ chkCompat.checked = false; refiltrar(); }
+      const i = lista.indexOf(ini); if (i >= 0) elegir(i);
+      scroller.focus();
+    } else {
+      const cap = ultimoCapitulo ? b.resolver(ultimoCapitulo) : null;
+      if (cap && cap.EsCapitulo) irACapitulo(cap); else refiltrar();
+      caja.focus();
+    }
   }
+
+  // Editor de fórmula de medición
+  function AbrirFormula(f){
+    if (!f.els.length){ MostrarEstado("Esta fila no tiene elementos.", 2); return; }
+    const params = ParametrosNumericos(f.els[0], f.els[1]);
+    if (!params.length){ MostrarEstado("No se encontraron parámetros numéricos en " + f.tipo + ".", 2); return; }
+    const valores = new Map(params.map(p => [p.Nombre.toLowerCase(), p.Valor]));
+    const M = abrirModal("fx");
+    M.box.innerHTML = `
+      <div class="md-head"><div><h2>Medición con fórmula</h2><p class="md-sub"></p></div><button class="ibtn md-x" aria-label="Cerrar">✕</button></div>
+      <div class="fx-body">
+        <div class="fx-izq">
+          <div class="lbl">Parámetros numéricos · doble clic para añadir</div>
+          <input type="text" class="fx-filtro" placeholder="Filtrar parámetros..." aria-label="Filtrar parámetros">
+          <div class="fx-lista"><table><thead><tr><th>Parámetro</th><th class="num">Valor (1er elemento)</th><th>Ud</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="fx-der">
+          <div class="lbl">Fórmula</div>
+          <textarea class="fx-f" rows="4" spellcheck="false" aria-label="Fórmula"></textarea>
+          <p class="fx-ayuda muted">Ejemplos:  [Longitud] * [Altura desconectada]     [Volumen] * 7850     [Área] * 1,05<br>
+            Operadores + - * / ^ ( )  ·  funciones abs(x) sqrt(x) round(x;2) min(a;b) max(a;b)<br>
+            Decimales con coma o punto. [Nombre] busca en el ejemplar y luego en el tipo. Longitudes en m, áreas en m² y volúmenes en m³.</p>
+          <div class="lbl">Unidad del resultado</div>
+          <input type="text" class="fx-ud" aria-label="Unidad del resultado">
+          <div class="lbl">Resultado en el primer elemento</div>
+          <div class="fx-prev"></div>
+          <label class="check"><input type="checkbox" class="fx-cat"> <span></span></label>
+        </div>
+      </div>
+      <div class="md-foot"><button class="btn small fx-quitar">Quitar fórmula</button><span class="spacer"></span><button class="btn small fx-cancel">Cancelar</button><button class="btn small primary fx-ok">Aplicar fórmula</button></div>`;
+    const q = s => M.box.querySelector(s);
+    q(".md-sub").textContent = f.cat + "  ·  " + f.fam + "  ·  " + f.tipo + "  (" + fmtInt(f.n) + " elementos)";
+    const txt = q(".fx-f"), ud = q(".fx-ud"), prev = q(".fx-prev"), ok = q(".fx-ok"), chk = q(".fx-cat"), tb = q(".fx-lista tbody"), filtro = q(".fx-filtro");
+    q(".fx-cat + span").textContent = "Aplicar a todos los tipos de «" + f.cat + "»";
+    txt.value = f.Formula; ud.value = f.UdFormula || "ud";
+    q(".fx-quitar").hidden = !f.Formula;
+    const rellenar = () => {
+      const qq = plain(filtro.value);
+      tb.innerHTML = "";
+      params.forEach(p => {
+        if (qq && !plain(p.Nombre).includes(qq)) return;
+        const tr = el("tr"); if (p.EsTipo) tr.className = "tipo"; tr._p = p;
+        tr.append(el("td", "", p.Nombre), el("td", "num", p.Valor.toLocaleString("es-ES", { maximumFractionDigits:3 })), el("td", "", p.Ud));
+        tb.append(tr);
+      });
+    };
+    const insertar = p => {
+      const ins = "[" + p.Nombre + "]", i = txt.selectionStart ?? txt.value.length;
+      txt.value = txt.value.slice(0, i) + ins + txt.value.slice(txt.selectionEnd ?? i);
+      txt.focus(); txt.selectionStart = txt.selectionEnd = i + ins.length;
+      if (ud.value === "ud" && p.Ud && txt.value.trim() === ins) ud.value = p.Ud;
+      previsualizar();
+    };
+    const previsualizar = () => {
+      const s = txt.value.trim();
+      if (!s){ prev.textContent = "—"; prev.className = "fx-prev tenue"; ok.disabled = true; return; }
+      try{
+        const v = Evaluar(s, n => { const k = n.toLowerCase(); if (valores.has(k)) return valores.get(k); if (valores.has("tipo: " + k)) return valores.get("tipo: " + k);
+          const L = f.els[0].data.mc.lower; if (L.has(k) || L.has("tipo: " + k)) throw new Error("[" + n + "] está vacío o no es numérico en el primer elemento"); throw new Error("No existe el parámetro [" + n + "]"); });
+        prev.textContent = v.toLocaleString("es-ES", { maximumFractionDigits:3 }) + " " + ud.value.trim(); prev.className = "fx-prev ok"; ok.disabled = false;
+      } catch(err){ prev.textContent = err.message; prev.className = "fx-prev err"; ok.disabled = true; }
+    };
+    tb.addEventListener("dblclick", e => { const tr = e.target.closest("tr"); if (tr) insertar(tr._p); });
+    filtro.addEventListener("input", rellenar);
+    txt.addEventListener("input", previsualizar); ud.addEventListener("input", previsualizar);
+    const aplicar = (formula, unidad) => {
+      const destino = MS.rows.filter(g => g === f || (chk.checked && g.cat === f.cat && g.model === f.model));
+      const tipos = new Set(destino.map(g => g.tkey));
+      tipos.forEach(tk => { if (formula) MS.formulas[tk] = [formula, unidad]; else delete MS.formulas[tk]; });
+      let err = 0, con = 0;
+      MS.rows.forEach(g => {
+        if (!tipos.has(g.tkey)) return;
+        aplicarEstado(g);
+        err += g.ErroresFormula;
+        if (g.Formula){ con++; FijarMedida(g, "fx"); } else if (g.UdSel === "fx") FijarMedida(g, UdNatural(g));
+      });
+      saveBoq(); M.cerrar(); RefrescarTodo();
+      if (!con) MostrarEstado("Fórmula quitada.", 1);
+      else MostrarEstado("Fórmula aplicada a " + con + " fila(s)" + (err ? "  ·  " + err + " elemento(s) sin poder calcular (parámetro inexistente o vacío)" : "") + ".", err ? 2 : 1);
+    };
+    ok.addEventListener("click", () => aplicar(txt.value.trim(), ud.value.trim()));
+    q(".fx-quitar").addEventListener("click", () => aplicar("", ""));
+    q(".fx-cancel").addEventListener("click", M.cerrar);
+    q(".md-x").addEventListener("click", M.cerrar);
+    rellenar(); previsualizar();
+    txt.focus(); txt.selectionStart = txt.selectionEnd = txt.value.length;
+  }
+
+  // ---- Exportar a BC3 (FIEBDC-3) con mediciones ----
+  const Fb = s => (s == null ? "" : String(s)).replace(/\|/g, "/").replace(/~/g, "-").replace(/\\/g, "/").replace(/[\r\n]+/g, " ").trim();
+  const FbTexto = s => (s == null ? "" : String(s)).replace(/\|/g, "/").replace(/~/g, "-").replace(/\\/g, "/").trim();
+  const FbNum = (v, dec) => { if (!isFinite(v)) v = 0; const r = Math.round(v * Math.pow(10, dec)) / Math.pow(10, dec); return String(Number(r.toFixed(dec))); };
+  const UdParaBC3 = n => n === "ml" ? "m" : n === "m2b" ? "m2" : n === "" ? "ud" : n;
+  function CapituloRaizBC3(p){
+    if (!MS.bc3 || !p) return null;
+    const cadena = []; let a = p.Padre, g = 0;
+    while (a && a !== MS.bc3.raiz && g < 40){ cadena.unshift(a); a = a.Padre; g++; }
+    if (!cadena.length) return null;
+    let top = cadena[0];
+    if (top.Codigo.startsWith("-") && cadena.length > 1) top = cadena[1];
+    return top;
+  }
+  const CP1252_EXTRA = { 0x20AC:0x80, 0x201A:0x82, 0x0192:0x83, 0x201E:0x84, 0x2026:0x85, 0x2020:0x86, 0x2021:0x87, 0x02C6:0x88, 0x2030:0x89, 0x0160:0x8A, 0x2039:0x8B, 0x0152:0x8C, 0x017D:0x8E,
+    0x2018:0x91, 0x2019:0x92, 0x201C:0x93, 0x201D:0x94, 0x2022:0x95, 0x2013:0x96, 0x2014:0x97, 0x02DC:0x98, 0x2122:0x99, 0x0161:0x9A, 0x203A:0x9B, 0x0153:0x9C, 0x017E:0x9E, 0x0178:0x9F };
+  function enc1252(s){
+    const out = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++){
+      const c = s.charCodeAt(i);
+      out[i] = (c < 0x80 || (c >= 0xA0 && c <= 0xFF)) ? c : (CP1252_EXTRA[c] ?? 0x3F);
+    }
+    return out;
+  }
+  function EscribirBC3(filas, titulo, capBC3, descompuestos){
+    const res = { Capitulos:0, Partidas:0, Lineas:0, SinCodigo:0, SinMedicion:0, Conflictos:0, Descompuestos:0, Total:0 };
+    const d = new Date(), p2 = n => String(n).padStart(2, "0");
+    const fecha = p2(d.getDate()) + p2(d.getMonth() + 1) + d.getFullYear();
+    const partidas = new Map(), capitulos = new Map(), ordenCaps = [], codCat = new Map();
+    for (const f of filas){
+      if (!TienePartida(f)) continue;
+      if (!f.Codigo){ res.SinCodigo++; continue; }
+      let med = Medicion(f);
+      if (isNaN(med)){ med = 0; res.SinMedicion++; }
+      let ud = UdParaBC3(UdEfectiva(f));
+      if (UdEfectiva(f) === "fx") ud = f.UdFormula || "ud";
+      if (f.Ref && !f.UdSel && f.Ref.Ud) ud = f.Ref.Ud;
+      const k = f.Codigo.toUpperCase();
+      let p = partidas.get(k);
+      if (!p){
+        p = { Codigo:Fb(f.Codigo), Ud:Fb(ud), Resumen:Fb(f.Resumen), Precio:f.TienePrecio ? f.Precio : 0, Ref:f.Ref, Texto:f.Ref ? f.Ref.Texto : "",
+              ConDescomp: descompuestos && !!f.Ref && !DifiereBC3(f) && f.Ref.Descomp.length > 0, Comentarios:[], Cantidades:[] };
+        partidas.set(k, p);
+        let cc, cr;
+        if (capBC3){
+          const cap = CapituloRaizBC3(f.Ref);
+          if (cap){ cc = Fb(cap.Codigo); cr = Fb(cap.Resumen); } else { cc = "PROPIAS#"; cr = "PARTIDAS PROPIAS"; }
+        } else {
+          if (!codCat.has(f.cat)) codCat.set(f.cat, "C" + String(codCat.size + 1).padStart(2, "0") + "#");
+          cc = codCat.get(f.cat); cr = Fb(f.cat.toUpperCase());
+        }
+        let ce = capitulos.get(cc.toUpperCase());
+        if (!ce){ ce = { Codigo:cc, Resumen:cr, Partidas:[] }; capitulos.set(cc.toUpperCase(), ce); ordenCaps.push(ce); }
+        ce.Partidas.push(p);
+      } else {
+        const distinto = Math.abs(p.Precio - (f.TienePrecio ? f.Precio : 0)) > 0.004;
+        if (distinto || p.Ud.toLowerCase() !== Fb(ud).toLowerCase()) res.Conflictos++;
+      }
+      let com = f.cat + ": " + f.fam + " - " + TipoVisible(f);
+      if (MS.multiModel) com += " [" + f.model + "]";
+      p.Comentarios.push(Fb(com)); p.Cantidades.push(med);
+    }
+    const totalP = p => p.Cantidades.reduce((a, b) => a + b, 0);
+    ordenCaps.sort((a, b) => { const pa = a.Codigo === "PROPIAS#", pb = b.Codigo === "PROPIAS#"; if (pa !== pb) return pa ? 1 : -1; return a.Codigo.localeCompare(b.Codigo, "es", { sensitivity:"base" }); });
+    const L = [];
+    const raiz = "BECSA_BOQ##";
+    L.push("~V|BECSA|FIEBDC-3/2020|BECSA Visor BIM (BoQ v2.9)||ANSI||2||||");
+    L.push("~K|\\2\\2\\3\\2\\2\\2\\2\\EUR\\|");
+    let total = 0; const subt = [];
+    ordenCaps.forEach(c => { let st = 0; c.Partidas.forEach(p => st += (Math.round(totalP(p) * 1000) / 1000) * p.Precio); subt.push(st); total += st; });
+    res.Total = total;
+    L.push("~C|" + raiz + "||" + Fb(titulo) + "|" + FbNum(total, 2) + "|" + fecha + "|0|");
+    L.push("~D|" + raiz + "|" + ordenCaps.map(c => c.Codigo + "\\1\\1\\").join("") + "|");
+    const componentes = new Set();
+    const agregar = (c, prof) => { if (!c || prof > 20 || componentes.has(c)) return; componentes.add(c); c.Descomp.forEach(ld => agregar(ld.Concepto, prof + 1)); };
+    ordenCaps.forEach((c, i) => {
+      L.push("~C|" + c.Codigo + "||" + c.Resumen + "|" + FbNum(subt[i], 2) + "|" + fecha + "|0|");
+      L.push("~D|" + c.Codigo + "|" + c.Partidas.map(p => p.Codigo + "\\1\\" + FbNum(totalP(p), 3) + "\\").join("") + "|");
+      res.Capitulos++;
+      c.Partidas.forEach((p, j) => {
+        L.push("~C|" + p.Codigo + "|" + p.Ud + "|" + p.Resumen + "|" + FbNum(p.Precio, 4) + "|" + fecha + "|0|");
+        if (p.Texto) L.push("~T|" + p.Codigo + "|" + FbTexto(p.Texto).replace(/\n/g, "\r\n") + "|");
+        if (p.ConDescomp){
+          L.push("~D|" + p.Codigo + "|" + p.Ref.Descomp.map(ld => { agregar(ld.Concepto, 0); return Fb(ld.Concepto.Codigo) + "\\" + FbNum(ld.Factor, 6) + "\\" + FbNum(ld.Rendimiento, 6) + "\\"; }).join("") + "|");
+          res.Descompuestos++;
+        }
+        const ml = p.Comentarios.map((cm, k) => { res.Lineas++; return "\\" + cm + "\\" + FbNum(p.Cantidades[k], 3) + "\\\\\\\\"; }).join("");
+        L.push("~M|" + c.Codigo + "\\" + p.Codigo + "|" + (i + 1) + "\\" + (j + 1) + "\\|" + FbNum(totalP(p), 3) + "|" + ml + "|");
+        res.Partidas++;
+      });
+    });
+    const codsP = new Set(Array.from(partidas.keys()));
+    componentes.forEach(cc => {
+      if (codsP.has(cc.Codigo.toUpperCase())) return;
+      L.push("~C|" + Fb(cc.Codigo) + "|" + Fb(cc.Ud) + "|" + Fb(cc.Resumen) + "|" + FbNum(cc.Precio, 4) + "|" + fecha + "|" + (cc.TipoC || 0) + "|");
+      if (cc.Descomp.length) L.push("~D|" + Fb(cc.Codigo) + "|" + cc.Descomp.map(ld => Fb(ld.Concepto.Codigo) + "\\" + FbNum(ld.Factor, 6) + "\\" + FbNum(ld.Rendimiento, 6) + "\\").join("") + "|");
+    });
+    return { bytes: enc1252(L.join("\r\n") + "\r\n"), res };
+  }
+  const nombreProyecto = () => {
+    const n = Array.from(new Set(MS.rows.map(r => r.model))).join("_") || "Medicion";
+    return n.replace(/[\\/:*?"<>|]+/g, "_").slice(0, 80);
+  };
+  function ExportarBC3(){
+    const cods = new Set(); let tipos = 0;
+    MS.filtered.forEach(f => { if (f.Codigo){ cods.add(f.Codigo.toUpperCase()); tipos++; } });
+    if (!cods.size){ MostrarEstado("No hay filas con código de partida para exportar (revisa los filtros).", 2); return; }
+    const hay = !!MS.bc3;
+    const M = abrirModal("exp");
+    M.box.innerHTML = `
+      <div class="md-head"><div><h2>Exportar presupuesto a BC3</h2><p class="md-sub"></p></div><button class="ibtn md-x" aria-label="Cerrar">✕</button></div>
+      <div class="exp-body">
+        <div class="lbl">Capítulos</div>
+        <label class="check"><input type="radio" name="expcap" value="bc3"> Según el banco de precios (05 ESTRUCTURAS, 07 CUBIERTAS...)</label>
+        <label class="check"><input type="radio" name="expcap" value="cat"> Un capítulo por categoría de Revit (Muros, Suelos, Puertas...)</label>
+        <div class="lbl">Contenido</div>
+        <label class="check"><input type="checkbox" class="exp-desc"> Incluir descompuestos y textos del BC3 (solo en partidas sin modificar)</label>
+        <p class="muted">Cada tipo de Revit sale como una línea de medición de su partida. Se abre en Presto, Arquímedes, etc.</p>
+      </div>
+      <div class="md-foot"><span class="spacer"></span><button class="btn small exp-cancel">Cancelar</button><button class="btn small primary exp-ok">Exportar</button></div>`;
+    const q = s => M.box.querySelector(s);
+    q(".md-sub").textContent = cods.size + " partidas · " + tipos + " filas con código (las visibles en la tabla)";
+    const rb = M.box.querySelectorAll("input[name=expcap]");
+    rb[0].checked = hay; rb[0].disabled = !hay; rb[1].checked = !hay;
+    q(".exp-desc").checked = hay; q(".exp-desc").disabled = !hay;
+    q(".exp-cancel").addEventListener("click", M.cerrar); q(".md-x").addEventListener("click", M.cerrar);
+    q(".exp-ok").addEventListener("click", () => {
+      const capBC3 = rb[0].checked, desc = q(".exp-desc").checked;
+      M.cerrar();
+      try{
+        const titulo = Array.from(new Set(MS.rows.map(r => r.model))).join(", ") + " - " + MS.desc;
+        const { bytes, res } = EscribirBC3(MS.filtered, titulo, capBC3, desc);
+        const dd = new Date(), stampC = dd.getFullYear() + String(dd.getMonth() + 1).padStart(2, "0") + String(dd.getDate()).padStart(2, "0");
+        download(new Blob([bytes], { type:"application/octet-stream" }), nombreProyecto() + "_BoQ_" + stampC + ".bc3");
+        let msg = "BC3 exportado: " + res.Capitulos + " capítulos · " + res.Partidas + " partidas · " + res.Lineas + " líneas de medición · " + fmtEur(res.Total);
+        const av = [];
+        if (res.SinCodigo) av.push(res.SinCodigo + " con precio pero sin código (no se exportan)");
+        if (res.SinMedicion) av.push(res.SinMedicion + " sin medición (van a 0)");
+        if (res.Conflictos) av.push(res.Conflictos + " códigos repetidos con distinto precio o unidad (manda el primero)");
+        if (av.length) msg += "   ·   Avisos: " + av.join(" · ");
+        MostrarEstado(msg, av.length ? 2 : 1);
+      } catch(err){ MostrarEstado("No se pudo exportar el BC3: " + err.message, 3); }
+    });
+  }
+
+  // ---- Exportar CSV / Excel ----
   const round = (v, d) => Math.round(v * Math.pow(10, d)) / Math.pow(10, d);
   const stamp = () => new Date().toISOString().slice(0, 10);
   function download(blob, name){
@@ -2493,19 +3617,24 @@ function workerMain(){
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   }
+  const numOrEmpty = (tiene, v) => (!tiene || isNaN(v)) ? "" : round(v, 3);
+  function filasTabla(){
+    const head = ["Modelo", "Categoría", "Familia", "Tipo", "Cantidad", "ml", "m²", "m³", "Acero kg", "Código", "Resumen", "Ud", "Medición", "Precio (€)", "Importe (€)", "Estado"];
+    const body = MS.filtered.map(f => {
+      const u = UdEfectiva(f);
+      return [f.model, f.cat, f.fam, TipoVisible(f), f.n, numOrEmpty(f.has.ml, f.sums.ml), numOrEmpty(f.has.m2, f.sums.m2), numOrEmpty(f.has.m3, f.sums.m3),
+        numOrEmpty(f.has.kg, f.sums.kg), f.Codigo, f.Resumen, u === "fx" ? (f.UdFormula || "ud") : TextoUd(u), numOrEmpty(true, Medicion(f)),
+        f.TienePrecio ? round(f.Precio, 4) : "", numOrEmpty(true, Importe(f)), TextoEstado(f)];
+    });
+    return { head, body };
+  }
   function exportCsv(){
-    if (!MS.rows.length){ toast("No hay nada medido."); return; }
-    const mode = $("mMode").value, t = tableData(mode);
-    const cell = v => {
-      if (typeof v === "number") return String(v).replace(".", ",");
-      const s = String(v ?? "");
-      return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-    };
-    const total = MS.rows.reduce((a, r) => a + (amountOf(r) || 0), 0);
-    const lines = [t.head.map(cell).join(";")].concat(t.body.map(r => r.map(cell).join(";")));
-    const totalRow = t.head.map(() => ""); totalRow[0] = "TOTAL"; totalRow[mode === "type" ? 10 : 7] = round(total, 2);
-    lines.push(totalRow.map(cell).join(";"));
-    download(new Blob(["\uFEFF" + lines.join("\r\n")], { type:"text/csv;charset=utf-8" }), "Medicion_" + (mode === "type" ? "por_tipo" : "por_codigo") + "_" + stamp() + ".csv");
+    if (!MS.filtered.length){ MostrarEstado("No hay nada medido.", 2); return; }
+    const { head, body } = filasTabla();
+    const cell = v => typeof v === "number" ? String(v).replace(".", ",") : (/[;"\n]/.test(String(v ?? "")) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v ?? ""));
+    const lines = [head.map(cell).join(";")].concat(body.map(r => r.map(cell).join(";")));
+    download(new Blob(["﻿" + lines.join("\r\n")], { type:"text/csv;charset=utf-8" }), "BoQ_" + stamp() + ".csv");
+    MostrarEstado("CSV exportado.", 1);
   }
   function loadXlsxLib(){
     if (window.XLSX) return Promise.resolve(window.XLSX);
@@ -2516,39 +3645,418 @@ function workerMain(){
     });
   }
   function exportXlsx(){
-    if (!MS.rows.length){ toast("No hay nada medido."); return; }
+    if (!MS.filtered.length){ MostrarEstado("No hay nada medido.", 2); return; }
     loadXlsxLib().then(X => {
       const wb = X.utils.book_new();
-      const total = MS.rows.reduce((a, r) => a + (amountOf(r) || 0), 0);
-      [["Por código de montaje", "code"], ["Por tipo", "type"]].forEach(([name, mode]) => {
-        const t = tableData(mode);
-        const totalRow = t.head.map(() => ""); totalRow[0] = "TOTAL"; totalRow[mode === "type" ? 10 : 7] = round(total, 2);
-        const ws = X.utils.aoa_to_sheet([t.head].concat(t.body, [totalRow]));
-        const range = X.utils.decode_range(ws["!ref"]);
-        for (let R = 1; R <= range.e.r; R++){
-          t.numCols.forEach(C => {
-            const ref = X.utils.encode_cell({ r:R, c:C }), c = ws[ref];
-            if (c && c.t === "n") c.z = /nº|tipos/i.test(t.head[C]) ? "0" : (/Cantidad/.test(t.head[C]) ? "#,##0.000" : "#,##0.00");
-          });
-        }
-        ws["!cols"] = t.head.map(h => ({ wch: /Descripción|Tipo$|Familia/.test(h) ? 30 : Math.max(10, Math.min(28, h.length + 2)) }));
-        ws["!autofilter"] = { ref: X.utils.encode_range({ s:{ r:0, c:0 }, e:{ r:range.e.r - 1, c:range.e.c } }) };
-        X.utils.book_append_sheet(wb, ws, name);
+      const { head, body } = filasTabla();
+      const total = MS.filtered.reduce((a, f) => a + (isNaN(Importe(f)) ? 0 : Importe(f)), 0);
+      const tr = head.map(() => ""); tr[0] = "TOTAL"; tr[14] = round(total, 2);
+      const ws = X.utils.aoa_to_sheet([head].concat(body, [tr]));
+      ws["!cols"] = head.map(h => ({ wch: /Resumen|Tipo$|Familia|Estado/.test(h) ? 32 : Math.max(9, h.length + 2) }));
+      ws["!autofilter"] = { ref: X.utils.encode_range({ s:{ r:0, c:0 }, e:{ r:body.length, c:head.length - 1 } }) };
+      X.utils.book_append_sheet(wb, ws, "Por tipo");
+      // Por partida
+      const g = new Map();
+      MS.filtered.forEach(f => {
+        if (!f.Codigo) return;
+        const k = f.Codigo.toUpperCase();
+        if (!g.has(k)) g.set(k, { code:f.Codigo, res:f.Resumen, uds:new Set(), tipos:0, n:0, qty:0, precio:f.TienePrecio ? f.Precio : null, imp:0 });
+        const it = g.get(k), u = UdEfectiva(f);
+        it.uds.add(u === "fx" ? (f.UdFormula || "ud") : TextoUd(u)); it.tipos++; it.n += f.n;
+        const m = Medicion(f); if (!isNaN(m)) it.qty += m;
+        const im = Importe(f); if (!isNaN(im)) it.imp += im;
       });
+      const h2 = ["Código", "Resumen", "Ud", "Nº tipos", "Nº elementos", "Cantidad", "Precio (€)", "Importe (€)"];
+      const b2 = Array.from(g.values()).sort((a, b) => a.code.localeCompare(b.code, "es", { numeric:true }))
+        .map(it => [it.code, it.res, it.uds.size === 1 ? Array.from(it.uds)[0] : "varias", it.tipos, it.n, it.uds.size === 1 ? round(it.qty, 3) : "", it.precio === null ? "" : round(it.precio, 4), round(it.imp, 2)]);
+      const ws2 = X.utils.aoa_to_sheet([h2].concat(b2, [["TOTAL", "", "", "", "", "", "", round(total, 2)]]));
+      ws2["!cols"] = h2.map(h => ({ wch: h === "Resumen" ? 48 : 13 }));
+      X.utils.book_append_sheet(wb, ws2, "Por partida");
       const crit = [
         ["Criterios de medición"],
         ["Fecha", new Date().toLocaleString("es-ES")],
-        ["Modelos", S.models.filter(m => m.ready).map(m => m.name).join(", ")],
-        ["Ámbito", $("mScope").options[$("mScope").selectedIndex].text],
-        ["Muros en m²", MS.wallArea === "bruta" ? "Área bruta: longitud x altura, sin descontar huecos" : "Área neta: área de Revit, descontando huecos"],
+        ["Modelos", Array.from(new Set(MS.rows.map(r => r.model))).join(", ")],
+        ["Ámbito", MS.desc],
+        ["BC3", MS.bc3 ? MS.bc3.nombre : "(ninguno)"],
+        ["Medida por defecto", "Según la unidad de la partida del BC3; si no hay, según la categoría (como la macro BoQ)"],
+        ["Muros y suelos", "m² = área neta de Revit; m² bruta = sin descontar huecos"],
         ["Instalaciones", "Una línea por tipo y tamaño; aislamientos por espesor"],
-        ["Unidades", "Valores internos de Revit convertidos a m, m² y m³"],
-        ["kg", "W (kg/m) x longitud; en vigas, longitud de corte"]
+        ["kg", "Peso calculado por la macro de exportación o W (kg/m) x longitud"]
       ];
-      const wsC = X.utils.aoa_to_sheet(crit); wsC["!cols"] = [{ wch:18 }, { wch:70 }];
+      const wsC = X.utils.aoa_to_sheet(crit); wsC["!cols"] = [{ wch:20 }, { wch:80 }];
       X.utils.book_append_sheet(wb, wsC, "Criterios");
-      X.writeFile(wb, "Medicion_" + stamp() + ".xlsx");
-    }).catch(err => toast(err.message));
+      X.writeFile(wb, "BoQ_" + stamp() + ".xlsx");
+      MostrarEstado("Excel exportado.", 1);
+    }).catch(err => MostrarEstado(err.message, 3));
+  }
+
+  // ---- Compartir: exportar / importar lo guardado en este navegador ----
+  function ExportarDatos(){
+    const modelos = Array.from(new Set(MS.rows.map(r => r.model)));
+    const pref = modelos.map(m => m + "|");
+    const deModelo = k => pref.some(p => k.startsWith(p));
+    const pick = o => Object.fromEntries(Object.entries(o).filter(([k]) => deModelo(k)));
+    const datos = { app:"BECSA_BOQ_VISOR", version:1, fecha:new Date().toISOString(), modelos, ov:pick(MS.ov), medidas:pick(MS.medidas), formulas:pick(MS.formulas) };
+    const n = Object.keys(datos.ov).length + Object.keys(datos.medidas).length + Object.keys(datos.formulas).length;
+    if (!n){ MostrarEstado("No hay datos de medición guardados para estos modelos.", 2); return; }
+    download(new Blob([JSON.stringify(datos, null, 1)], { type:"application/json" }), nombreProyecto() + "_datosBoQ_" + stamp() + ".json");
+    MostrarEstado("Exportado: " + Object.keys(datos.ov).length + " partidas, " + Object.keys(datos.formulas).length + " fórmulas y " + Object.keys(datos.medidas).length + " medidas elegidas a mano.", 1);
+  }
+  function ImportarDatos(file){
+    file.text().then(t => {
+      let d;
+      try{ d = JSON.parse(t); } catch(e){ MostrarEstado("El fichero no es un JSON válido.", 3); return; }
+      if (!d || d.app !== "BECSA_BOQ_VISOR"){ MostrarEstado("El fichero no son datos de medición del visor.", 3); return; }
+      const actuales = new Set(MS.rows.map(r => r.model));
+      if (d.modelos && d.modelos.length && !d.modelos.some(m => actuales.has(m)) &&
+          !confirm("Los datos se exportaron desde «" + d.modelos.join(", ") + "» y tienes cargado «" + Array.from(actuales).join(", ") + "».\nSolo se aplican a los tipos con el mismo nombre de modelo, categoría, familia y tipo.\n\n¿Importar igualmente?")) return;
+      Object.assign(MS.ov, d.ov || {}); Object.assign(MS.medidas, d.medidas || {}); Object.assign(MS.formulas, d.formulas || {});
+      saveBoq(); refreshMeasure();
+      MostrarEstado("Importado: " + Object.keys(d.ov || {}).length + " partidas, " + Object.keys(d.formulas || {}).length + " fórmulas y " + Object.keys(d.medidas || {}).length + " medidas.", 1);
+    });
+  }
+
+  function refreshMeasure(){ if (!MS.open) return; computeRows(); RellenarCategorias(); renderMeasure(); }
+  function setMeasure(on){
+    MS.open = on;
+    $("measure").hidden = !on;
+    $("measureBtn").setAttribute("aria-pressed", String(on));
+    if (on){ ActualizarCabeceraBC3(); refreshMeasure(); recuperarUltimoBC3(); }
+    resize();
+  }
+
+
+  // ---------- Carpeta de proyectos (Chrome / Edge: File System Access) ----------
+  // Se elige una carpeta (p. ej. la de SharePoint sincronizada con OneDrive) con una subcarpeta por proyecto.
+  // La medición del proyecto se guarda en esa carpeta (Medicion_VisorBIM.json) y la comparte todo el equipo.
+  const FS_OK = typeof window.showDirectoryPicker === "function";
+  const MED_FILE = "Medicion_VisorBIM.json";
+  const MAPAS = ["ov", "medidas", "formulas"];
+  const PJ = { root:null, dir:null, nombre:"", esRaiz:false, modelos:[], base:null, mtime:0, escritura:false,
+               bc3:"", bc3Base:"", ocupado:false, pendiente:false, timer:0, sucio:false, error:"", guardado:null, ultimo:"" };
+
+  async function permiso(h, escribir){
+    const opt = { mode: escribir ? "readwrite" : "read" };
+    try{
+      if ((await h.queryPermission(opt)) === "granted") return true;
+      return (await h.requestPermission(opt)) === "granted";
+    } catch(e){ return false; }
+  }
+  async function pedirPermisos(root){
+    PJ.escritura = await permiso(root, true);
+    if (PJ.escritura) return true;
+    if (await permiso(root, false)) return true;
+    toast("Sin permiso para leer la carpeta de proyectos.");
+    return false;
+  }
+  async function carpetaGuardada(){
+    if (PJ.root) return PJ.root;
+    try{ const h = await idbGet("carpetaProyectos"); if (h && h.kind === "directory") PJ.root = h; } catch(e){}
+    return PJ.root;
+  }
+  async function elegirCarpeta(){
+    if (!FS_OK){ toast("Para trabajar con una carpeta de proyectos usa Chrome o Edge."); return; }
+    let h;
+    try{ h = await window.showDirectoryPicker({ id:"visor-bim-proyectos", mode:"readwrite" }); }
+    catch(e){ return; }
+    PJ.root = h; PJ.escritura = (await h.queryPermission({ mode:"readwrite" })) === "granted";
+    try{ await idbSet("carpetaProyectos", h); } catch(e){}
+    pintarInicio();
+    AbrirProyectos(true);
+  }
+
+  const esExt = (n, exts) => !n.startsWith("~$") && !n.startsWith(".") && exts.includes(n.split(".").pop().toLowerCase());
+  async function recorrer(dir, prof, fn, ruta){
+    ruta = ruta || "";
+    for await (const [n, h] of dir.entries()){
+      if (h.kind === "file") await fn(n, h, ruta);
+      else if (prof > 0 && !n.startsWith(".") && !n.startsWith("~")) await recorrer(h, prof - 1, fn, ruta + n + "/");
+    }
+  }
+  async function resumenProyecto(dir, prof){
+    const r = { daes:0, bc3:0, med:0, mod:0 };
+    await recorrer(dir, prof, async (n, h, ruta) => {
+      if (esExt(n, ["dae"])){ r.daes++; try{ r.mod = Math.max(r.mod, (await h.getFile()).lastModified); } catch(e){} }
+      else if (esExt(n, ["bc3"])) r.bc3++;
+      else if (n === MED_FILE && !ruta){ try{ r.med = (await h.getFile()).lastModified; } catch(e){} }
+    });
+    return r;
+  }
+  const fechaCorta = ms => ms ? new Date(ms).toLocaleString("es-ES", { dateStyle:"short", timeStyle:"short" }) : "—";
+
+  // Lista de proyectos de la carpeta
+  async function AbrirProyectos(yaConPermiso){
+    if (!FS_OK){ toast("Para trabajar con una carpeta de proyectos usa Chrome o Edge."); return; }
+    const root = await carpetaGuardada();
+    if (!root){ elegirCarpeta(); return; }
+    if (!yaConPermiso && !(await pedirPermisos(root))) return;
+    const M = abrirModal("proj");
+    M.box.innerHTML = `
+      <div class="md-head"><div><h2>Proyectos</h2><p class="md-sub"></p></div><button class="ibtn md-x" aria-label="Cerrar">✕</button></div>
+      <div class="nav-tools"><input type="text" class="pj-q" placeholder="Buscar proyecto..." aria-label="Buscar proyecto">
+        <button class="btn small pj-recargar">Actualizar lista</button><button class="btn small pj-cambiar">Cambiar carpeta...</button></div>
+      <div class="pj-scroll"><table class="nav-t pj-t"><thead><tr><th>Proyecto</th><th class="num">Modelos</th><th>Medición compartida</th><th class="num">BC3</th><th>Modelos actualizados</th></tr></thead><tbody></tbody></table>
+        <p class="pj-info muted"></p></div>
+      <div class="md-foot"><span class="muted pj-nota"></span><span class="spacer"></span><button class="btn small pj-cerrar">Cerrar</button></div>`;
+    const q = s => M.box.querySelector(s);
+    q(".md-sub").textContent = "Carpeta: " + root.name + (PJ.escritura ? "" : "   ·   solo lectura (la medición no se guardará en la carpeta)");
+    q(".pj-nota").textContent = "Una subcarpeta por proyecto con sus .dae y .xlsx. La medición se guarda en " + MED_FILE + " dentro del proyecto.";
+    const tbody = q("tbody"), info = q(".pj-info"), caja = q(".pj-q");
+    let lista = [], vivo = true;
+    const pintar = () => {
+      const pal = plain(caja.value).split(" ").filter(Boolean);
+      tbody.innerHTML = "";
+      lista.filter(p => pal.every(w => plain(p.nombre).includes(w))).forEach(p => {
+        const tr = el("tr"); tr._p = p; tr.tabIndex = 0;
+        if (PJ.dir && p.nombre === PJ.nombre) tr.className = "on";
+        tr.append(el("td", "fuerte", p.esRaiz ? p.nombre + "  (carpeta raíz)" : p.nombre), el("td", "num", fmtInt(p.r.daes)),
+                  el("td", p.r.med ? "" : "muted", p.r.med ? "Sí · " + fechaCorta(p.r.med) : "Todavía no"),
+                  el("td", "num", p.r.bc3 ? fmtInt(p.r.bc3) : "—"), el("td", "", fechaCorta(p.r.mod)));
+        tbody.append(tr);
+      });
+    };
+    const escanear = async () => {
+      lista = []; tbody.innerHTML = ""; info.textContent = "Buscando proyectos...";
+      try{
+        const r0 = await resumenProyecto(root, 0);
+        if (r0.daes) lista.push({ nombre:root.name, dir:root, esRaiz:true, r:r0 });
+        for await (const [n, h] of root.entries()){
+          if (!vivo) return;
+          if (h.kind !== "directory" || n.startsWith(".") || n.startsWith("~")) continue;
+          const r = await resumenProyecto(h, 2);
+          if (r.daes){ lista.push({ nombre:n, dir:h, esRaiz:false, r }); lista.sort((a, b) => (b.esRaiz - a.esRaiz) || a.nombre.localeCompare(b.nombre, "es", { numeric:true })); pintar(); }
+        }
+        pintar();
+        info.textContent = lista.length ? fmtInt(lista.length) + " proyecto(s). Clic para abrir." : "No hay ninguna subcarpeta con modelos .dae. Exporta los modelos con la macro a una subcarpeta por proyecto.";
+      } catch(err){ info.textContent = "No se pudo leer la carpeta: " + err.message; }
+    };
+    const abrir = tr => { if (!tr || !tr._p) return; vivo = false; M.cerrar(); abrirProyecto(tr._p); };
+    tbody.addEventListener("click", e => abrir(e.target.closest("tr")));
+    tbody.addEventListener("keydown", e => { if (e.key === "Enter") abrir(e.target.closest("tr")); });
+    caja.addEventListener("input", pintar);
+    caja.addEventListener("keydown", e => { if (e.key === "Enter"){ const tr = tbody.querySelector("tr"); if (tr) abrir(tr); } });
+    q(".pj-recargar").addEventListener("click", escanear);
+    q(".pj-cambiar").addEventListener("click", () => { vivo = false; M.cerrar(); elegirCarpeta(); });
+    const cerrar = () => { vivo = false; M.cerrar(); };
+    q(".md-x").addEventListener("click", cerrar); q(".pj-cerrar").addEventListener("click", cerrar);
+    caja.focus();
+    escanear();
+  }
+
+  async function abrirProyectoPorNombre(nombre){
+    const root = await carpetaGuardada(); if (!root) return;
+    if (!(await pedirPermisos(root))) return;
+    let p = null;
+    if (nombre === root.name && (await resumenProyecto(root, 0)).daes) p = { nombre, dir:root, esRaiz:true };
+    else { try{ p = { nombre, dir: await root.getDirectoryHandle(nombre), esRaiz:false }; } catch(e){ p = null; } }
+    if (!p){ toast("No se encuentra «" + nombre + "» en la carpeta."); AbrirProyectos(true); return; }
+    abrirProyecto(p);
+  }
+
+  async function abrirProyecto(p){
+    if (PJ.dir && PJ.sucio) await sincronizar();
+    toast("Abriendo " + p.nombre + "...");
+    const files = [], bc3s = [];
+    let med = null;
+    try{
+      await recorrer(p.dir, p.esRaiz ? 0 : 2, async (n, h, ruta) => {
+        if (esExt(n, ["dae", "xlsx", "xls", "csv"])) files.push(await h.getFile());
+        else if (esExt(n, ["bc3"])) bc3s.push({ n, f: await h.getFile(), raiz:false });
+        else if (n === MED_FILE && !ruta) med = h;
+      });
+      if (!p.esRaiz) for await (const [n, h] of PJ.root.entries()) if (h.kind === "file" && esExt(n, ["bc3"])) bc3s.push({ n, f: await h.getFile(), raiz:true });
+    } catch(err){ toast("No se pudo leer el proyecto: " + err.message); return; }
+    const daes = files.filter(f => /\.dae$/i.test(f.name));
+    if (!daes.length){ toast("No hay modelos .dae en " + p.nombre + "."); return; }
+    S.models.slice().forEach(removeModel);            // cierra el proyecto anterior
+    Object.assign(PJ, { dir:p.dir, nombre:p.nombre, esRaiz:p.esRaiz, modelos:daes.map(f => stemOf(f.name)), base:{ ov:{}, medidas:{}, formulas:{} },
+                        mtime:0, bc3:"", bc3Base:"", sucio:false, pendiente:false, error:"", guardado:null });
+    // Medición compartida del proyecto
+    if (med){
+      try{
+        const f = await med.getFile(), doc = JSON.parse(await f.text());
+        if (doc && doc.app === "BECSA_BOQ_VISOR"){
+          const m = mapasDe(doc);
+          aplicarDelta(mapasDe(MS), m, true);
+          PJ.base = clonar(m); PJ.mtime = f.lastModified; PJ.bc3 = PJ.bc3Base = doc.bc3 || ""; PJ.guardado = new Date(f.lastModified);
+        }
+      } catch(err){ toast("No se pudo leer " + MED_FILE + ": " + err.message); }
+    } else {
+      // Proyecto sin medición compartida: los datos del navegador de modelos con el mismo nombre pueden ser de otro proyecto
+      const locales = mapasDe(MS);
+      if (hayDatos(locales) && !(PJ.escritura && confirm("En este navegador hay partidas guardadas de modelos con el mismo nombre (" + PJ.modelos.join(", ") + ").\n\n" +
+          "¿Usarlas como punto de partida de la medición de «" + p.nombre + "»?\nSi eliges Cancelar, el proyecto empieza sin partidas.")))
+        aplicarDelta(locales, { ov:{}, medidas:{}, formulas:{} }, true);
+    }
+    // Banco de precios: el indicado en la medición, si no el más reciente del proyecto, si no el de la carpeta raíz
+    const porFecha = (a, b) => b.f.lastModified - a.f.lastModified;
+    const elegido = (PJ.bc3 && bc3s.find(b => b.n.toLowerCase() === PJ.bc3.toLowerCase())) ||
+                    bc3s.filter(b => !b.raiz).sort(porFecha)[0] || bc3s.filter(b => b.raiz).sort(porFecha)[0];
+    if (elegido){
+      try{ loadBC3Buffer(await elegido.f.arrayBuffer(), stemOf(elegido.n), true); MS.bc3Tried = true; if (!PJ.bc3) PJ.bc3 = PJ.bc3Base = elegido.n; }
+      catch(err){ MostrarEstado("No se pudo leer el BC3 " + elegido.n + ": " + err.message, 3); }
+    }
+    handleFiles(files);
+    PJ.ultimo = p.nombre; savePref("visor-bim-ultimo-proyecto", p.nombre);
+    pintarChip(); pintarInicio();
+    programarSync(400);   // si la medición del navegador tenía datos de estos modelos y la carpeta no, se guardan
+  }
+
+  async function cerrarProyecto(){
+    if (!PJ.dir) return;
+    const dir = PJ.dir;
+    if (PJ.sucio) await sincronizar();
+    if (PJ.dir !== dir) return;
+    clearTimeout(PJ.timer);
+    Object.assign(PJ, { dir:null, nombre:"", modelos:[], base:null, mtime:0, bc3:"", bc3Base:"", sucio:false, pendiente:false, error:"" });
+    pintarChip();
+  }
+
+  // ---- Sincronización con el archivo de la carpeta (fusión a tres bandas: lo mío + lo de otros) ----
+  const estable = v => (v && typeof v === "object" && !Array.isArray(v)) ? "{" + Object.keys(v).sort().map(k => JSON.stringify(k) + ":" + estable(v[k])).join(",") + "}" : JSON.stringify(v);
+  const clonar = o => JSON.parse(JSON.stringify(o));
+  function mapasDe(src){
+    const pref = PJ.modelos.map(m => m + "|"), out = {};
+    MAPAS.forEach(t => { out[t] = {}; Object.entries((src && src[t]) || {}).forEach(([k, v]) => { if (pref.some(p => k.startsWith(p))) out[t][k] = v; }); });
+    return out;
+  }
+  const igualMapas = (a, b) => MAPAS.every(t => estable(a[t] || {}) === estable(b[t] || {}));
+  const hayDatos = a => MAPAS.some(t => Object.keys(a[t] || {}).length);
+  function fusionar(base, mios, suyos){
+    const out = {}; let ajenos = 0;
+    MAPAS.forEach(t => {
+      const b = base[t] || {}, o = mios[t] || {}, s = suyos[t] || {}, r = Object.assign({}, s);
+      new Set([...Object.keys(b), ...Object.keys(o)]).forEach(k => { if (estable(o[k]) !== estable(b[k])){ if (k in o) r[k] = o[k]; else delete r[k]; } });
+      new Set([...Object.keys(b), ...Object.keys(s)]).forEach(k => { if (estable(s[k]) !== estable(b[k])) ajenos++; });
+      out[t] = r;
+    });
+    return { mapas:out, ajenos };
+  }
+  // Pasa a la medición del visor lo que cambia de 'de' a 'a' (sin tocar lo demás)
+  function aplicarDelta(de, a, todo){
+    let n = 0;
+    MAPAS.forEach(t => {
+      const x = de[t] || {}, y = a[t] || {};
+      new Set([...Object.keys(x), ...Object.keys(y)]).forEach(k => {
+        if (!todo && estable(x[k]) === estable(y[k])) return;
+        if (k in y) MS[t][k] = y[k]; else delete MS[t][k];
+        n++;
+      });
+    });
+    if (n){ guardarLocal(); if (MS.open) refreshMeasure(); }
+    return n;
+  }
+  function programarSync(ms){
+    if (!PJ.dir) return;
+    clearTimeout(PJ.timer);
+    PJ.timer = setTimeout(sincronizar, ms ?? 1200);
+  }
+  async function sincronizar(){
+    if (!PJ.dir) return;
+    if (PJ.ocupado){ PJ.pendiente = true; return; }
+    clearTimeout(PJ.timer);
+    PJ.ocupado = true; PJ.pendiente = false;
+    const dir = PJ.dir;
+    pintarChip();
+    try{
+      const mios = mapasDe(MS);
+      let fh = null, mtime = 0, doc = null;
+      try{ fh = await dir.getFileHandle(MED_FILE); } catch(e){ fh = null; }
+      let suyos = null;
+      if (fh){
+        const f = await fh.getFile(); mtime = f.lastModified;
+        if (mtime !== PJ.mtime){ try{ doc = JSON.parse(await f.text()); suyos = mapasDe(doc); } catch(e){ suyos = null; } }
+        else suyos = PJ.base;
+      }
+      let res = mios, ajenos = 0;
+      if (doc && suyos){
+        const r = fusionar(PJ.base, mios, suyos); res = r.mapas; ajenos = r.ajenos;
+        if ((doc.bc3 || "") !== PJ.bc3Base){ if (PJ.bc3 === PJ.bc3Base) PJ.bc3 = doc.bc3 || ""; PJ.bc3Base = doc.bc3 || ""; }
+      }
+      const escribir = PJ.escritura && (suyos ? (!igualMapas(res, suyos) || PJ.bc3 !== PJ.bc3Base) : (hayDatos(res) || (PJ.bc3 && PJ.bc3 !== PJ.bc3Base)));
+      if (escribir){
+        if (!fh) fh = await dir.getFileHandle(MED_FILE, { create:true });
+        const out = { app:"BECSA_BOQ_VISOR", version:1, fecha:new Date().toISOString(), proyecto:PJ.nombre, modelos:PJ.modelos, bc3:PJ.bc3 };
+        MAPAS.forEach(t => out[t] = res[t]);
+        const w = await fh.createWritable();
+        await w.write(JSON.stringify(out, null, 1)); await w.close();
+        mtime = (await fh.getFile()).lastModified;
+        PJ.bc3Base = PJ.bc3; PJ.guardado = new Date();
+      }
+      if (PJ.dir === dir){
+        PJ.mtime = mtime; PJ.base = clonar(res); PJ.error = "";
+        if (!igualMapas(res, mios)) aplicarDelta(mios, res, false);
+        if (ajenos) MostrarEstado("Se han incorporado " + ajenos + " cambio(s) guardados por otra persona en la carpeta del proyecto.", 1);
+        PJ.sucio = PJ.escritura ? PJ.pendiente : false;
+      }
+    } catch(err){ PJ.error = err.message; }
+    PJ.ocupado = false;
+    pintarChip();
+    if (PJ.pendiente) programarSync(300);
+  }
+
+  // El BC3 que se abre a mano en un proyecto: se ofrece guardar una copia en la carpeta para todo el equipo
+  async function bc3EnProyecto(file){
+    if (!PJ.dir) return;
+    PJ.bc3 = file.name;
+    if (PJ.escritura){
+      let existe = false;
+      try{ await PJ.dir.getFileHandle(file.name); existe = true; } catch(e){}
+      if (!existe && confirm("¿Guardar una copia de «" + file.name + "» en la carpeta del proyecto «" + PJ.nombre + "»?\nAsí todo el equipo abrirá el proyecto con el mismo banco de precios.")){
+        try{ const h = await PJ.dir.getFileHandle(file.name, { create:true }); const w = await h.createWritable(); await w.write(file); await w.close(); }
+        catch(err){ toast("No se pudo copiar el BC3: " + err.message); }
+      }
+    }
+    PJ.sucio = true; programarSync(300);
+  }
+
+  function pintarChip(){
+    const c = $("projChip");
+    if (!PJ.dir){ c.hidden = true; return; }
+    c.hidden = false;
+    let est, cls;
+    if (PJ.error){ est = "error al guardar"; cls = "n3"; }
+    else if (!PJ.escritura){ est = "solo lectura"; cls = "n2"; }
+    else if (PJ.ocupado || PJ.sucio){ est = "guardando..."; cls = "n0"; }
+    else if (PJ.guardado){ est = "guardado " + PJ.guardado.toLocaleTimeString("es-ES", { hour:"2-digit", minute:"2-digit" }); cls = "n1"; }
+    else { est = "sin cambios"; cls = "n0"; }
+    c.querySelector("b").textContent = PJ.nombre;
+    const s = c.querySelector("span"); s.textContent = est; s.className = "mstatus " + cls;
+    c.title = "Proyecto de la carpeta " + (PJ.root ? PJ.root.name : "") + ". La medición se guarda en " + MED_FILE +
+              (PJ.error ? "\nError: " + PJ.error : "") + "\nClic para ver los proyectos.";
+  }
+  async function pintarInicio(){
+    const txt = $("projStartTxt"), btn = $("projOpen"), last = $("projLast");
+    $("projBtn").hidden = !FS_OK;
+    if (!FS_OK){ txt.textContent = "Para abrir proyectos desde una carpeta (SharePoint, red...) usa Chrome o Edge. Mientras, puedes añadir los modelos a mano."; btn.hidden = true; last.hidden = true; return; }
+    const root = await carpetaGuardada();
+    if (!root){ txt.textContent = "Elige una vez la carpeta donde guardáis los modelos (por ejemplo, la de SharePoint sincronizada). El visor la recordará."; btn.textContent = "Elegir carpeta..."; last.hidden = true; return; }
+    txt.textContent = "Carpeta: " + root.name;
+    btn.textContent = "Ver proyectos";
+    const u = PJ.ultimo || loadPref("visor-bim-ultimo-proyecto", "");
+    last.hidden = !u; last.textContent = "Abrir «" + u + "»"; last.dataset.p = u;
+    btn.classList.toggle("primary", !u);
+  }
+  function guardarLocal(){
+    try{ localStorage.setItem(BQ_KEY, JSON.stringify({ ov:MS.ov, medidas:MS.medidas, formulas:MS.formulas })); }
+    catch(e){ toast("No se pudieron guardar los cambios en este navegador."); }
+  }
+
+  // ---------- Modo sencillo / avanzado (internamente "tecnico") ----------
+  const MODO_KEY = "visor-bim-modo";
+  function setModo(m){
+    MS.modo = m === "tecnico" ? "tecnico" : "sencillo";
+    document.body.dataset.modo = MS.modo;
+    savePref(MODO_KEY, MS.modo);
+    $("modoSeg").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.modo === MS.modo)));
+    MostrarEstado(MS.modo === "tecnico" ? "Selecciona filas (Ctrl / Mayús para varias) y asigna partida. Doble clic en una fila la muestra en el modelo."
+                                        : "Modo sencillo: consulta de la medición. Doble clic en una fila la muestra en el modelo. Para asignar partidas cambia a Avanzado.", 0);
+    // En Sencillo no hay sección ni rayos X: si estaban activos se quitan
+    if (MS.modo !== "tecnico"){
+      if (S.section) setSection(false);
+      if (S.xray) $("xrayBtn").click();
+    }
+    if (MS.open) renderMeasure();
   }
 
   // ---------- Varios ----------
@@ -2604,19 +4112,65 @@ function workerMain(){
   });
   $("showAllBtn").addEventListener("click", showAll);
   $("measureBtn").addEventListener("click", () => setMeasure(!MS.open));
+  // Proyectos y modos
+  $("projBtn").addEventListener("click", () => AbrirProyectos(false));
+  $("projOpen").addEventListener("click", () => AbrirProyectos(false));
+  $("projLast").addEventListener("click", e => abrirProyectoPorNombre(e.currentTarget.dataset.p));
+  $("projChip").addEventListener("click", () => AbrirProyectos(false));
+  $("modoSeg").addEventListener("click", e => { const b = e.target.closest("button[data-modo]"); if (b) setModo(b.dataset.modo); });
+  window.addEventListener("focus", () => { if (PJ.dir) sincronizar(); });
+  setInterval(() => { if (PJ.dir && !document.hidden) sincronizar(); }, 20000);
+  window.addEventListener("beforeunload", e => { if (PJ.dir && (PJ.sucio || PJ.ocupado)){ sincronizar(); e.preventDefault(); e.returnValue = ""; } });
+  setModo(loadPref(MODO_KEY, "sencillo"));
+  pintarInicio();
   $("mClose").addEventListener("click", () => setMeasure(false));
-  $("mRefresh").addEventListener("click", refreshMeasure);
   $("mScope").addEventListener("change", refreshMeasure);
-  $("mMode").addEventListener("change", renderMeasure);
-  $("mWallArea").value = MS.wallArea;
-  $("mWallArea").addEventListener("change", e => { MS.wallArea = e.target.value; savePref("visor-bim-area-muros", MS.wallArea); renderMeasure(); });
+  $("mCat").addEventListener("change", renderMeasure);
   $("mFilter").addEventListener("input", renderMeasure);
-  $("mMissing").addEventListener("change", renderMeasure);
+  ["mSinPartida"].forEach(id => $(id).addEventListener("change", renderMeasure));
+  $("mTable").addEventListener("change", onMeasureChange);
+  $("mTable").addEventListener("click", onMeasureClick);
+  $("mTable").addEventListener("pointerdown", iniciarResize);
+  $("mTable").addEventListener("dblclick", e => {
+    const rs = e.target.closest(".col-rs");
+    if (rs){ e.preventDefault(); autoAjustarColumna(rs.parentElement.dataset.c); return; }
+    if (e.target.closest("input, select, button, thead")) return;
+    const tr = e.target.closest("tbody tr"); const f = tr && rowByKey(tr.dataset.key);
+    if (f) verEnModelo([f]);
+  });
+  $("mTable").addEventListener("input", e => { if (e.target.matches("input.code")) sugerirCodigos(e.target); });
+  $("mTable").addEventListener("focusin", e => { if (e.target.matches("select[data-f=med]")) e.target.dataset.prev = e.target.value; });
+  $("mTable").addEventListener("keydown", e => {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)){ e.preventDefault(); if (e.target.matches("input")) e.target.blur(); AbrirNavegador(FilasSeleccionadas()); return; }
+    if (e.key === "Enter" && e.target.matches("input")) e.target.blur();
+    if (e.key === "Escape" && e.target.matches("input")){ const tr = e.target.closest("tr"), f = tr && rowByKey(tr.dataset.key); if (f){ refrescarFila(f); } }
+  });
+  $("measure").addEventListener("keydown", e => {
+    if (e.target.matches("input, select, textarea")) return;
+    if (MS.modo !== "tecnico" && (e.key === "Delete" || e.key === "Enter")) return;
+    if (e.key === "Delete" && MS.sel.size){ e.preventDefault(); e.stopPropagation(); QuitarPartidaSeleccion(); }
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && MS.sel.size){ e.preventDefault(); AbrirNavegador(FilasSeleccionadas()); }
+    if (e.key.toLowerCase() === "a" && (e.ctrlKey || e.metaKey)){ e.preventDefault(); MS.sel = new Set(MS.filtered.map(f => f.key)); marcarSeleccion(); }
+  });
+  $("mSync").addEventListener("click", ActualizarDesdeBC3);
+  $("mQuitar").addEventListener("click", QuitarPartidaSeleccion);
+  $("mAsignar").addEventListener("click", () => AbrirNavegador(FilasSeleccionadas()));
+  $("bc3Load").addEventListener("click", () => $("bc3Input").click());
+  $("bc3Input").addEventListener("change", e => { const f = e.target.files[0]; if (f) cargarBC3Fichero(f); e.target.value = ""; });
+  $("bc3Explore").addEventListener("click", () => AbrirNavegador(null));
+  $("mBig").addEventListener("click", () => { MS.big = !MS.big; $("measure").classList.toggle("big", MS.big); $("mBig").setAttribute("aria-pressed", String(MS.big)); resize(); });
+  $("mShare").addEventListener("click", e => { e.stopPropagation(); const p = $("mSharePop"); p.hidden = !p.hidden; $("mShare").setAttribute("aria-expanded", String(!p.hidden)); });
+  $("mSharePop").addEventListener("click", e => {
+    const b = e.target.closest("button[data-a]"); if (!b) return;
+    $("mSharePop").hidden = true; $("mShare").setAttribute("aria-expanded", "false");
+    if (b.dataset.a === "exp") ExportarDatos(); else if (b.dataset.a === "colw") restablecerAnchos(); else $("boqInput").click();
+  });
+  document.addEventListener("pointerdown", e => { if (!$("mSharePop").hidden && !e.target.closest(".mmenu")){ $("mSharePop").hidden = true; $("mShare").setAttribute("aria-expanded", "false"); } });
+  $("boqInput").addEventListener("change", e => { const f = e.target.files[0]; if (f) ImportarDatos(f); e.target.value = ""; });
+  $("mVer").addEventListener("click", () => verEnModelo(FilasSeleccionadas()));
   $("mCsv").addEventListener("click", exportCsv);
   $("mXlsx").addEventListener("click", exportXlsx);
-  $("mTable").addEventListener("change", onMeasureEdit);
-  $("mTable").addEventListener("click", onMeasureClick);
-  $("mTable").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.matches("input")) e.target.blur(); });
+  $("mBc3").addEventListener("click", ExportarBC3);
   $("allOn").addEventListener("click", () => setAllCats(true));
   $("allOff").addEventListener("click", () => setAllCats(false));
   $("searchBtn").addEventListener("click", () => runSearch(false));
@@ -2643,7 +4197,7 @@ function workerMain(){
 
   applyTheme();
   resize();
-  window.__visor = { CUT, MS, S, DIM, snapPick, setDim, handleFiles, pick, select, setView, setSection, fitAll, renderer, get camera(){ return camera; } };
+  window.__visor = { CUT, MS, S, DIM, PJ, sincronizar, setModo, snapPick, setDim, handleFiles, pick, select, setView, setSection, fitAll, renderer, get camera(){ return camera; } };
 })();
 </script>
 </body>
