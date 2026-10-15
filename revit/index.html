@@ -237,6 +237,23 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
 #empty .or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:20px 0 4px}
 #empty .or::before,#empty .or::after{content:"";flex:1;border-top:1px solid var(--line)}
 #empty .row>*{flex:none}
+#mFase{width:auto;max-width:220px}
+#mFase.activo{background:var(--ink);color:var(--panel);border-color:var(--ink);font-weight:600}
+.modal.filt{width:min(860px,calc(100vw - 24px))}
+.filt-body{padding:12px 16px;overflow:auto}
+.filt-modo{display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:14px;margin-bottom:8px}
+.filt-modo .check{margin:0}
+.filt-t{width:100%;border-collapse:collapse}
+.filt-t th{text-align:left;font-size:12px;font-weight:600;color:var(--muted);padding:4px 6px;text-transform:uppercase;letter-spacing:.04em}
+.filt-t td{padding:4px 6px;border:0;width:auto;color:var(--ink)}
+.filt-t td:first-child{width:38%;color:var(--ink);padding-right:6px}
+.filt-t td:nth-child(2){width:22%}
+.filt-t td:last-child{width:32px}
+.filt-t tr.vacia input,.filt-t tr.vacia select{opacity:.75}
+.filt-t input:disabled{opacity:.4}
+.filt-ayuda{font-size:12.5px;margin:10px 0 6px}
+.filt-prev{font-size:14px;font-weight:600;padding:6px 0}
+.filt-prev.ok{color:#2E9E5B}.filt-prev.err{color:#C0392B}
 .mstatus{font-size:13px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 300px}
 .mstatus.n1{color:#2E9E5B}.mstatus.n2{color:var(--warn)}.mstatus.n3{color:#C0392B;font-weight:600}
 .mlegend{font-size:12px;color:var(--muted);display:flex;gap:10px;align-items:center;white-space:nowrap}
@@ -506,6 +523,8 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
       <select id="mCat" aria-label="Categoría"><option value="">Todas las categorías</option></select>
       <input type="text" id="mFilter" placeholder="Filtrar familia, tipo, código..." aria-label="Filtrar filas">
       <label class="check"><input type="checkbox" id="mSinPartida"> Solo sin partida</label>
+      <select id="mFase" class="solo-tecnico" aria-label="Fase de creación" hidden><option value="">Fase: todas</option></select>
+      <button class="btn small solo-tecnico" id="mFiltroParam" aria-pressed="false">Filtro por parámetro</button>
       <span class="spacer"></span>
       <button class="btn small solo-tecnico" id="mSync" title="Traer resumen, precio y unidad del BC3 a las filas seleccionadas">Actualizar desde BC3</button>
       <button class="btn small solo-tecnico" id="mQuitar" title="Quitar la partida de las filas seleccionadas (Supr)">Quitar partida</button>
@@ -2631,9 +2650,11 @@ function workerMain(){
   function computeRows(){
     const scope = $("mScope").value;
     const byKey = new Map();
+    const conFiltro = filtroActivo();
     S.models.forEach(m => {
       if (!m.ready || !m.data) return;
       const d = m.data, mc = d.mc;
+      const PF = conFiltro ? prepararFiltro(MS.filtro, m) : null;
       for (let e = 0; e < m.n; e++){
         const ri = d.rowOf[e];
         if (ri < 0) continue;
@@ -2641,6 +2662,7 @@ function workerMain(){
         if (scope === "search" && (!S.search || !m.match[e])) continue;
         if (scope === "sel" && !isSel(m, e)) continue;
         const row = d.rows[ri];
+        if (PF && !cumpleFiltro(PF, row)) continue;   // fase / reglas por parámetro (antes de agrupar)
         const cat = d.catCol >= 0 ? String(row[d.catCol] || "") : "";
         const fam = mc.fam >= 0 ? String(row[mc.fam] || "") : "";
         const tipo = mc.tipo >= 0 ? String(row[mc.tipo] || "") : "";
@@ -2691,7 +2713,7 @@ function workerMain(){
                            a.tipo.localeCompare(b.tipo, "es") || cmpSize(a.size, b.size));
     const nm = new Set(MS.rows.map(r => r.model)).size;
     MS.multiModel = nm > 1;
-    MS.desc = CAT_LABEL[scope] || "";
+    MS.desc = (CAT_LABEL[scope] || "") + (conFiltro ? " · " + textoFiltro() : "");
     const keys = new Set(MS.rows.map(r => r.key));
     MS.sel.forEach(k => { if (!keys.has(k)) MS.sel.delete(k); });
     if (MS.bc3) PrepararBC3(false);
@@ -2992,7 +3014,8 @@ function workerMain(){
     const frac = MS.filtered.length ? asig / MS.filtered.length : 0;
     $("kPresu").innerHTML = ""; $("kAsig").innerHTML = ""; $("kElem").innerHTML = "";
     const kpi = (el, big, small) => { const b = document.createElement("b"); b.textContent = big; const s = document.createElement("span"); s.textContent = small; el.append(b, s); };
-    const lbl = document.createElement("span"); lbl.className = "klbl"; lbl.textContent = "Importe total" + (filt ? " (filtrado)" : "");
+    const lbl = document.createElement("span"); lbl.className = "klbl"; lbl.textContent = "Importe total" + (filtroActivo() ? " · con filtro" : filt ? " (filtrado)" : "");
+    $("kPresu").title = filtroActivo() ? "Solo los elementos que cumplen: " + textoFiltro() : "";
     $("kPresu").append(lbl);
     kpi($("kPresu"), fmtEur(total), conImp + " filas con importe");
     kpi($("kAsig"), fmtInt(asig) + " / " + fmtInt(MS.filtered.length), Math.round(frac * 100) + " % con partida" + (avisos ? " · " + avisos + " incompletas" : ""));
@@ -3716,7 +3739,7 @@ function workerMain(){
     });
   }
 
-  function refreshMeasure(){ if (!MS.open) return; computeRows(); RellenarCategorias(); renderMeasure(); }
+  function refreshMeasure(){ if (!MS.open) return; RellenarFases(); computeRows(); RellenarCategorias(); renderMeasure(); }
   function setMeasure(on){
     MS.open = on;
     $("measure").hidden = !on;
@@ -4042,6 +4065,236 @@ function workerMain(){
     catch(e){ toast("No se pudieron guardar los cambios en este navegador."); }
   }
 
+  // ---------- Filtro de elementos: fase de creación + reglas por parámetro (modo Avanzado) ----------
+  // Igual que el BoQ v3.0 del add-in: se aplica a cada elemento ANTES de agrupar por tipo, así la medición,
+  // el importe y lo que se exporta salen solo con lo que cumple (p. ej. «Certificación» = 15 → producción del mes 15).
+  const OPS = [
+    ["eq", "es igual a", "="], ["ne", "no es igual a", "≠"], ["has", "contiene", "contiene"], ["nhas", "no contiene", "no contiene"],
+    ["sw", "empieza por", "empieza por"], ["gt", "mayor que", ">"], ["ge", "mayor o igual que", "≥"], ["lt", "menor que", "<"],
+    ["le", "menor o igual que", "≤"], ["val", "tiene valor", "con valor"], ["nval", "no tiene valor", "sin valor"]
+  ];
+  const OP_TXT = Object.fromEntries(OPS.map(o => [o[0], o[2]]));
+  const opNecesitaValor = op => op !== "val" && op !== "nval";
+  MS.filtro = { fase:"", reglas:[], todas:true };
+
+  // Número escrito como en Revit: "15", "15,5", "1.250,00", "18.000 mm" (sin convertir unidades)
+  function numTexto(s){
+    const m = String(s ?? "").trim().replace(/(\d)\s+(?=\d)/g, "$1").match(/^([-+]?\d[\d.,]*)(.*)$/);
+    if (!m || /\d/.test(m[2]) || m[2].trim().length > 14) return NaN;
+    let t = m[1];
+    const hc = t.includes(","), hd = t.includes(".");
+    if (hc && hd) t = t.lastIndexOf(",") > t.lastIndexOf(".") ? t.replace(/\./g, "").replace(",", ".") : t.replace(/,/g, "");
+    else if (hc) t = /^[-+]?\d{1,3}(,\d{3}){2,}$/.test(t) ? t.replace(/,/g, "") : t.replace(",", ".");
+    else if (hd && /^[-+]?\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, "");
+    const v = parseFloat(t);
+    return isNaN(v) ? NaN : v;
+  }
+  const filtroActivo = () => MS.modo === "tecnico" && (!!MS.filtro.fase || MS.filtro.reglas.length > 0);
+  function textoReglas(f){
+    return f.reglas.map(r => "«" + r.param + "» " + OP_TXT[r.op] + (opNecesitaValor(r.op) ? " " + r.valor : "")).join(f.todas ? " y " : " o ");
+  }
+  function textoFiltro(){
+    if (!filtroActivo()) return "";
+    const p = [];
+    if (MS.filtro.fase) p.push("fase «" + MS.filtro.fase + "»");
+    if (MS.filtro.reglas.length) p.push(textoReglas(MS.filtro));
+    return p.join(" · ");
+  }
+  const colFase = mc => { const L = mc.lower; return L.get("fase de creación") ?? L.get("fase de creacion") ?? L.get("phase created"); };
+  function colsParametro(mc, nombre){
+    const L = mc.lower, n = String(nombre).trim().toLowerCase();
+    if (n.startsWith("tipo:")) return { ci:L.get(n.replace(/^tipo:\s*/, "tipo: ")), ct:undefined };
+    return { ci:L.get(n), ct:L.get("tipo: " + n) };
+  }
+  const valorEnFila = (row, c) => {
+    let v = c.ci !== undefined ? row[c.ci] : "";
+    if ((v === "" || v == null) && c.ct !== undefined) v = row[c.ct];
+    return v == null ? "" : String(v).trim();
+  };
+  // Prepara el filtro para un modelo: columnas y valores precalculados (null = no hay filtro)
+  function prepararFiltro(f, m){
+    const mc = m.data.mc;
+    return {
+      fase: f.fase, cFase: colFase(mc), todas: f.todas,
+      reglas: f.reglas.map(r => ({ op:r.op, c:colsParametro(mc, r.param), txt:plain(r.valor), num:numTexto(r.valor) }))
+    };
+  }
+  function cumpleRegla(s, r){
+    if (r.op === "nval") return s === "";
+    if (s === "") return false;                 // sin el parámetro no cumple (como en los filtros de Revit)
+    if (r.op === "val") return true;
+    const t = plain(s);
+    const igual = () => t === r.txt || (!isNaN(r.num) && Math.abs(numTexto(s) - r.num) < 1e-9);
+    switch (r.op){
+      case "eq": return igual();
+      case "ne": return !igual();
+      case "has": return t.includes(r.txt);
+      case "nhas": return !t.includes(r.txt);
+      case "sw": return t.startsWith(r.txt);
+    }
+    const n = numTexto(s);
+    const c = (!isNaN(n) && !isNaN(r.num)) ? n - r.num : t.localeCompare(r.txt, "es", { numeric:true });
+    return r.op === "gt" ? c > 0 : r.op === "ge" ? c >= 0 : r.op === "lt" ? c < 0 : c <= 0;
+  }
+  function cumpleFiltro(P, row){
+    if (P.fase){
+      if (P.cFase === undefined) return false;
+      if (plain(row[P.cFase] ?? "") !== plain(P.fase)) return false;
+    }
+    if (!P.reglas.length) return true;
+    if (P.todas){ for (const r of P.reglas) if (!cumpleRegla(valorEnFila(row, r.c), r)) return false; return true; }
+    for (const r of P.reglas) if (cumpleRegla(valorEnFila(row, r.c), r)) return true;
+    return false;
+  }
+  // Cuenta cuántos elementos (con datos) cumplen un filtro, para la vista previa del diálogo
+  function contarFiltro(f){
+    let tot = 0, ok = 0;
+    S.models.forEach(m => {
+      if (!m.ready || !m.data) return;
+      const d = m.data, P = prepararFiltro(f, m);
+      for (let e = 0; e < m.n; e++){ const ri = d.rowOf[e]; if (ri < 0) continue; tot++; if (cumpleFiltro(P, d.rows[ri])) ok++; }
+    });
+    return { tot, ok };
+  }
+
+  // Desplegable de fase con las fases que traen los modelos
+  function RellenarFases(){
+    const sel = $("mFase"), fases = new Set();
+    S.models.forEach(m => {
+      if (!m.ready || !m.data) return;
+      const c = colFase(m.data.mc); if (c === undefined) return;
+      m.data.rows.forEach(r => { const v = String(r[c] ?? "").trim(); if (v) fases.add(v); });
+    });
+    const lista = Array.from(fases).sort((a, b) => a.localeCompare(b, "es", { numeric:true }));
+    sel.innerHTML = "";
+    const o0 = document.createElement("option"); o0.value = ""; o0.textContent = "Fase: todas"; sel.append(o0);
+    lista.forEach(v => { const o = document.createElement("option"); o.value = v; o.textContent = "Fase: " + v; sel.append(o); });
+    if (MS.filtro.fase && !lista.includes(MS.filtro.fase)) MS.filtro.fase = "";
+    sel.value = MS.filtro.fase;
+    sel.hidden = !lista.length;
+    sel.classList.toggle("activo", !!MS.filtro.fase);
+    sel.title = lista.length ? "Mide solo los elementos creados en esta fase (Fase de creación)" : "";
+  }
+  function pintarBotonFiltro(){
+    const b = $("mFiltroParam"), n = MS.filtro.reglas.length;
+    b.textContent = n ? "Parámetro: " + n + (n === 1 ? " regla" : " reglas") : "Filtro por parámetro";
+    b.setAttribute("aria-pressed", String(n > 0));
+    b.title = n ? "Filtro activo: " + textoReglas(MS.filtro) + "\nClic para cambiarlo o quitarlo" : "Medir solo los elementos que cumplan unas reglas (p. ej. «Certificación» = 15)";
+  }
+  function aplicarFiltroElementos(msg){
+    pintarBotonFiltro();
+    refreshMeasure();
+    if (!filtroActivo()){ MostrarEstado(msg || "Filtro quitado: se mide todo.", 1); return; }
+    const n = MS.rows.reduce((a, f) => a + f.n, 0);
+    if (!n) MostrarEstado("Ningún elemento cumple el filtro (" + textoFiltro() + "). Revisa las reglas o quítalo.", 2);
+    else MostrarEstado("Filtro: " + textoFiltro() + "  ·  " + fmtInt(n) + " elemento(s) cumplen.", 1);
+  }
+
+  // Lista de parámetros y valores que existen en los modelos cargados
+  function catalogoParametros(){
+    const ej = new Map(), tipo = new Map();
+    S.models.forEach(m => {
+      if (!m.ready || !m.data) return;
+      m.data.header.forEach(h => {
+        const s = String(h).trim(); if (!s || /^(elementid|uniqueid)$/i.test(s)) return;
+        if (/^tipo:/i.test(s)) tipo.set(s.toLowerCase(), s); else ej.set(s.toLowerCase(), s);
+      });
+    });
+    const orden = (a, b) => a.localeCompare(b, "es");
+    return Array.from(ej.values()).sort(orden).concat(Array.from(tipo.values()).sort(orden));
+  }
+  function valoresParametro(nombre, max){
+    const vals = new Map();
+    S.models.forEach(m => {
+      if (!m.ready || !m.data) return;
+      const c = colsParametro(m.data.mc, nombre);
+      if (c.ci === undefined && c.ct === undefined) return;
+      for (const row of m.data.rows){
+        const v = valorEnFila(row, c);
+        if (v){ vals.set(v, (vals.get(v) || 0) + 1); if (vals.size > 2000) break; }
+      }
+    });
+    return Array.from(vals.keys()).sort((a, b) => { const x = numTexto(a), y = numTexto(b); return (!isNaN(x) && !isNaN(y)) ? x - y : a.localeCompare(b, "es", { numeric:true }); }).slice(0, max);
+  }
+
+  function AbrirFiltroParametro(){
+    if (!S.models.some(m => m.ready && m.data)){ MostrarEstado("Carga primero los modelos con su .xlsx.", 2); return; }
+    const params = catalogoParametros();
+    const M = abrirModal("filt");
+    M.box.innerHTML = `
+      <div class="md-head"><div><h2>Filtro por parámetro</h2><p class="md-sub">Mide solo los elementos que cumplan las reglas. Se aplica a cada elemento antes de agrupar por tipo.</p></div><button class="ibtn md-x" aria-label="Cerrar">✕</button></div>
+      <div class="filt-body">
+        <div class="filt-modo">Que se cumplan
+          <label class="check"><input type="radio" name="filtmodo" value="y"> todas las reglas (Y)</label>
+          <label class="check"><input type="radio" name="filtmodo" value="o"> alguna regla (O)</label>
+        </div>
+        <table class="filt-t"><thead><tr><th>Parámetro</th><th>Condición</th><th>Valor</th><th></th></tr></thead><tbody></tbody></table>
+        <datalist id="filtParams"></datalist>
+        <p class="filt-ayuda muted">El parámetro se busca en el ejemplar y, si no lo tiene, en el tipo («Tipo: …» busca solo en el tipo). Los números se comparan como números, con coma o punto; los textos sin distinguir mayúsculas ni acentos. Un elemento sin el parámetro no cumple la regla, salvo con «no tiene valor».<br>
+          Ejemplo: «Certificación» es igual a 15 → producción del mes 15. «menor o igual que» 15 → a origen.</p>
+        <div class="filt-prev"></div>
+      </div>
+      <div class="md-foot"><button class="btn small filt-quitar">Quitar filtro</button><span class="spacer"></span><button class="btn small filt-cancel">Cancelar</button><button class="btn small primary filt-ok">Aplicar filtro</button></div>`;
+    const q = s => M.box.querySelector(s);
+    const dl = q("#filtParams");
+    params.forEach(p => { const o = document.createElement("option"); o.value = p; dl.append(o); });
+    M.box.querySelector('input[value="' + (MS.filtro.todas ? "y" : "o") + '"]').checked = true;
+    const tb = q(".filt-t tbody"), prev = q(".filt-prev");
+    const filas = [];
+    for (let i = 0; i < 4; i++){
+      const r = MS.filtro.reglas[i] || { param:"", op:"eq", valor:"" };
+      const tr = el("tr");
+      const ip = el("input"); ip.type = "text"; ip.setAttribute("list", "filtParams"); ip.placeholder = i === 0 ? "p. ej. Certificación" : "Parámetro"; ip.value = r.param; ip.setAttribute("aria-label", "Parámetro de la regla " + (i + 1));
+      const so = el("select"); so.setAttribute("aria-label", "Condición de la regla " + (i + 1));
+      OPS.forEach(o => { const op = el("option", "", o[1]); op.value = o[0]; so.append(op); }); so.value = r.op;
+      const iv = el("input"); iv.type = "text"; iv.placeholder = "Valor"; iv.value = r.valor; iv.setAttribute("aria-label", "Valor de la regla " + (i + 1));
+      const dv = el("datalist"); dv.id = "filtVal" + i; iv.setAttribute("list", dv.id);
+      const bx = el("button", "ibtn", "✕"); bx.title = "Vaciar esta regla"; bx.setAttribute("aria-label", "Vaciar la regla " + (i + 1));
+      const c1 = el("td"), c2 = el("td"), c3 = el("td"), c4 = el("td");
+      c1.append(ip); c2.append(so); c3.append(iv, dv); c4.append(bx); tr.append(c1, c2, c3, c4); tb.append(tr);
+      const fila = { ip, so, iv, dv, tr };
+      const valores = () => { dv.innerHTML = ""; if (ip.value.trim()) valoresParametro(ip.value, 300).forEach(v => { const o = document.createElement("option"); o.value = v; dv.append(o); }); };
+      const estado = () => { iv.disabled = !opNecesitaValor(so.value); tr.classList.toggle("vacia", !ip.value.trim()); };
+      ip.addEventListener("change", () => { valores(); vista(); });
+      ip.addEventListener("input", vista);
+      so.addEventListener("change", () => { estado(); vista(); });
+      iv.addEventListener("input", vista);
+      iv.addEventListener("focus", () => { if (!dv.children.length) valores(); });
+      bx.addEventListener("click", () => { ip.value = ""; iv.value = ""; so.value = "eq"; estado(); vista(); });
+      estado();
+      filas.push(fila);
+    }
+    const leer = () => ({
+      fase: MS.filtro.fase,
+      todas: M.box.querySelector('input[name="filtmodo"]:checked').value === "y",
+      reglas: filas.filter(f => f.ip.value.trim() && (!opNecesitaValor(f.so.value) || f.iv.value.trim() !== ""))
+                   .map(f => ({ param:f.ip.value.trim(), op:f.so.value, valor:opNecesitaValor(f.so.value) ? f.iv.value.trim() : "" }))
+    });
+    let tm = 0;
+    function vista(){
+      clearTimeout(tm);
+      tm = setTimeout(() => {
+        const f = leer();
+        const sinCol = f.reglas.filter(r => !catalogoTiene(params, r.param)).map(r => "«" + r.param + "»");
+        const incompletas = filas.filter(x => x.ip.value.trim() && opNecesitaValor(x.so.value) && x.iv.value.trim() === "").length;
+        if (!f.reglas.length){ prev.textContent = "Sin reglas: se mide todo." + (incompletas ? "  (Hay reglas sin valor que no se aplicarán.)" : ""); prev.className = "filt-prev muted"; return; }
+        const r = contarFiltro(f);
+        prev.textContent = "Cumplen " + fmtInt(r.ok) + " de " + fmtInt(r.tot) + " elementos" + (MS.filtro.fase ? " (con la fase «" + MS.filtro.fase + "»)" : "") + "." +
+          (sinCol.length ? "  No existe en los datos: " + sinCol.join(", ") + "." : "") + (incompletas ? "  Hay reglas sin valor que no se aplicarán." : "");
+        prev.className = "filt-prev " + (r.ok ? "ok" : "err");
+      }, 150);
+    }
+    M.box.querySelectorAll('input[name="filtmodo"]').forEach(x => x.addEventListener("change", vista));
+    q(".filt-ok").addEventListener("click", () => { const f = leer(); MS.filtro.reglas = f.reglas; MS.filtro.todas = f.todas; M.cerrar(); aplicarFiltroElementos(); });
+    q(".filt-quitar").addEventListener("click", () => { MS.filtro.reglas = []; M.cerrar(); aplicarFiltroElementos(); });
+    q(".filt-quitar").hidden = !MS.filtro.reglas.length;
+    q(".filt-cancel").addEventListener("click", M.cerrar);
+    q(".md-x").addEventListener("click", M.cerrar);
+    vista();
+    filas[0].ip.focus();
+  }
+  const catalogoTiene = (params, nombre) => { const n = nombre.trim().toLowerCase(); return params.some(p => p.toLowerCase() === n || p.toLowerCase() === "tipo: " + n || p.toLowerCase().replace(/^tipo:\s*/, "tipo: ") === n.replace(/^tipo:\s*/, "tipo: ")); };
+
   // ---------- Modo sencillo / avanzado (internamente "tecnico") ----------
   const MODO_KEY = "visor-bim-modo";
   function setModo(m){
@@ -4056,7 +4309,7 @@ function workerMain(){
       if (S.section) setSection(false);
       if (S.xray) $("xrayBtn").click();
     }
-    if (MS.open) renderMeasure();
+    if (MS.open) refreshMeasure();
   }
 
   // ---------- Varios ----------
@@ -4128,6 +4381,8 @@ function workerMain(){
   $("mCat").addEventListener("change", renderMeasure);
   $("mFilter").addEventListener("input", renderMeasure);
   ["mSinPartida"].forEach(id => $(id).addEventListener("change", renderMeasure));
+  $("mFase").addEventListener("change", e => { MS.filtro.fase = e.target.value; e.target.classList.toggle("activo", !!MS.filtro.fase); aplicarFiltroElementos(); });
+  $("mFiltroParam").addEventListener("click", AbrirFiltroParametro);
   $("mTable").addEventListener("change", onMeasureChange);
   $("mTable").addEventListener("click", onMeasureClick);
   $("mTable").addEventListener("pointerdown", iniciarResize);
