@@ -205,6 +205,39 @@ body.dragging #view::after{content:"Suelta los archivos IFC para añadirlos";pos
 #help td{padding:3px 0}
 #help td:first-child{font-family:var(--mono);color:var(--accent);width:92px}
 
+/* Pestaña Mediciones */
+.ribbon{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:10px;border-bottom:1px solid var(--line);flex:none}
+.rb{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;border:1px solid transparent;border-radius:6px;background:none;font-size:12px;line-height:1.2;text-align:center;min-height:64px}
+.rb:hover{background:var(--panel2);border-color:var(--line)}
+.rb.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.rb svg{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.rb svg .fillsoft{fill:var(--accent-soft)}
+.rb svg .fillacc{fill:var(--accent);fill-opacity:.55}
+.rb svg .edgeacc{stroke:var(--accent);stroke-width:2.6}
+.rb .dd{font-style:normal;font-size:9px;color:var(--muted)}
+.rb small{display:block;color:var(--accent);font-weight:600;font-size:11.5px;max-width:86px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#measSel,#measFaces,#measRes,#measures{flex:none;border-bottom:1px solid var(--line)}
+#measFaces:empty,#measRes:empty{display:none}
+#pane-meas #measures{border-top:0;max-height:none}
+.msel-empty{padding:12px;color:var(--muted);line-height:1.55;font-size:12.5px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:5px 10px;padding:8px 12px 10px;font-size:12.5px}
+.kv span{color:var(--muted)}
+.kv span i{font-style:normal;color:var(--faint);font-size:11px;margin-left:3px}
+.kv b{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.mwarn{margin:0 12px 10px;padding:6px 8px;border-radius:5px;background:color-mix(in srgb,var(--danger) 10%,transparent);color:var(--danger);font-size:12px;line-height:1.4}
+.sec .lbl small{display:block;color:var(--faint);font-size:11px}
+.sec.mres .val{color:var(--text);font-weight:600;white-space:nowrap}
+.sec.mres .lbl{min-width:0}
+#ctx .mdens{display:flex;align-items:center;gap:6px;padding:2px 4px 2px 0}
+#ctx .mdens button{flex:1}
+#ctx .mdens input{width:78px;height:26px;padding:0 6px;border:1px solid var(--line2);border-radius:4px;background:var(--panel)}
+#ctx .mdens span{color:var(--muted);font-size:12px}
+#ctx button.on{color:var(--accent);font-weight:600}
+#ctx .mnote{padding:4px 10px 2px;color:var(--faint);font-size:11px;max-width:260px}
+#faceLabels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:6}
+.flabel{position:absolute;transform:translate(-50%,-50%);background:var(--accent);color:var(--accent-ink);font-size:11.5px;font-weight:600;padding:1px 7px;border-radius:9px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+body.measuring #viewerCanvas{cursor:progress}
+
 /* Etiquetas de medición xeokit */
 .viewer-ruler-label,.viewer-angle-label{font-family:var(--sans)!important}
 
@@ -237,10 +270,8 @@ body.dragging #view::after{content:"Suelta los archivos IFC para añadirlos";pos
     <svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-2 6z"/></svg><span class="t">Seleccionar</span></button>
   <button class="btn" data-mode="section" title="Clic en una superficie para crear un plano de sección">
     <svg viewBox="0 0 24 24"><path d="M3 17 12 21l9-4M3 12l9 4 9-4"/><path d="M12 3v9" stroke-dasharray="2 2"/></svg><span class="t">Sección</span></button>
-  <button class="btn" data-mode="distance" title="Medir distancias (con imán a vértices y aristas)">
-    <svg viewBox="0 0 24 24"><path d="M3 17 17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/></svg><span class="t">Distancia</span></button>
-  <button class="btn" data-mode="angle" title="Medir ángulos (tres clics)">
-    <svg viewBox="0 0 24 24"><path d="M4 20 20 6M4 20h16"/><path d="M12 20a8 8 0 0 0-2.5-5.8"/></svg><span class="t">Ángulo</span></button>
+  <button class="btn" id="btnMeas" title="Mediciones: volumen, área, longitud, peso, distancia y ángulo">
+    <svg viewBox="0 0 24 24"><path d="M3 17 17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/></svg><span class="t">Mediciones</span></button>
   <div class="sep"></div>
   <button class="btn" id="btnHide" title="Ocultar selección (H)"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><path d="M4 4l16 16"/></svg><span class="t">Ocultar</span></button>
   <button class="btn" id="btnIsolate" title="Aislar selección (I)"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="8"/><path d="M3 3h4M17 3h4v4M21 17v4h-4M7 21H3v-4M3 7V3"/></svg><span class="t">Aislar</span></button>
@@ -250,7 +281,7 @@ body.dragging #view::after{content:"Suelta los archivos IFC para añadirlos";pos
   <button class="btn icon" id="btnFit" title="Encuadrar (F: selección o todo)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
   <button class="btn icon" id="btnProj" title="Cambiar perspectiva / ortogonal"><svg viewBox="0 0 24 24"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg></button>
   <button class="btn icon" id="btnSnap" title="Guardar captura PNG"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
-  <button class="btn" id="btnClearMeas" title="Borrar todas las cotas (también: clic derecho sobre una cota)"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg><span class="t">Borrar cotas</span></button>
+  <button class="btn" id="btnClearMeas" title="Borrar todas las cotas y caras medidas (también: clic derecho sobre una cota)"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg><span class="t">Borrar cotas</span></button>
   <div class="spacer"></div>
   <button class="btn icon" id="btnTheme" title="Cambiar entre tema claro y oscuro"><svg viewBox="0 0 24 24" id="themeIcon"></svg></button>
   <button class="btn icon" id="btnHelp" title="Atajos"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.7M12 17.5v.01"/></svg></button>
@@ -262,6 +293,7 @@ body.dragging #view::after{content:"Suelta los archivos IFC para añadirlos";pos
     <button class="tab active" data-tab="models">Modelos</button>
     <button class="tab" data-tab="tree">Árbol</button>
     <button class="tab" data-tab="search">Buscar</button>
+    <button class="tab" data-tab="meas">Mediciones</button>
   </div>
   <div class="pane active" id="pane-models">
     <div id="modelList"><div class="empty">Todavía no hay modelos. Abre uno o varios archivos .ifc; se superponen en sus coordenadas reales.</div></div>
@@ -272,7 +304,6 @@ body.dragging #view::after{content:"Suelta los archivos IFC para añadirlos";pos
       <button class="chip" id="chipHSec" title="Crear un corte horizontal por el centro de lo visible">Corte en planta</button>
     </div>
     <div id="sections"></div>
-    <div id="measures"></div>
   </div>
   <div class="pane" id="pane-tree">
     <div class="tree-tools">
@@ -293,12 +324,33 @@ body.dragging #view::after{content:"Suelta los archivos IFC para añadirlos";pos
     </div>
     <div id="results"></div>
   </div>
+  <div class="pane" id="pane-meas">
+    <div class="ribbon" role="toolbar" aria-label="Herramientas de medición">
+      <button class="rb" id="rbVol" title="Volumen de los elementos seleccionados">
+        <svg viewBox="0 0 24 24"><path d="M12 3 4 7v10l8 4 8-4V7z" class="fillsoft"/><path d="M4 7l8 4 8-4M12 11v10"/></svg><span>Volumen</span></button>
+      <button class="rb" id="rbArea" aria-haspopup="true" title="Área de una cara o superficie de la selección">
+        <svg viewBox="0 0 24 24"><path d="M4 8l8-4 8 4-8 4z" class="fillacc"/><path d="M4 8v8l8 4 8-4V8M12 12v8"/></svg><span>Área <i class="dd">▾</i></span></button>
+      <button class="rb" id="rbLen" aria-haspopup="true" title="Longitud: entre puntos, arista completa, punto a plano, plano a plano">
+        <svg viewBox="0 0 24 24"><path d="M12 3 4 7v10l8 4 8-4V7z" opacity=".45"/><path d="M4 7l8 4 8-4M12 11v10" opacity=".45"/><path d="M4 17V7" class="edgeacc"/></svg><span>Longitud <i class="dd">▾</i></span></button>
+      <button class="rb" id="rbPeso" aria-haspopup="true" title="Peso de la selección = volumen × densidad del material">
+        <svg viewBox="0 0 24 24"><path d="M6 9h12l2.5 11h-17z" class="fillsoft"/><circle cx="12" cy="6" r="2.5"/><path d="M9.5 16.5v-4M9.5 14.5l2.2-2M9.5 14.5l2.2 2M14 12.5h1.6a1 1 0 0 1 0 0v4h-1.6"/></svg><span>Peso: <i class="dd">▾</i><small id="pesoMat">Acero</small></span></button>
+      <button class="rb" data-mode="distance" title="Distancia entre dos puntos (con imán a vértices y aristas)">
+        <svg viewBox="0 0 24 24"><path d="M3 17 17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/></svg><span>Distancia</span></button>
+      <button class="rb" data-mode="angle" title="Ángulo con tres clics: origen, vértice y destino">
+        <svg viewBox="0 0 24 24"><path d="M4 20 20 6M4 20h16"/><path d="M12 20a8 8 0 0 0-2.5-5.8"/></svg><span>Ángulo</span></button>
+    </div>
+    <div id="measSel"></div>
+    <div id="measFaces"></div>
+    <div id="measRes"></div>
+    <div id="measures"></div>
+  </div>
 </aside>
 
 <main id="view">
   <canvas id="viewerCanvas"></canvas>
   <canvas id="navCube"></canvas>
   <div id="modeHint"></div>
+  <div id="faceLabels"></div>
   <div id="jobs"></div>
   <div id="dropzone">
     <div class="card">
@@ -456,13 +508,17 @@ function ifcWorkerMain(WebIFC, self) {
     const fn = new Float32Array(nf * 3);
     const edges = new Map();
     const out = [];
+    let area = 0, vol = 0, borde = 0;
     for (let f = 0; f < nf; f++) {
       const i0 = idx[3 * f], i1 = idx[3 * f + 1], i2 = idx[3 * f + 2];
       const ax = pos[3 * i0], ay = pos[3 * i0 + 1], az = pos[3 * i0 + 2];
       const ux = pos[3 * i1] - ax, uy = pos[3 * i1 + 1] - ay, uz = pos[3 * i1 + 2] - az;
       const vx = pos[3 * i2] - ax, vy = pos[3 * i2 + 1] - ay, vz = pos[3 * i2 + 2] - az;
       let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
-      const len = Math.hypot(nx, ny, nz) || 1;
+      const len0 = Math.hypot(nx, ny, nz), len = len0 || 1;
+      area += len0 / 2;
+      const bx = pos[3 * i1], by = pos[3 * i1 + 1], bz = pos[3 * i1 + 2], cx = pos[3 * i2], cy = pos[3 * i2 + 1], cz = pos[3 * i2 + 2];
+      vol += (ax * (by * cz - bz * cy) + ay * (bz * cx - bx * cz) + az * (bx * cy - by * cx)) / 6;
       fn[3 * f] = nx / len; fn[3 * f + 1] = ny / len; fn[3 * f + 2] = nz / len;
       const w = [weld[i0], weld[i1], weld[i2]];
       for (let e = 0; e < 3; e++) {
@@ -479,8 +535,9 @@ function ifcWorkerMain(WebIFC, self) {
         }
       }
     }
-    for (const [key, f] of edges) if (f >= 0) { const a = Math.floor(key / nu), b = key - a * nu; out.push(rep[a], rep[b]); }
-    return new Uint32Array(out);
+    for (const [key, f] of edges) if (f >= 0) { const a = Math.floor(key / nu), b = key - a * nu; out.push(rep[a], rep[b]); borde++; }
+    // borde > 0: malla abierta (el volumen geométrico no es fiable)
+    return { edges: new Uint32Array(out), area, vol: Math.abs(vol), open: borde > 0 };
   }
 
   /* ---------- Lote de geometría ---------- */
@@ -532,7 +589,7 @@ function ifcWorkerMain(WebIFC, self) {
       const inf = info(eid);
       if (!inf || SKIP.has(inf.type)) { if (fm.delete) fm.delete(); return; }
       const geoms = fm.geometries;
-      let nMeshes = 0;
+      let nMeshes = 0, eVol = 0, eArea = 0, eOpen = 0;
       for (let j = 0, nj = geoms.size(); j < nj; j++) {
         const pg = geoms.get(j);
         let g;
@@ -561,7 +618,9 @@ function ifcWorkerMain(WebIFC, self) {
         for (let k = 0; k < nv; k++) { pos[3 * k] = wp[3 * k] - ox; pos[3 * k + 1] = wp[3 * k + 1] - oy; pos[3 * k + 2] = wp[3 * k + 2] - oz; }
         const idx = new Uint32Array(id);
         if (g.delete) g.delete();
-        const edg = d.edges === false ? new Uint32Array(0) : buildEdges(pos, idx, cosT);
+        const be = buildEdges(pos, idx, cosT);
+        const edg = d.edges === false ? new Uint32Array(0) : be.edges;
+        eVol += be.vol; eArea += be.area; if (be.open) eOpen = 1;
         const c = pg.color;
         // meta por malla: [entidadLocal, ox, oy, oz, r, g, b, a, nPos, nIdx, nEdg]
         b.meta.push(b.ents.length, ox, oy, oz, c.x, c.y, c.z, c.w, pos.length, idx.length, edg.length);
@@ -572,7 +631,7 @@ function ifcWorkerMain(WebIFC, self) {
         nMeshes++;
       }
       if (fm.delete) fm.delete();
-      if (nMeshes) { b.ents.push([inf.guid, inf.type, nMeshes]); meshEids.push(eid); }
+      if (nMeshes) { b.ents.push([inf.guid, inf.type, nMeshes, eVol, eArea, eOpen]); meshEids.push(eid); }
       if (b.bytes > (d.batchBytes || 24e6) || b.ents.length > 4000) { flush(b, done, total); b = newBatch(); }
     });
     flush(b, done, total);
@@ -679,11 +738,195 @@ function ifcWorkerMain(WebIFC, self) {
     return { sections };
   }
 
+  /* ---------- Geometría bajo demanda: caras y aristas para las mediciones ---------- */
+  const geoCache = new Map();   // expressID -> geometría soldada (las últimas consultadas)
+  function geomOf(guid) {
+    const eid = guidToEid.get(guid);
+    if (eid === undefined) return null;
+    if (geoCache.has(eid)) { const g = geoCache.get(eid); geoCache.delete(eid); geoCache.set(eid, g); return g; }
+    const P = [], I = [];
+    let nv = 0;
+    const fm = api.GetFlatMesh(modelID, eid);
+    const geoms = fm.geometries;
+    for (let j = 0, nj = geoms.size(); j < nj; j++) {
+      const pg = geoms.get(j);
+      let g;
+      try { g = api.GetGeometry(modelID, pg.geometryExpressID); } catch (e) { continue; }
+      const vd = api.GetVertexArray(g.GetVertexData(), g.GetVertexDataSize());
+      const id = api.GetIndexArray(g.GetIndexData(), g.GetIndexDataSize());
+      const n = vd.length / 6, m = pg.flatTransformation;
+      for (let k = 0; k < n; k++) {
+        const x = vd[6 * k], y = vd[6 * k + 1], z = vd[6 * k + 2];
+        P.push(m[0] * x + m[4] * y + m[8] * z + m[12], m[1] * x + m[5] * y + m[9] * z + m[13], m[2] * x + m[6] * y + m[10] * z + m[14]);
+      }
+      for (let t = 0; t < id.length; t++) I.push(id[t] + nv);
+      nv += n;
+      if (g.delete) g.delete();
+    }
+    if (fm.delete) fm.delete();
+    if (!I.length) return null;
+    const pos = Float64Array.from(P), idx = Uint32Array.from(I), nf = idx.length / 3;
+    // Soldar vértices repetidos (mismas coordenadas a 0,1 mm)
+    const w = new Uint32Array(nv), rep = [], map = new Map();
+    for (let i = 0; i < nv; i++) {
+      const k = Math.round(pos[3 * i] * 1e4) + "," + Math.round(pos[3 * i + 1] * 1e4) + "," + Math.round(pos[3 * i + 2] * 1e4);
+      let q = map.get(k);
+      if (q === undefined) { q = rep.length; rep.push(i); map.set(k, q); }
+      w[i] = q;
+    }
+    const nrm = new Float64Array(nf * 3), off = new Float64Array(nf), far = new Float64Array(nf), adj = new Map(), nu = rep.length;
+    let mn = [Infinity, Infinity, Infinity], mx = [-Infinity, -Infinity, -Infinity];
+    for (let i = 0; i < nv; i++) for (let a = 0; a < 3; a++) { const v = pos[3 * i + a]; if (v < mn[a]) mn[a] = v; if (v > mx[a]) mx[a] = v; }
+    for (let f = 0; f < nf; f++) {
+      const i0 = idx[3 * f], i1 = idx[3 * f + 1], i2 = idx[3 * f + 2];
+      const ux = pos[3 * i1] - pos[3 * i0], uy = pos[3 * i1 + 1] - pos[3 * i0 + 1], uz = pos[3 * i1 + 2] - pos[3 * i0 + 2];
+      const vx = pos[3 * i2] - pos[3 * i0], vy = pos[3 * i2 + 1] - pos[3 * i0 + 1], vz = pos[3 * i2 + 2] - pos[3 * i0 + 2];
+      let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      const len = Math.hypot(nx, ny, nz);
+      far[f] = len / 2;
+      if (len > 0) { nx /= len; ny /= len; nz /= len; }
+      nrm[3 * f] = nx; nrm[3 * f + 1] = ny; nrm[3 * f + 2] = nz;
+      off[f] = nx * pos[3 * i0] + ny * pos[3 * i0 + 1] + nz * pos[3 * i0 + 2];
+      const ws = [w[i0], w[i1], w[i2]];
+      for (let e = 0; e < 3; e++) {
+        let a = ws[e], b = ws[(e + 1) % 3];
+        if (a === b) continue;
+        if (a > b) { const t = a; a = b; b = t; }
+        const key = a * nu + b;
+        const l = adj.get(key);
+        if (l) l.push(f); else adj.set(key, [f]);
+      }
+    }
+    const g = { pos, idx, w, rep, nu, nrm, off, far, adj, nf, diag: Math.hypot(mx[0] - mn[0], mx[1] - mn[1], mx[2] - mn[2]) };
+    geoCache.set(eid, g);
+    if (geoCache.size > 16) geoCache.delete(geoCache.keys().next().value);
+    return g;
+  }
+  const P3 = (g, i) => [g.pos[3 * i], g.pos[3 * i + 1], g.pos[3 * i + 2]];
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const lin = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+  const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  function closestOnTri(p, a, b, c) {   // Ericson, Real-Time Collision Detection
+    const ab = sub(b, a), ac = sub(c, a), ap = sub(p, a);
+    const d1 = dot(ab, ap), d2 = dot(ac, ap);
+    if (d1 <= 0 && d2 <= 0) return a;
+    const bp = sub(p, b), d3 = dot(ab, bp), d4 = dot(ac, bp);
+    if (d3 >= 0 && d4 <= d3) return b;
+    const vc = d1 * d4 - d3 * d2;
+    if (vc <= 0 && d1 >= 0 && d3 <= 0) return lin(a, b, d1 / (d1 - d3));
+    const cp = sub(p, c), d5 = dot(ab, cp), d6 = dot(ac, cp);
+    if (d6 >= 0 && d5 <= d6) return c;
+    const vb = d5 * d2 - d1 * d6;
+    if (vb <= 0 && d2 >= 0 && d6 <= 0) return lin(a, c, d2 / (d2 - d6));
+    const va = d3 * d6 - d5 * d4;
+    if (va <= 0 && (d4 - d3) >= 0 && (d5 - d6) >= 0) return lin(b, c, (d4 - d3) / ((d4 - d3) + (d5 - d6)));
+    const den = 1 / (va + vb + vc), v = vb * den, ww = vc * den;
+    return [a[0] + ab[0] * v + ac[0] * ww, a[1] + ab[1] * v + ac[1] * ww, a[2] + ab[2] * v + ac[2] * ww];
+  }
+  // Cara plana bajo el clic: triángulos coplanarios conectados con el más cercano al punto
+  function faceAt(guid, p) {
+    const g = geomOf(guid);
+    if (!g) return { error: "Este elemento no tiene geometría." };
+    let best = -1, bd = Infinity;
+    for (let f = 0; f < g.nf; f++) {
+      if (!g.far[f]) continue;
+      const q = closestOnTri(p, P3(g, g.idx[3 * f]), P3(g, g.idx[3 * f + 1]), P3(g, g.idx[3 * f + 2]));
+      const d = dist(p, q);
+      if (d < bd) { bd = d; best = f; }
+    }
+    if (best < 0) return { error: "No se encontró ninguna cara." };
+    const n0 = [g.nrm[3 * best], g.nrm[3 * best + 1], g.nrm[3 * best + 2]], o0 = g.off[best];
+    const tol = Math.max(1e-3, g.diag * 1e-5), cosT = 0.99985;   // ~1°
+    const inR = new Uint8Array(g.nf), stack = [best], region = [];
+    inR[best] = 1;
+    while (stack.length) {
+      const f = stack.pop(); region.push(f);
+      for (let e = 0; e < 3; e++) {
+        let a = g.w[g.idx[3 * f + e]], b = g.w[g.idx[3 * f + (e + 1) % 3]];
+        if (a === b) continue;
+        if (a > b) { const t = a; a = b; b = t; }
+        for (const h of g.adj.get(a * g.nu + b) || []) {
+          if (inR[h] || !g.far[h]) continue;
+          const d = g.nrm[3 * h] * n0[0] + g.nrm[3 * h + 1] * n0[1] + g.nrm[3 * h + 2] * n0[2];
+          const ci = g.idx[3 * h];
+          if (d > cosT && Math.abs(dot(n0, P3(g, ci)) - o0) < tol) { inR[h] = 1; stack.push(h); }
+        }
+      }
+    }
+    let area = 0, cx = 0, cy = 0, cz = 0, per = 0;
+    const tris = new Float64Array(region.length * 9);
+    region.forEach((f, k) => {
+      const A = P3(g, g.idx[3 * f]), B = P3(g, g.idx[3 * f + 1]), C = P3(g, g.idx[3 * f + 2]);
+      tris.set(A, 9 * k); tris.set(B, 9 * k + 3); tris.set(C, 9 * k + 6);
+      area += g.far[f];
+      cx += (A[0] + B[0] + C[0]) / 3 * g.far[f]; cy += (A[1] + B[1] + C[1]) / 3 * g.far[f]; cz += (A[2] + B[2] + C[2]) / 3 * g.far[f];
+      for (let e = 0; e < 3; e++) {   // perímetro: aristas con un solo triángulo de la cara
+        const i = g.idx[3 * f + e], j = g.idx[3 * f + (e + 1) % 3];
+        let a = g.w[i], b = g.w[j];
+        if (a === b) continue;
+        if (a > b) { const t = a; a = b; b = t; }
+        let c = 0; for (const h of g.adj.get(a * g.nu + b) || []) if (inR[h]) c++;
+        if (c === 1) per += dist(P3(g, i), P3(g, j));
+      }
+    });
+    const c = area ? [cx / area, cy / area, cz / area] : P3(g, g.idx[3 * best]);
+    const k = dot(n0, p) - o0;
+    return { area, perimeter: per, normal: n0, centroid: c, point: [p[0] - n0[0] * k, p[1] - n0[1] * k, p[2] - n0[2] * k], tris, nTris: region.length };
+  }
+  // Arista completa más cercana al clic (une los tramos alineados)
+  function edgeAt(guid, p) {
+    const g = geomOf(guid);
+    if (!g) return { error: "Este elemento no tiene geometría." };
+    const cosE = Math.cos(20 * Math.PI / 180);
+    const feat = [], byV = new Map();
+    for (const [key, fs] of g.adj) {
+      let ok = fs.length !== 2;
+      if (!ok) { const a = fs[0], b = fs[1]; ok = g.nrm[3 * a] * g.nrm[3 * b] + g.nrm[3 * a + 1] * g.nrm[3 * b + 1] + g.nrm[3 * a + 2] * g.nrm[3 * b + 2] < cosE; }
+      if (!ok) continue;
+      const a = Math.floor(key / g.nu), b = key - a * g.nu;
+      const e = feat.length; feat.push([a, b]);
+      (byV.get(a) || byV.set(a, []).get(a)).push(e);
+      (byV.get(b) || byV.set(b, []).get(b)).push(e);
+    }
+    const V = q => P3(g, g.rep[q]);
+    let best = -1, bd = Infinity;
+    feat.forEach(([a, b], e) => {
+      const A = V(a), B = V(b), ab = sub(B, A), L2 = dot(ab, ab);
+      const t = L2 ? Math.max(0, Math.min(1, dot(sub(p, A), ab) / L2)) : 0;
+      const d = dist(p, lin(A, B, t));
+      if (d < bd) { bd = d; best = e; }
+    });
+    const lim = Math.min(0.5, Math.max(0.05, g.diag * 0.05));
+    if (best < 0 || bd > lim) return { error: "No hay ninguna arista cerca del clic. Haz clic justo sobre la arista." };
+    const usado = new Set([best]);
+    const extender = (desde, hacia) => {   // sigue por tramos alineados
+      let prev = desde, cur = hacia;
+      for (let guard = 0; guard < 10000; guard++) {
+        const d0 = sub(V(cur), V(prev)), l0 = Math.hypot(...d0);
+        let next = -1;
+        for (const e of byV.get(cur) || []) {
+          if (usado.has(e)) continue;
+          const o = feat[e][0] === cur ? feat[e][1] : feat[e][0];
+          const d1 = sub(V(o), V(cur)), l1 = Math.hypot(...d1);
+          if (l0 && l1 && dot(d0, d1) / (l0 * l1) > 0.99999) { next = e; usado.add(e); prev = cur; cur = o; break; }
+        }
+        if (next < 0) return cur;
+      }
+      return cur;
+    };
+    const [a0, b0] = feat[best];
+    const fin = extender(a0, b0), ini = extender(b0, a0);
+    const A = V(ini), B = V(fin);
+    return { a: A, b: B, length: dist(A, B) };
+  }
+
   self.onmessage = async (e) => {
     const d = e.data;
     try {
       if (d.cmd === "load") await load(d);
       else if (d.cmd === "props") post({ cmd: "props", reqId: d.reqId, data: await props(d.guid) });
+      else if (d.cmd === "geo") post({ cmd: "geo", reqId: d.reqId, data: d.op === "edge" ? edgeAt(d.guid, d.p) : faceAt(d.guid, d.p) });
     } catch (err) {
       post({ cmd: "error", reqId: d.reqId, message: String((err && err.message) || err) });
     }
@@ -791,10 +1034,10 @@ function startJob(job) {
   });
 }
 function onWorkerMsg(job, d) {
-  if (d.cmd === "props" || (d.cmd === "error" && d.reqId)) {
+  if (d.cmd === "props" || d.cmd === "geo" || (d.cmd === "error" && d.reqId)) {
     const p = job.pending.get(d.reqId); if (!p) return;
     job.pending.delete(d.reqId);
-    d.cmd === "props" ? p.res(d.data) : p.rej(new Error(d.message));
+    d.cmd !== "error" ? p.res(d.data) : p.rej(new Error(d.message));
     return;
   }
   if (job.cancelled || job.finished) return;
@@ -815,7 +1058,7 @@ async function ingest(job, d) {
   let deadline = performance.now() + 12;
   for (let e = 0; e < ents.length; e++) {
     if (job.cancelled) return;
-    const [guid, type, nm] = ents[e];
+    const [guid, type, nm, eVol, eArea, eOpen] = ents[e];
     const meshIds = [];
     for (let k = 0; k < nm; k++, mi++) {
       const b = mi * 11;
@@ -833,6 +1076,7 @@ async function ingest(job, d) {
     let id = guid;
     if (allIds.has(id)) { id = job.id + "#" + guid; job.remap.set(guid, id); job.shared++; }
     allIds.add(id); job.idList.push(id);
+    GEO.set(id, { vol: eVol || 0, area: eArea || 0, open: !!eOpen, type, model: job.id, guid });
     const hiddenType = type === "IfcSpace";
     sm.createEntity({ id, meshIds, isObject: true, visible: !hiddenType, pickable: !hiddenType });
     job.count++;
@@ -840,6 +1084,7 @@ async function ingest(job, d) {
   }
 }
 const allIds = new Set();
+const GEO = new Map();   // id de entidad -> { vol (m³), area (m²), open, type, model, guid } calculados al cargar
 let colorSeq = 0;
 async function finish(job, d) {
   if (job.cancelled) return;
@@ -907,6 +1152,14 @@ function renderJobs() {
   }
 }
 $("#jobs").addEventListener("click", e => { const b = e.target.closest("[data-cancel]"); if (b) cancelJob(b.dataset.cancel); });
+function askGeo(m, msg) {
+  return new Promise((res, rej) => {
+    const job = m.job, reqId = ++job.reqSeq;
+    job.pending.set(reqId, { res, rej });
+    m.worker.postMessage(Object.assign({ cmd: "geo", reqId }, msg));
+    setTimeout(() => { if (job.pending.has(reqId)) { job.pending.delete(reqId); rej(new Error("tiempo agotado")); } }, 30000);
+  });
+}
 function askProps(m, guid) {
   return new Promise((res, rej) => {
     const job = m.job, reqId = ++job.reqSeq;
@@ -919,7 +1172,7 @@ function askProps(m, guid) {
 function removeModel(id) {
   const m = models[id]; if (!m) return;
   clearSelection();
-  for (const oid in (m.sceneModel.objects || {})) allIds.delete(oid);
+  for (const oid in (m.sceneModel.objects || {})) { allIds.delete(oid); GEO.delete(oid); }
   try { m.sceneModel.destroy(); } catch (e) {}
   if (viewer.metaScene.metaModels[id]) { try { viewer.metaScene.destroyMetaModel(id); } catch (e) {} }
   try { m.worker.terminate(); } catch (e) {}
@@ -1065,6 +1318,7 @@ function afterSelectionChange(propsId, groupInfo) {
   if (propsId) renderProps(propsId);
   else if (groupInfo) renderGroup(groupInfo);
   else if (!n) renderPropsEmpty();
+  renderMeasSel();
 }
 
 const canvas = $("#viewerCanvas");
@@ -1083,6 +1337,8 @@ canvas.addEventListener("mouseup", e => {
     const hit = scene.pick({ canvasPos });
     const ent = hit && hit.entity && scene.objects[hit.entity.id] ? hit.entity : null;
     selectEntity(ent, e.ctrlKey || e.metaKey || e.shiftKey);
+  } else if (MEDIR_MODOS.includes(mode)) {
+    measureClick(canvasPos);
   } else if (mode === "section") {
     const hit = scene.pick({ canvasPos, pickSurface: true });
     if (hit && hit.entity && scene.objects[hit.entity.id] && hit.worldPos && hit.worldNormal) {
@@ -1160,15 +1416,23 @@ $("#btnClearMeas").onclick = () => clearMeasures();
 const HINTS = {
   section: "<b>Sección:</b> haz clic sobre una cara para cortar por ese plano",
   distance: "<b>Distancia:</b> clic en el punto inicial y clic en el final. Clic derecho sobre una cota para borrarla. Esc para salir",
-  angle: "<b>Ángulo:</b> clic en origen, vértice y destino. Esc para salir"
+  angle: "<b>Ángulo:</b> clic en origen, vértice y destino. Esc para salir",
+  face: "<b>Área de cara:</b> clic en las caras que quieras sumar (otro clic en la misma la quita). Esc para salir",
+  edge: "<b>Arista completa:</b> clic sobre una arista para medirla entera. Esc para salir",
+  ptplane: "<b>Punto a plano:</b> 1) clic en la cara que define el plano. Esc para salir",
+  planeplane: "<b>Plano a plano:</b> 1) clic en la primera cara. Esc para salir"
 };
 function setMode(m) {
   distControl.active && distControl.deactivate();
   angleControl.active && angleControl.deactivate();
   const leavingMeasure = (mode === "distance" || mode === "angle") && m !== mode;
   mode = m;
-  if (leavingMeasure && measures.length) toast("Las cotas se quedan en pantalla. Bórralas con clic derecho sobre ellas, con Supr o desde la pestaña Modelos.");
+  if (leavingMeasure && measures.length) toast("Las cotas se quedan en pantalla. Bórralas con clic derecho sobre ellas, con Supr o desde la pestaña Mediciones.");
   $$("[data-mode]").forEach(b => b.classList.toggle("on", b.dataset.mode === m));
+  MT.step = 0; MT.plane = null; if (FACES.some(f => f.temp)) clearFaces(true);
+  $("#rbArea").classList.toggle("on", m === "face");
+  $("#rbLen").classList.toggle("on", ["edge", "ptplane", "planeplane"].includes(m));
+  $("#btnMeas").classList.toggle("on", m !== "select" && m !== "section");
   if (m === "distance") distControl.activate();
   if (m === "angle") angleControl.activate();
   if (m !== "select") clearHover();
@@ -1216,6 +1480,7 @@ function clearMeasures() {
   distPlugin.clear(); anglePlugin.clear();
   measures.length = 0; hoverMeasure = null;
   renderMeasures();
+  if (FACES.length) clearFaces();
 }
 function markMeasureRow(m, on) {
   const i = measures.findIndex(q => q.m === m);
@@ -1227,7 +1492,7 @@ function renderMeasures() {
   box.innerHTML = `<div class="panel-title">Cotas <span class="muted">${measures.length}</span><span style="flex:1"></span>
       <button class="chip" data-ms="clear">Borrar todas</button></div>` +
     measures.map((x, i) => `<div class="sec" data-i="${i}">
-      <span class="lbl">${x.kind === "dist" ? "Distancia" : "Ángulo"} ${x.n}</span>
+      <span class="lbl">${x.label || (x.kind === "dist" ? "Distancia" : "Ángulo")} ${x.n}</span>
       <span class="val">${esc(measureValue(x))}</span>
       <button class="mini" data-ms="vis" title="Mostrar u ocultar">${x.m.visible === false ? ICON.eyeOff : ICON.eye}</button>
       <button class="mini danger" data-ms="del" title="Borrar cota">${ICON.x}</button></div>`).join("");
@@ -1243,6 +1508,282 @@ $("#measures").addEventListener("mouseover", e => { const r = e.target.closest("
 $("#measures").addEventListener("mouseleave", () => measures.forEach(x => x.m.setHighlighted(false)));
 wireMeasures(distPlugin, "dist");
 wireMeasures(anglePlugin, "angle");
+
+/* ============ Mediciones (como BIM Vision): volumen, área, longitud y peso ============ */
+// Volumen y superficie de cada elemento se calculan al cargar, a partir de su malla (fórmula de la divergencia).
+// Caras y aristas se calculan al hacer clic, en el proceso de segundo plano, con la geometría exacta del elemento.
+const MATERIALES = [
+  ["acero", "Acero", 7850], ["hormigon", "Hormigón en masa", 2300], ["ha", "Hormigón armado", 2500],
+  ["madera", "Madera", 500], ["aluminio", "Aluminio", 2700], ["custom", "Densidad propia", null]
+];
+const PESO_KEY = "visorIfcPeso";
+let pesoSel = { id: "acero", custom: 1000 };
+try { const v = JSON.parse(localStorage.getItem(PESO_KEY) || "null"); if (v && v.id) pesoSel = Object.assign(pesoSel, v); } catch (e) {}
+const matActual = () => MATERIALES.find(x => x[0] === pesoSel.id) || MATERIALES[0];
+const densidad = () => matActual()[2] ?? (Number(pesoSel.custom) || 0);
+const nombreMat = () => matActual()[0] === "custom" ? "Densidad propia" : matActual()[1];
+function pintarPeso() {   // en la cinta, nombre corto; la densidad va en la ayuda del botón
+  $("#pesoMat").textContent = matActual()[0] === "custom" ? "Propia" : matActual()[0] === "ha" ? "H. armado" : matActual()[0] === "hormigon" ? "Hormigón" : matActual()[1];
+  $("#rbPeso").title = "Peso de la selección = volumen × densidad. Material: " + nombreMat() + " (" + fmtDens(densidad()) + ")";
+}
+const nf = (v, d0, d1) => v.toLocaleString("es-ES", { minimumFractionDigits: d0, maximumFractionDigits: d1 ?? d0 });
+const fmtM3 = v => nf(v, 3) + " m³", fmtM2 = v => nf(v, 2) + " m²", fmtML = v => nf(v, 3) + " m";
+const fmtKg = v => v >= 1000 ? nf(v, 0) + " kg (" + nf(v / 1000, 3) + " t)" : nf(v, 2) + " kg";
+const fmtDens = v => nf(v, 0, 1) + " kg/m³";
+const vsub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const vdot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+
+function statsIds(ids) {
+  let n = 0, vol = 0, area = 0, open = 0, sin = 0;
+  for (const id of ids) {
+    const g = GEO.get(id);
+    if (!g) { sin++; continue; }
+    n++; vol += g.vol; area += g.area; if (g.open) open++;
+  }
+  return { n, vol, area, open, sin };
+}
+
+// ---- Resumen de la selección (se actualiza solo) ----
+function renderMeasSel() {
+  const box = $("#measSel"); if (!box) return;
+  const ids = scene.selectedObjectIds;
+  if (!ids.length) {
+    box.innerHTML = `<div class="msel-empty">Selecciona uno o varios elementos (clic, Ctrl+clic o desde el árbol) para ver su <b>volumen</b>, <b>superficie</b> y <b>peso</b>.</div>`;
+    return;
+  }
+  const s = statsIds(ids), d = densidad();
+  box.innerHTML = `<div class="panel-title">Selección <span class="muted">${fmtN(s.n)} elemento${s.n === 1 ? "" : "s"}</span></div>
+    <div class="kv">
+      <span>Volumen</span><b>${fmtM3(s.vol)}</b>
+      <span>Superficie total</span><b>${fmtM2(s.area)}</b>
+      <span>Peso · ${esc(nombreMat())} <i>${fmtDens(d)}</i></span><b>${fmtKg(s.vol * d)}</b>
+    </div>
+    ${s.open ? `<div class="mwarn">${fmtN(s.open)} elemento${s.open === 1 ? " tiene" : "s tienen"} la geometría abierta (no es un sólido cerrado): su volumen y su peso no son fiables.</div>` : ""}`;
+}
+
+// ---- Resultados fijados ----
+const RES = [];
+let resSeq = 0;
+function addRes(label, value, detail) {
+  RES.push({ n: ++resSeq, label, value, detail: detail || "" });
+  renderRes();
+  const p = $("#measRes"); if (p) p.scrollIntoView({ block: "nearest" });
+}
+function renderRes() {
+  const box = $("#measRes");
+  if (!RES.length) { box.innerHTML = ""; return; }
+  box.innerHTML = `<div class="panel-title">Resultados <span class="muted">${RES.length}</span><span style="flex:1"></span>
+      <button class="chip" data-mr="copyall" title="Copiar todos los resultados">Copiar</button><button class="chip" data-mr="clear">Borrar</button></div>` +
+    RES.map((r, i) => `<div class="sec mres" data-i="${i}" title="${esc(r.detail)}">
+      <span class="lbl">${esc(r.label)}${r.detail ? `<small>${esc(r.detail)}</small>` : ""}</span>
+      <span class="val">${esc(r.value)}</span>
+      <button class="mini" data-mr="copy" title="Copiar valor">${ICON.copy}</button>
+      <button class="mini danger" data-mr="del" title="Quitar">${ICON.x}</button></div>`).join("");
+}
+$("#measRes").addEventListener("click", e => {
+  const b = e.target.closest("[data-mr]"); if (!b) return;
+  const a = b.dataset.mr;
+  if (a === "clear") { RES.length = 0; renderRes(); return; }
+  if (a === "copyall") { copyText(RES.map(r => r.label + (r.detail ? " (" + r.detail + ")" : "") + "\t" + r.value).join("\n"), "Resultados copiados"); return; }
+  const i = +b.closest(".sec").dataset.i, r = RES[i]; if (!r) return;
+  if (a === "copy") copyText(r.value, "Copiado: " + r.value);
+  if (a === "del") { RES.splice(i, 1); renderRes(); }
+});
+
+function medirSeleccion(que) {
+  const ids = scene.selectedObjectIds;
+  if (!ids.length) { toast("Selecciona antes uno o varios elementos"); return; }
+  const s = statsIds(ids), det = fmtN(s.n) + " elemento" + (s.n === 1 ? "" : "s") + (s.open ? " · " + s.open + " con geometría abierta" : "");
+  if (que === "vol") addRes("Volumen", fmtM3(s.vol), det);
+  else if (que === "area") addRes("Superficie total", fmtM2(s.area), det);
+  else if (que === "peso") addRes("Peso · " + nombreMat(), fmtKg(s.vol * densidad()), det + " · " + fmtDens(densidad()));
+}
+
+// ---- Caras medidas (área) y caras de referencia (planos) ----
+const FACES = [];       // { id, area, perimeter, normal, centroid, tris, n, temp }
+let faceN = 0, faceSM = null, faceSMSeq = 0;
+function rebuildFaceOverlay() {
+  if (faceSM) { try { faceSM.destroy(); } catch (e) {} faceSM = null; }
+  if (FACES.length) {
+    faceSM = new SceneModel(scene, { id: "medicionCaras" + (++faceSMSeq), isModel: false, edges: false, dtxEnabled: false });
+    const acc = hex2rgb(THEME_MATERIALS[currentTheme()].measure);
+    FACES.forEach((f, i) => {
+      const t = f.tris, o = f.centroid, n = f.normal, k = 0.004;
+      const pos = new Float32Array(t.length);
+      for (let j = 0; j < t.length; j += 3) { pos[j] = t[j] - o[0] + n[0] * k; pos[j + 1] = t[j + 1] - o[1] + n[1] * k; pos[j + 2] = t[j + 2] - o[2] + n[2] * k; }
+      const idx = new Uint32Array(t.length / 3); for (let j = 0; j < idx.length; j++) idx[j] = j;
+      const mid = "mcara" + faceSMSeq + "_" + i;
+      faceSM.createMesh({ id: mid, primitive: "triangles", origin: o, positions: pos, indices: idx, color: f.temp ? [0.25, 0.55, 0.95] : acc, opacity: 0.6 });
+      faceSM.createEntity({ id: mid + "e", meshIds: [mid], isObject: false, pickable: false, collidable: false });
+    });
+    faceSM.finalize();
+  }
+  renderFaceLabels();
+}
+function renderFaceLabels() {
+  const box = $("#faceLabels");
+  box.innerHTML = FACES.filter(f => !f.temp).map(f => `<div class="flabel" data-n="${f.n}">C${f.n} · ${esc(fmtM2(f.area))}</div>`).join("");
+  posFaceLabels();
+}
+function posFaceLabels() {
+  const box = $("#faceLabels"); if (!box.children.length) return;
+  const cam = viewer.scene.camera, vm = cam.viewMatrix;
+  for (const el of box.children) {
+    const f = FACES.find(x => x.n === +el.dataset.n); if (!f) continue;
+    const c = f.centroid, z = vm[2] * c[0] + vm[6] * c[1] + vm[10] * c[2] + vm[14];
+    const p = cam.projectWorldPos(c);
+    el.style.display = z < 0 && p ? "" : "none";
+    if (p) { el.style.left = p[0] + "px"; el.style.top = p[1] + "px"; }
+  }
+}
+viewer.scene.camera.on("matrix", posFaceLabels);
+viewer.scene.camera.on("projMatrix", posFaceLabels);
+window.addEventListener("resize", posFaceLabels);
+
+function renderFaces() {
+  const box = $("#measFaces");
+  const caras = FACES.filter(f => !f.temp);
+  if (!caras.length) { box.innerHTML = ""; return; }
+  const tot = caras.reduce((a, f) => a + f.area, 0), per = caras.reduce((a, f) => a + f.perimeter, 0);
+  box.innerHTML = `<div class="panel-title">Área de caras <span class="muted">${caras.length}</span><span style="flex:1"></span>
+      <button class="chip" data-mf="pin" title="Pasar el total a Resultados">Fijar</button><button class="chip" data-mf="clear">Borrar</button></div>
+    <div class="kv"><span>Área total</span><b>${fmtM2(tot)}</b><span>Perímetro total</span><b>${fmtML(per)}</b></div>` +
+    caras.map(f => `<div class="sec" data-n="${f.n}"><span class="lbl">Cara C${f.n}<small>perímetro ${esc(fmtML(f.perimeter))}</small></span>
+      <span class="val">${esc(fmtM2(f.area))}</span><button class="mini danger" data-mf="del" title="Quitar">${ICON.x}</button></div>`).join("");
+}
+$("#measFaces").addEventListener("click", e => {
+  const b = e.target.closest("[data-mf]"); if (!b) return;
+  const a = b.dataset.mf;
+  const caras = FACES.filter(f => !f.temp);
+  if (a === "pin") { const tot = caras.reduce((s, f) => s + f.area, 0); addRes("Área de " + caras.length + " cara" + (caras.length === 1 ? "" : "s"), fmtM2(tot), "perímetro " + fmtML(caras.reduce((s, f) => s + f.perimeter, 0))); clearFaces(); return; }
+  if (a === "clear") { clearFaces(); return; }
+  if (a === "del") { const n = +b.closest(".sec").dataset.n; const i = FACES.findIndex(f => f.n === n); if (i >= 0) FACES.splice(i, 1); rebuildFaceOverlay(); renderFaces(); }
+});
+function clearFaces(soloTemp) {
+  for (let i = FACES.length - 1; i >= 0; i--) if (!soloTemp || FACES[i].temp) FACES.splice(i, 1);
+  rebuildFaceOverlay(); renderFaces();
+}
+const mismaCara = (a, b) => a.id === b.id && Math.abs(vdot(a.normal, b.normal) - 1) < 1e-6 && Math.hypot(...vsub(a.centroid, b.centroid)) < 1e-4;
+
+// ---- Cotas creadas por las herramientas (arista, punto-plano, plano-plano) ----
+let cotaSeq = 0;
+function addCota(label, a, b, entity) {
+  const m = distPlugin.createMeasurement({ id: "cotaMed" + (++cotaSeq), origin: { entity, worldPos: a }, target: { entity, worldPos: b }, visible: true });
+  try { m.clickable = true; } catch (e) {}
+  measures.push({ plugin: distPlugin, m, kind: "dist", n: ++measureSeq, label });
+  renderMeasures();
+  return m;
+}
+
+// ---- Clic en el modelo con una herramienta de medición ----
+const MT = { step: 0, plane: null, busy: false };
+const MEDIR_MODOS = ["face", "edge", "ptplane", "planeplane"];
+async function measureClick(canvasPos) {
+  if (MT.busy) return;
+  const puntoLibre = mode === "ptplane" && MT.step === 1;
+  let hit = null;
+  if (mode === "edge" || puntoLibre) hit = scene.pick({ canvasPos, snapToEdge: true, snapToVertex: puntoLibre, snapRadius: 18 });
+  if (!hit || !hit.worldPos || !hit.entity) hit = scene.pick({ canvasPos, pickSurface: true });
+  if (!hit || !hit.entity || !hit.worldPos || !scene.objects[hit.entity.id]) { toast("Haz clic sobre un elemento del modelo"); return; }
+  const id = hit.entity.id, p = [...hit.worldPos];
+  if (puntoLibre) {   // punto → plano
+    const pl = MT.plane, n = pl.normal, d = vdot(n, vsub(p, pl.point));
+    const q = [p[0] - n[0] * d, p[1] - n[1] * d, p[2] - n[2] * d];
+    if (Math.abs(d) < 1e-5) toast("El punto está sobre el plano (distancia 0)");
+    else addCota("Punto-plano", q, p, hit.entity);
+    MT.step = 0; MT.plane = null; clearFaces(true); pintarPasoMedida();
+    return;
+  }
+  const g = GEO.get(id), m = g && models[g.model];
+  if (!g || !m) { toast("Ese elemento no tiene geometría medible", true); return; }
+  MT.busy = true; document.body.classList.add("measuring");
+  try {
+    const r = await askGeo(m, { op: mode === "edge" ? "edge" : "face", guid: g.guid, p });
+    if (!r || r.error) { toast((r && r.error) || "No se pudo medir", true); return; }
+    if (mode === "edge") { addCota("Arista", r.a, r.b, hit.entity); return; }
+    const cara = { id, area: r.area, perimeter: r.perimeter, normal: r.normal, centroid: r.centroid, point: r.point, tris: r.tris };
+    if (mode === "face") {
+      const i = FACES.findIndex(f => !f.temp && mismaCara(f, cara));
+      if (i >= 0) FACES.splice(i, 1); else FACES.push(Object.assign(cara, { n: ++faceN }));
+      rebuildFaceOverlay(); renderFaces();
+    } else if (mode === "ptplane" || (mode === "planeplane" && MT.step === 0)) {
+      MT.plane = cara; MT.step = 1;
+      FACES.push(Object.assign(cara, { n: ++faceN, temp: true })); rebuildFaceOverlay();
+      pintarPasoMedida();
+    } else {   // plano → plano
+      const a = MT.plane, b = cara, c = Math.abs(vdot(a.normal, b.normal));
+      if (c < Math.cos(Math.PI / 180)) {
+        const ang = Math.acos(Math.min(1, c)) * 180 / Math.PI;
+        addRes("Plano a plano: caras no paralelas", nf(ang, 1) + "°", "ángulo entre las dos caras; para medir la distancia tienen que ser paralelas");
+        toast("Las caras no son paralelas: forman " + nf(ang, 1) + "°");
+      } else {
+        const n = a.normal, d = vdot(n, vsub(b.point, a.point));
+        const q = [b.point[0] - n[0] * d, b.point[1] - n[1] * d, b.point[2] - n[2] * d];
+        if (Math.abs(d) < 1e-5) toast("Las dos caras están en el mismo plano (distancia 0)");
+        else addCota("Plano-plano", q, b.point, hit.entity);
+      }
+      MT.step = 0; MT.plane = null; clearFaces(true); pintarPasoMedida();
+    }
+  } catch (err) { toast("No se pudo medir: " + err.message, true); }
+  finally { MT.busy = false; document.body.classList.remove("measuring"); }
+}
+function pintarPasoMedida() {
+  const pasos = {
+    ptplane: ["<b>Punto a plano:</b> 1) clic en la cara que define el plano", "<b>Punto a plano:</b> 2) clic en el punto (se ajusta a vértices y aristas)"],
+    planeplane: ["<b>Plano a plano:</b> 1) clic en la primera cara", "<b>Plano a plano:</b> 2) clic en una cara paralela"]
+  };
+  if (!pasos[mode]) return;
+  const h = $("#modeHint"); h.innerHTML = pasos[mode][MT.step] + ". Esc para salir"; h.classList.add("show");
+}
+
+// ---- Menús desplegables de la cinta ----
+function abrirMenuMed(btn, html, onPick) {
+  ctx.innerHTML = html;
+  ctx.classList.add("show");
+  const r = btn.getBoundingClientRect();
+  ctx.style.left = Math.min(r.left, innerWidth - ctx.offsetWidth - 6) + "px";
+  ctx.style.top = Math.min(r.bottom + 4, innerHeight - ctx.offsetHeight - 6) + "px";
+  ctx.onclick = ev => {
+    if (ev.target.closest("input")) return;
+    const b = ev.target.closest("[data-mt]"); if (!b) return;
+    ctx.onclick = null; closeCtx(); onPick(b.dataset.mt);
+  };
+}
+$("#rbVol").onclick = () => medirSeleccion("vol");
+$("#rbArea").onclick = e => abrirMenuMed(e.currentTarget, `
+  <button data-mt="face">Área de cara<kbd>clic en caras</kbd></button>
+  <button data-mt="sel">Superficie total de la selección</button>`,
+  a => a === "face" ? setMode("face") : medirSeleccion("area"));
+$("#rbLen").onclick = e => abrirMenuMed(e.currentTarget, `
+  <button data-mt="distance">Entre dos puntos</button>
+  <button data-mt="edge">Arista completa</button>
+  <button data-mt="ptplane">Punto a plano</button>
+  <button data-mt="planeplane">Plano a plano<kbd>caras paralelas</kbd></button>`,
+  a => setMode(a));
+$("#rbPeso").onclick = e => abrirMenuMed(e.currentTarget,
+  MATERIALES.filter(m => m[0] !== "custom").map(m => `<button data-mt="${m[0]}" class="${pesoSel.id === m[0] ? "on" : ""}">${m[1]}<kbd>${fmtDens(m[2])}</kbd></button>`).join("") +
+  `<hr><div class="mdens"><button data-mt="custom" class="${pesoSel.id === "custom" ? "on" : ""}">Densidad propia</button>
+    <input type="number" id="densCustom" min="0" step="10" value="${esc(String(pesoSel.custom))}" aria-label="Densidad propia en kg/m³"><span>kg/m³</span></div>
+  <div class="mnote">Peso = volumen × densidad de los elementos seleccionados</div>`,
+  a => {
+    if (a === "custom") { const v = parseFloat(String($("#densCustom").value).replace(",", ".")); if (!(v > 0)) { toast("Escribe una densidad mayor que 0", true); return; } pesoSel.custom = v; }
+    pesoSel.id = a;
+    try { localStorage.setItem(PESO_KEY, JSON.stringify(pesoSel)); } catch (err) {}
+    pintarPeso();
+    renderMeasSel();
+    if (scene.selectedObjectIds.length) medirSeleccion("peso");
+    else toast("Material: " + nombreMat() + " (" + fmtDens(densidad()) + "). Selecciona elementos para calcular su peso.");
+  });
+$("#ctx").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "densCustom") { const b = ctx.querySelector('[data-mt="custom"]'); if (b) b.click(); } });
+pintarPeso();
+function abrirMediciones() {
+  if (narrow()) document.body.classList.add("show-left"); else document.body.classList.remove("hide-left");
+  $$(".tab").forEach(x => x.classList.toggle("active", x.dataset.tab === "meas"));
+  $$(".pane").forEach(p => p.classList.toggle("active", p.id === "pane-meas"));
+}
+$("#btnMeas").onclick = abrirMediciones;
+renderMeasSel();
+
 
 /* ============ Planos de sección ============ */
 let secSeq = 0;
@@ -1527,7 +2068,7 @@ async function copyText(text, okMsg) {
     ta.remove();
   }
 }
-window.__visor = { viewer, models, jobs, distPlugin, anglePlugin };   // para depurar desde la consola
+window.__visor = { viewer, models, jobs, distPlugin, anglePlugin, GEO, FACES, RES, measures, setMode, get mode() { return mode; } };   // para depurar desde la consola
 </script>
 </body>
 </html>
