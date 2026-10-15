@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Visores BIM · BECSA</title>
+<title>BECSA Visores</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
@@ -28,12 +28,12 @@
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
 body{background:var(--bg);color:var(--text);font:15px/1.5 var(--sans);display:flex;flex-direction:column;min-height:100vh}
-main{flex:1;width:100%;max-width:980px;margin:0 auto;padding:56px 24px 40px}
+main{flex:1;width:100%;max-width:1120px;margin:0 auto;padding:56px 24px 40px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;color:var(--muted);margin-bottom:18px}
 .brand svg{width:22px;height:22px}
 h1{font-size:30px;line-height:1.2;font-weight:600;margin:0 0 8px;letter-spacing:-.01em}
 .lead{color:var(--muted);margin:0 0 36px;max-width:620px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:20px}
 .card{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px;box-shadow:var(--shadow);text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
 .card:hover{border-color:var(--accent);transform:translateY(-2px)}
 .card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
@@ -54,10 +54,10 @@ h1{font-size:30px;line-height:1.2;font-weight:600;margin:0 0 8px;letter-spacing:
 <main>
   <div class="brand">
     <svg viewBox="0 0 32 32"><path d="M4 24 16 4l12 20z" style="fill:var(--accent)"/><path d="M10 24h12" style="stroke:var(--panel)" stroke-width="3"/></svg>
-    BECSA · Herramientas BIM
+    BECSA Visores
   </div>
-  <h1>Visores de modelos</h1>
-  <p class="lead">Elige el visor según los archivos que tengas. Los dos funcionan en el navegador sin instalar nada y los archivos no salen de tu equipo.</p>
+  <h1>Visores de modelos y planos</h1>
+  <p class="lead">Elige el visor según los archivos que tengas. Todos funcionan en el navegador sin instalar nada y los archivos no salen de tu equipo.</p>
 
   <div class="grid">
     <a class="card" href="ifc/index.html">
@@ -67,8 +67,8 @@ h1{font-size:30px;line-height:1.2;font-weight:600;margin:0 0 8px;letter-spacing:
       <ul>
         <li>Varios IFC a la vez en sus coordenadas reales</li>
         <li>Árbol BIM, GUID, Psets, cantidades, tipo y materiales</li>
-        <li>Secciones, cotas de distancia y ángulo</li>
-        <li>Ocultar, aislar, transparencia y color por modelo</li>
+        <li>Mediciones: volumen, área, longitud, peso, distancia y ángulo</li>
+        <li>Secciones, ocultar, aislar y color por modelo</li>
       </ul>
       <span class="go">Abrir visor IFC <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
     </a>
@@ -79,11 +79,24 @@ h1{font-size:30px;line-height:1.2;font-weight:600;margin:0 0 8px;letter-spacing:
       <div class="formats"><span>DAE</span><span>XLSX</span></div>
       <ul>
         <li>Geometría y parámetros de Revit enlazados por ElementId</li>
-        <li>Colorear por categoría, modelo o parámetro</li>
-        <li>Caja de sección, plantas y alzados</li>
-        <li>Mediciones con coste, exportables a Excel y CSV</li>
+        <li>Proyectos desde una carpeta (SharePoint) compartida</li>
+        <li>Caja de sección, plano de corte, plantas y alzados</li>
+        <li>Mediciones con BC3, partidas, fórmulas y filtros; exporta a BC3 y Excel</li>
       </ul>
       <span class="go">Abrir visor Revit <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <a class="card" href="cad/index.html">
+      <h2>Visor CAD</h2>
+      <p class="sub">Para planos 2D de AutoCAD y otros programas CAD.</p>
+      <div class="formats"><span>DWG</span><span>DXF</span></div>
+      <ul>
+        <li>Modelo y presentaciones</li>
+        <li>Capas: encender y apagar</li>
+        <li>Medir distancia, área, ángulo y arco</li>
+        <li>Línea de comandos al estilo AutoCAD</li>
+      </ul>
+      <span class="go">Abrir visor CAD <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
     </a>
   </div>
 
