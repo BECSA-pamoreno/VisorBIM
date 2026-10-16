@@ -93,17 +93,51 @@ input[type=text],select{width:100%;padding:6px 9px;border:1px solid var(--line);
 .toolbar select{width:auto;background:var(--panel);padding:5px 8px}
 .toolbar .btn{padding:5px 10px;font-size:14px}
 .sep{width:1px;background:var(--line);margin:0 2px}
-#clipPanels{position:absolute;left:12px;bottom:12px;display:flex;flex-direction:column;gap:8px;max-width:calc(100% - 24px)}
-#sectionPanel,#cutPanel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;width:290px;max-width:100%}
+#clipPanels{position:absolute;left:12px;bottom:12px;display:flex;flex-direction:row;flex-wrap:wrap-reverse;align-items:flex-end;gap:8px;max-width:calc(100% - 24px);pointer-events:none;z-index:8}
+#clipPanels>*{pointer-events:auto}
+#measPanel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;width:300px;max-width:100%;display:flex;flex-direction:column;max-height:calc(100vh - 220px)}
+#measPanel .cp-head{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+#measPanel .cp-head h2{margin:0}
+#measPanel .mm-modes{display:flex;gap:6px;margin-bottom:6px}
+#measPanel .mm-modes .btn{display:inline-flex;align-items:center;gap:5px;flex:1;justify-content:center}
+#measPanel .mm-modes svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#measHint{margin:0 0 6px;font-size:13px}
+#dimAxesChk{font-size:13px}
+#dimListWrap{overflow:auto;min-height:0;border-top:1px solid var(--line);margin-top:4px;padding-top:4px}
+#measPanel .mini{border:1px solid transparent;background:none;border-radius:5px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);padding:0}
+#measPanel .mini:hover{background:var(--soft);color:var(--ink)}
+.dim-ic{width:18px;text-align:center;color:var(--muted);font-weight:700;flex:none}
+#view #lens[hidden]{display:none}
+#view #lens{position:absolute;width:150px;height:150px;border-radius:50%;border:2px solid var(--accent);box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none;z-index:9;background:var(--viewport)}
+#dimSvg .ang .arc{fill:none;stroke:var(--accent);stroke-width:2}
+#dimSvg .ang .arcfill{fill:color-mix(in srgb,var(--accent) 22%,transparent);stroke:none;opacity:1}
+#dimSvg .ang .vtx{fill:var(--ink);stroke:var(--accent)}
+#dimSvg .ang.rubber .ln{stroke-dasharray:6 4}
+#cutPanel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;width:290px;max-width:100%}
 #cutPanel h2{margin-bottom:6px}
 #cutPanel .btn{white-space:normal}
-.cutrow{display:grid;grid-template-columns:1fr 84px;gap:8px;align-items:center;margin:4px 0}
-.cutrow input[type=number]{width:100%;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--soft);text-align:right;font-variant-numeric:tabular-nums}
 #view.picking canvas{cursor:crosshair}
-#sectionPanel h2{margin-bottom:6px}
-#sectionPanel .btn{white-space:normal}
-.rng{display:grid;grid-template-columns:62px 1fr 1fr;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin:4px 0}
-.rng input{width:100%}
+#cutPanel{width:310px}
+#cutPanel .cp-head{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+#cutPanel .cp-head h2{margin:0}
+#cutPanel .mini,.cutitem .mini{border:1px solid transparent;background:none;border-radius:5px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);padding:0}
+#cutPanel .mini:hover{background:var(--soft);color:var(--ink)}
+.cutitem .mini.danger:hover{color:var(--warn)}
+.cutitem .mini svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.cutitem{display:flex;align-items:center;gap:4px;padding:3px 4px 3px 6px;border-radius:6px;border:1px solid transparent;cursor:pointer}
+.cutitem:hover{background:var(--soft)}
+.cutitem.cur{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.cutitem .lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px}
+.cutitem.off .lbl{color:var(--muted);text-decoration:line-through}
+#cutPanel .cp-acts .btn{white-space:nowrap}
+#cutList{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
+#cutList:empty{display:none}
+.toolbar .btn{display:inline-flex;align-items:center;gap:6px}
+.toolbar .btn svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.toolbar .btn .cnt{font-size:11px;font-weight:700;background:var(--accent);color:var(--accent-ink);border-radius:9px;padding:0 6px;line-height:17px}
+#view.cutdrag canvas{cursor:grabbing !important}
+#view.cuthover canvas{cursor:grab}
+#view.walking #clipPanels{display:none}
 #dimSvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
 #dimSvg .halo{stroke:var(--panel);stroke-width:5;stroke-linecap:round;opacity:.85}
 #dimSvg .ln{stroke:var(--accent);stroke-width:2;stroke-linecap:round}
@@ -117,6 +151,7 @@ input[type=text],select{width:100%;padding:6px 9px;border:1px solid var(--line);
 .dim-ax{position:absolute;transform:translate(-50%,-50%);font-size:11.5px;font-weight:600;padding:1px 5px;border-radius:4px;color:#fff;white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:none;opacity:.95}
 .dim-ax.x{background:#d6453d} .dim-ax.y{background:#2f9a48} .dim-ax.z{background:#2f6fd6}
 #dimAxesChk{margin:0 0 6px}
+#dimAxesChk[hidden]{display:none}
 #dimLabels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .dim-label{position:absolute;transform:translate(-50%,-50%);background:var(--ink);color:var(--panel);font-size:13px;font-weight:600;padding:2px 7px;border-radius:5px;white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:auto;cursor:context-menu;user-select:none;box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .dim-label.hl{background:var(--accent);color:var(--accent-ink)}
@@ -334,6 +369,14 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
   main>aside,#center{grid-row:auto}
   aside.left,aside.right{border:0;border-top:1px solid var(--line)}
 }
+#walkHud{position:absolute;left:12px;bottom:12px;z-index:6;max-width:min(560px,calc(100% - 24px));background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:8px 12px;box-shadow:0 6px 18px rgba(0,0,0,.18);font-size:13px}
+#walkHud .wh-head{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+#walkHud .wh-msg{margin:4px 0 6px;padding:5px 8px;border-radius:5px;background:color-mix(in srgb,var(--accent) 18%,transparent)}
+#walkHud .wh-keys{display:flex;flex-wrap:wrap;gap:4px 12px;color:var(--muted)}
+#walkHud .wh-st{margin-top:5px;font-size:12px;color:var(--muted)}
+#walkHud kbd{font-size:11px}
+#view.walking canvas{cursor:grab}
+#view.walking canvas:active{cursor:grabbing}
 @media (prefers-reduced-motion: reduce){ *{transition:none !important} }
 </style>
 </head>
@@ -346,7 +389,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
   <button class="projchip" id="projChip" hidden><b></b><span class="mstatus"></span></button>
   <div class="seg" id="modoSeg" role="group" aria-label="Modo de uso">
     <button type="button" data-modo="sencillo" title="Lo esencial: navegar, buscar, plano de corte, cotas y consultar la medición">Sencillo</button>
-    <button type="button" data-modo="tecnico" title="Todas las herramientas: sección, rayos X, abrir BC3, asignar partidas, fórmulas y exportar a BC3">Avanzado</button>
+    <button type="button" data-modo="tecnico" title="Todas las herramientas: rayos X, abrir BC3, asignar partidas, fórmulas y exportar a BC3">Avanzado</button>
   </div>
   <button class="btn primary" id="projBtn" title="Abrir un proyecto de la carpeta de proyectos">Proyectos</button>
   <button class="btn" id="openBtn">Añadir modelos</button>
@@ -358,11 +401,6 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
     <section>
       <h2>Modelos</h2>
       <ul class="models" id="models"><li class="muted">Añade el .dae y el .xlsx de cada modelo. Se colocan solos por sus coordenadas.</li></ul>
-    </section>
-    <section id="dimSection" hidden>
-      <div class="row" style="margin-bottom:6px"><h2 style="margin:0">Cotas <span class="count" id="dimCount"></span></h2><button class="btn small" id="dimClear" style="flex:none">Borrar todas</button></div>
-      <label class="check" id="dimAxesChk"><input type="checkbox" id="dimAxes" checked> Mostrar componentes X, Y, Z en cotas oblicuas</label>
-      <ul class="list" id="dimList"></ul>
     </section>
     <section>
       <h2>Buscar elementos</h2>
@@ -417,58 +455,64 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
         <option value="e">Alzado este</option>
         <option value="w">Alzado oeste</option>
       </select>
-      <button class="btn" id="orthoBtn" aria-pressed="false" title="Proyección ortogonal">Ortogonal</button>
-      <button class="btn" id="fitBtn" title="Encuadrar lo visible (F)">Encuadrar</button>
+      <button class="btn" id="orthoBtn" aria-pressed="false" title="Proyección ortogonal"><svg viewBox="0 0 24 24"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg><span>Ortogonal</span></button>
+      <button class="btn" id="fitBtn" title="Encuadrar lo visible (F)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg><span>Encuadrar</span></button>
       <span class="sep"></span>
-      <button class="btn solo-tecnico" id="sectionBtn" aria-pressed="false">Sección</button>
-      <button class="btn" id="cutBtn" aria-pressed="false" title="Corte alineado a una cara del modelo">Plano de corte</button>
-      <button class="btn solo-tecnico" id="xrayBtn" aria-pressed="false">Rayos X</button>
-      <button class="btn" id="edgesBtn" aria-pressed="true">Aristas</button>
+      <button class="btn" id="cutBtn" aria-pressed="false" title="Planos de corte: clic en una cara para crear uno; se pueden crear varios, moverlos y ocultarlos"><svg viewBox="0 0 24 24"><path d="M3 17 12 21l9-4M3 12l9 4 9-4"/><path d="M12 3v9" stroke-dasharray="2 2"/></svg><span>Planos de corte</span><b class="cnt" id="cutCnt" hidden></b></button>
+      <button class="btn solo-tecnico" id="xrayBtn" aria-pressed="false" title="Ver el modelo en transparencia"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="11" height="11" rx="1"/><rect x="9" y="9" width="11" height="11" rx="1" stroke-dasharray="2 2"/></svg><span>Rayos X</span></button>
+      <button class="btn" id="edgesBtn" aria-pressed="true" title="Mostrar u ocultar las aristas"><svg viewBox="0 0 24 24"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg><span>Aristas</span></button>
       <span class="sep"></span>
-      <button class="btn" id="showAllBtn" title="Quitar ocultos y aislamiento">Mostrar todo</button>
+      <button class="btn" id="showAllBtn" title="Quitar ocultos y aislamiento"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg><span>Mostrar todo</span></button>
       <span class="sep"></span>
-      <button class="btn" id="dimBtn" aria-pressed="false" title="Medir la distancia entre dos puntos, con imán a vértices y aristas (D)">Distancia</button>
-      <button class="btn" id="measureBtn" aria-pressed="false">Medición</button>
+      <button class="btn" id="dimBtn" aria-pressed="false" title="Medir distancias y ángulos, con imán a vértices y aristas y lupa (D)"><svg viewBox="0 0 24 24"><path d="M3 17 17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/></svg><span>Medir</span><b class="cnt" id="dimCnt" hidden title="Cotas y ángulos en el modelo"></b></button>
+      <button class="btn" id="walkBtn" aria-pressed="false" title="Recorrer el modelo a pie: W A S D para andar, arrastrar para mirar, clic para ver propiedades"><svg viewBox="0 0 24 24"><circle cx="13" cy="4.5" r="2"/><path d="M10 21l2-6 3 3v3M9 11l3-3 3 3 3 1M12 8l-1 6"/></svg><span>Caminar</span></button>
+      <button class="btn" id="measureBtn" aria-pressed="false" title="Tabla de medición y presupuesto"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 18h2M12 18h2M16 15v3"/></svg><span>Medición</span></button>
     </div>
     <div id="clipPanels">
+    <div id="measPanel" class="fpanel" hidden>
+      <div class="cp-head"><h2>Medir</h2><span class="count" id="dimCount"></span><span class="spacer"></span><button class="mini" id="measClose" title="Cerrar (las cotas se quedan en pantalla)">✕</button></div>
+      <div class="mm-modes">
+        <button class="btn small" data-mm="dist" aria-pressed="false" title="Distancia entre dos puntos (D)"><svg viewBox="0 0 24 24"><path d="M4 12h16M4 8v8M20 8v8"/><path d="M8 10l-3 2 3 2M16 10l3 2-3 2"/></svg>Distancia</button>
+        <button class="btn small" data-mm="ang" aria-pressed="false" title="Ángulo entre tres puntos: el segundo es el vértice"><svg viewBox="0 0 24 24"><path d="M4 20 18 5M4 20h16"/><path d="M11 20a7 7 0 0 0-2.2-5.1"/></svg>Ángulo</button>
+      </div>
+      <p class="muted" id="measHint"></p>
+      <label class="check" id="dimAxesChk"><input type="checkbox" id="dimAxes" checked> Componentes X, Y, Z en cotas oblicuas</label>
+      <div id="dimListWrap" hidden>
+        <ul class="list" id="dimList"></ul>
+        <div class="row" style="margin:6px 0 0"><button class="btn small" id="dimClear">Borrar todas</button></div>
+      </div>
+    </div>
     <div id="cutPanel" hidden>
-      <h2>Plano de corte</h2>
-      <p class="muted" id="cutHint" style="margin:0 0 6px">Haz clic en una cara del modelo.</p>
+      <div class="cp-head"><h2>Planos de corte</h2><span class="spacer"></span><button class="mini" id="cutClose" title="Cerrar el panel (los cortes se mantienen)">✕</button></div>
+      <p class="muted" id="cutHint" style="margin:0 0 6px"></p>
+      <div id="cutList"></div>
       <div id="cutControls" hidden>
-        <div class="cutrow">
-          <input type="range" id="cutRange" min="-100" max="100" step="0.01" value="0" aria-label="Desplazar el plano">
-          <input type="number" id="cutNum" step="0.01" value="0" aria-label="Desplazamiento en metros" title="Desplazamiento en metros">
-        </div>
-        <div class="muted" style="font-size:13px;margin-bottom:6px">Desplazamiento desde la cara (m). Positivo: hacia dentro.</div>
-        <label class="check"><input type="checkbox" id="cutShow" checked> Mostrar el plano</label>
-        <div class="row" style="margin:6px 0 0;flex-wrap:wrap">
-          <button class="btn small" id="cutFlip">Invertir</button>
-          <button class="btn small" id="cutLook">Mirar al corte</button>
-          <button class="btn small" id="cutNew">Nuevo plano</button>
-        </div>
+        <div class="row" style="margin:0 0 6px;flex-wrap:wrap"><button class="btn small" id="cutLook">Mirar al corte</button></div>
       </div>
-    </div>
-    <div id="sectionPanel" hidden>
-      <h2>Caja de sección</h2>
-      <div class="rng"><span>X (E-O)</span><input type="range" id="sx0" min="0" max="1000" value="0" aria-label="X mínimo"><input type="range" id="sx1" min="0" max="1000" value="1000" aria-label="X máximo"></div>
-      <div class="rng"><span>Y (N-S)</span><input type="range" id="sy0" min="0" max="1000" value="0" aria-label="Y mínimo"><input type="range" id="sy1" min="0" max="1000" value="1000" aria-label="Y máximo"></div>
-      <div class="rng"><span>Altura</span><input type="range" id="sz0" min="0" max="1000" value="0" aria-label="Altura mínima"><input type="range" id="sz1" min="0" max="1000" value="1000" aria-label="Altura máxima"></div>
-      <div class="row" style="margin:8px 0 0">
-        <button class="btn small" id="sectionSel" disabled>Ajustar a selección</button>
-        <button class="btn small" id="sectionReset">Restablecer</button>
+      <div class="row cp-acts" style="margin:6px 0 0">
+        <button class="btn small primary" id="cutNew" title="Clic en una cara del modelo para crear otro corte alineado con ella">+ Por cara</button>
+        <button class="btn small" id="cutHoriz" title="Plano horizontal a media altura del modelo; se mueve arrastrando su flecha">+ Horizontal</button>
+        <button class="btn small" id="cutClear">Quitar todos</button>
       </div>
     </div>
     </div>
+    <canvas id="lens" hidden></canvas>
     <svg id="dimSvg"></svg>
     <div id="dimLabels"></div>
     <div id="toast" hidden></div>
+    <div id="walkHud" hidden>
+      <div class="wh-head"><b>Modo caminar</b><span class="spacer"></span><button class="btn small" id="walkExit">Salir <kbd>Esc</kbd></button></div>
+      <div class="wh-msg" id="walkMsg" hidden></div>
+      <div class="wh-keys"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> o <kbd>↑</kbd><kbd>↓</kbd> andar</span><span><kbd>←</kbd><kbd>→</kbd> girar</span><span>arrastrar: mirar</span><span><kbd>Mayús</kbd> correr</span><span>clic: propiedades</span><span><kbd>H</kbd> ocultar</span><span>doble clic: ir a ese punto</span><span><kbd>G</kbd> volar / caminar</span></div>
+      <div class="wh-st" id="walkSt"></div>
+    </div>
   </div>
   </div>
 
   <aside class="right">
     <section>
       <h2>Propiedades</h2>
-      <p class="muted" id="selHint">Haz clic en un elemento para ver sus parámetros.<br><kbd>Ctrl</kbd>+clic: añadir o quitar de la selección. <kbd>Ctrl</kbd>+arrastrar: ventana (hacia la derecha, elementos enteros dentro; hacia la izquierda, los que toque; con <kbd>Mayús</kbd> quita).<br><kbd>H</kbd> ocultar, <kbd>I</kbd> aislar, <kbd>F</kbd> encuadrar, <kbd>D</kbd> distancia, <kbd>Esc</kbd> deseleccionar.</p>
+      <p class="muted" id="selHint">Haz clic en un elemento para ver sus parámetros.<br><kbd>Ctrl</kbd>+clic: añadir o quitar de la selección. <kbd>Ctrl</kbd>+arrastrar: ventana (hacia la derecha, elementos enteros dentro; hacia la izquierda, los que toque; con <kbd>Mayús</kbd> quita).<br><kbd>H</kbd> ocultar, <kbd>I</kbd> aislar, <kbd>F</kbd> encuadrar, <kbd>D</kbd> medir, <kbd>Esc</kbd> deseleccionar.</p>
       <div id="multiSel" hidden>
         <p class="sel-title"><span id="msCount"></span> elementos seleccionados</p>
         <p class="sel-sub" id="msSub"></p>
@@ -850,17 +894,14 @@ function workerMain(){
   sun.position.set(0.6, 1, 0.4);
   scene.add(sun);
 
-  const clipPlanes = [];        // caja de sección
-  const allPlanes = [];         // lo que usan los materiales: caja + plano de corte
-  const CUT = { on:false, picking:false, point:new THREE.Vector3(), normal:new THREE.Vector3(0, -1, 0), offset:0, plane:new THREE.Plane() };
+  const allPlanes = [];         // lo que usan los materiales: los planos de corte activos
+  const CUTS = [];              // { id, label, point, normal, offset, plane, active, show, horiz, helper }
+  const CUT = { picking:false, cur:null, seq:0, drag:null, get on(){ return CUTS.some(c => c.active); } };
   const matMain = new THREE.MeshLambertMaterial({ vertexColors:true, side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1 });
   const matGhost = new THREE.MeshLambertMaterial({ color:0x9aa5ab, transparent:true, opacity:0.07, depthWrite:false, side:THREE.DoubleSide });
   const matSel = new THREE.MeshLambertMaterial({ color:0xF2B705, emissive:0x3a2a00, side:THREE.DoubleSide });
   const matEdge = new THREE.LineBasicMaterial({ color:0x3A4A54, transparent:true, opacity:0.5 });
   const MATS = [matMain, matGhost, matSel, matEdge];
-  const sectionHelper = new THREE.Box3Helper(new THREE.Box3(), 0xF2B705);
-  sectionHelper.visible = false;
-  scene.add(sectionHelper);
 
   const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   function applyTheme(){
@@ -1033,6 +1074,7 @@ function workerMain(){
   }
 
   function removeModel(m){
+    if (WALK.on) setWalk(false);
     const i = S.models.indexOf(m);
     if (i >= 0) S.models.splice(i, 1);
     if (m.group){
@@ -1045,7 +1087,7 @@ function workerMain(){
     if (S.isolate) S.isolate.delete(m.id);
     if (!S.models.some(mm => mm.ready)) S.sceneOrigin = null;
     onModelsChanged(false);
-    if (!S.models.length){ $("empty").hidden = false; $("toolbar").hidden = true; setSection(false); setCut(false); cerrarProyecto(); pintarInicio(); }
+    if (!S.models.length){ $("empty").hidden = false; $("toolbar").hidden = true; clearCuts(); setCut(false); cerrarProyecto(); pintarInicio(); }
   }
 
   // ---------- Categorías, colores y dibujo ----------
@@ -1164,7 +1206,6 @@ function workerMain(){
     if (fit) fitAll();
     showProps();
     refreshMeasure();
-    $("sectionSel").disabled = !selCount();
   }
 
   function computeBounds(){
@@ -1173,7 +1214,6 @@ function workerMain(){
       if (!m.ready || !m.visible) return;
       m.chunks.forEach(c => { const b = c.main.geometry.boundingBox.clone().translate(m.group.position); S.bounds.union(b); });
     });
-    if (S.section) applySection();
   }
 
   // ---------- UI de modelos ----------
@@ -1307,7 +1347,6 @@ function workerMain(){
         box.expandByPoint(tmpV.set(B[i+3] + off.x, B[i+4] + off.y, B[i+5] + off.z));
       }
     });
-    if (S.section && !box.isEmpty()) box.intersect(S.sectionBox);
     return box;
   }
   const tmpV = new THREE.Vector3();
@@ -1364,8 +1403,7 @@ function workerMain(){
     return Math.max(tmin, 0);
   }
   function inSection(p){
-    if (S.section && !S.sectionBox.containsPoint(p)) return false;
-    if (CUT.on && CUT.plane.distanceToPoint(p) < -1e-6) return false;
+    for (const c of CUTS) if (c.active && c.plane.distanceToPoint(p) < -1e-6) return false;
     return true;
   }
   let lastHitNormal = null;
@@ -1395,6 +1433,29 @@ function workerMain(){
     }
     return best === Infinity ? null : best;
   }
+  // ¿Está el punto (coordenadas del grupo) dentro del sólido del elemento? Paridad de cruces con un rayo oblicuo
+  function insideElement(m, e, p){
+    const c = m.chunks[m.elC[e]], P = c.pos, F = c.full;
+    const t0 = m.elT[e] * 3, t1 = t0 + m.elTN[e] * 3;
+    const dx = 0.5773, dy = 0.5774, dz = 0.5776;
+    let n = 0;
+    for (let t = t0; t < t1; t += 3){
+      const a = F[t]*3, b = F[t+1]*3, cc = F[t+2]*3;
+      const e1x = P[b]-P[a], e1y = P[b+1]-P[a+1], e1z = P[b+2]-P[a+2];
+      const e2x = P[cc]-P[a], e2y = P[cc+1]-P[a+1], e2z = P[cc+2]-P[a+2];
+      const px = dy*e2z - dz*e2y, py = dz*e2x - dx*e2z, pz = dx*e2y - dy*e2x;
+      const det = e1x*px + e1y*py + e1z*pz;
+      if (Math.abs(det) < 1e-12) continue;
+      const inv = 1 / det;
+      const sx = p.x - P[a], sy = p.y - P[a+1], sz = p.z - P[a+2];
+      const u = (sx*px + sy*py + sz*pz) * inv; if (u < 0 || u > 1) continue;
+      const qx = sy*e1z - sz*e1y, qy = sz*e1x - sx*e1z, qz = sx*e1y - sy*e1x;
+      const v = (dx*qx + dy*qy + dz*qz) * inv; if (v < 0 || u + v > 1) continue;
+      if ((e2x*qx + e2y*qy + e2z*qz) * inv > 1e-7) n++;
+    }
+    return (n & 1) === 1;
+  }
+  const _capP = new THREE.Vector3(), _capL = new THREE.Vector3();
   function pick(clientX, clientY){
     const r = renderer.domElement.getBoundingClientRect();
     ray.setFromCamera(new THREE.Vector2(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1), camera);
@@ -1423,6 +1484,24 @@ function workerMain(){
           if (n.dot(d) > 0) n.negate();          // la normal mira hacia la cámara
           best = { t, m, e, point: ray.ray.at(t, new THREE.Vector3()), normal:n };
         }
+        // Tapa virtual de la sección: si el rayo cruza un plano de corte por dentro del elemento, se toca ahí (como si el corte estuviera relleno)
+        for (const c of CUTS){
+          if (!c.active) continue;
+          const den = c.plane.normal.dot(d);
+          if (Math.abs(den) < 1e-9) continue;
+          const tp = -c.plane.distanceToPoint(ray.ray.origin) / den;
+          if (tp <= 0 || (best && tp >= best.t) || (t !== null && tp >= t)) continue;
+          ray.ray.at(tp, _capP);
+          let fuera = false;
+          for (const c2 of CUTS) if (c2 !== c && c2.active && c2.plane.distanceToPoint(_capP) < -1e-6){ fuera = true; break; }
+          if (fuera) continue;
+          _capL.copy(_capP).sub(off);
+          const B = m.bbox, i6 = e * 6;
+          if (_capL.x < B[i6] - 1e-4 || _capL.y < B[i6+1] - 1e-4 || _capL.z < B[i6+2] - 1e-4 || _capL.x > B[i6+3] + 1e-4 || _capL.y > B[i6+4] + 1e-4 || _capL.z > B[i6+5] + 1e-4) continue;
+          if (!insideElement(m, e, _capL)) continue;
+          const n = c.plane.normal.clone(); if (n.dot(d) > 0) n.negate();
+          best = { t:tp, m, e, point:_capP.clone(), normal:n, cap:true };
+        }
       }
     });
     return best;
@@ -1435,6 +1514,7 @@ function workerMain(){
     const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
     down = null;
     if (moved > 5 || !S.models.some(m => m.ready)) return;
+    if (WALK.on && WALK.placing){ walkPuntoDesdeClic(e.clientX, e.clientY); return; }
     if (DIM.on){ dimClick(e.clientX, e.clientY); return; }
     const hit = pick(e.clientX, e.clientY);
     if (CUT.picking){
@@ -1494,7 +1574,6 @@ function workerMain(){
   function afterSelChange(){
     const n = selCount();
     if (!n) S.sel = null;
-    $("sectionSel").disabled = !n;
     const opt = $("mScope").querySelector('option[value="sel"]');
     if (opt) opt.textContent = "Selección (" + fmtInt(n) + ")";
     showProps();
@@ -1549,8 +1628,9 @@ function workerMain(){
         if (st !== 1 && st !== 3) continue;
         const i = e * 6;
         eb.min.set(B[i] + o.x, B[i+1] + o.y, B[i+2] + o.z); eb.max.set(B[i+3] + o.x, B[i+4] + o.y, B[i+5] + o.z);
-        if (S.section && !S.sectionBox.intersectsBox(eb)) continue;              // recortado por la caja de sección
-        if (CUT.on){ let any = false; for (let k = 0; k < 8 && !any; k++){ c3.set(k & 1 ? eb.max.x : eb.min.x, k & 2 ? eb.max.y : eb.min.y, k & 4 ? eb.max.z : eb.min.z); any = CUT.plane.distanceToPoint(c3) >= 0; } if (!any) continue; }
+        let cortado = false;
+        for (const cc of CUTS){ if (!cc.active) continue; let any = false; for (let k = 0; k < 8 && !any; k++){ c3.set(k & 1 ? eb.max.x : eb.min.x, k & 2 ? eb.max.y : eb.min.y, k & 4 ? eb.max.z : eb.min.z); any = cc.plane.distanceToPoint(c3) >= 0; } if (!any){ cortado = true; break; } }
+        if (cortado) continue;
         let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity, behind = false;
         for (let k = 0; k < 8; k++){
           v.set(k & 1 ? eb.max.x : eb.min.x, k & 2 ? eb.max.y : eb.min.y, k & 4 ? eb.max.z : eb.min.z).project(camera);
@@ -1753,150 +1833,343 @@ function workerMain(){
     rebuildAll();
   }
 
-  // ---------- Plano de corte alineado a una cara ----------
+  // ---------- Planos de corte (varios, cada uno alineado a una cara u horizontal) ----------
   const cutMat = new THREE.MeshBasicMaterial({ color:0xF2B705, transparent:true, opacity:0.07, side:THREE.DoubleSide, depthWrite:false });
-  const cutHelper = new THREE.Group();
-  const cutQuad = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), cutMat);
-  const cutEdge = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(-.5, -.5, 0), new THREE.Vector3(.5, -.5, 0), new THREE.Vector3(.5, .5, 0), new THREE.Vector3(-.5, .5, 0)]),
-    new THREE.LineBasicMaterial({ color:0xF2B705 }));
-  cutHelper.add(cutQuad, cutEdge); cutHelper.visible = false; cutHelper.renderOrder = 3;
-  scene.add(cutHelper);
+  const cutLineCur = new THREE.LineBasicMaterial({ color:0xF2B705 });
+  const cutLineOtro = new THREE.LineBasicMaterial({ color:0xB9A35A, transparent:true, opacity:0.6 });
+  const cutQuadGeo = new THREE.PlaneGeometry(1, 1);
+  const cutEdgeGeo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-.5, -.5, 0), new THREE.Vector3(.5, -.5, 0), new THREE.Vector3(.5, .5, 0), new THREE.Vector3(-.5, .5, 0)]);
+  // Flecha doble para arrastrar el plano seleccionado (siempre visible, encima del modelo)
+  const cutHandleMat = new THREE.MeshBasicMaterial({ color:0xF2B705, depthTest:false, transparent:true, opacity:0.95 });
+  const cutHandle = new THREE.Group();
+  {
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.6, 12), cutHandleMat);
+    const tipA = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.45, 16), cutHandleMat); tipA.position.y = 1.0;
+    const tipB = tipA.clone(); tipB.position.y = -1.0; tipB.rotation.z = Math.PI;
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 12), cutHandleMat);
+    const hitZone = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2.5, 8), new THREE.MeshBasicMaterial({ visible:false }));
+    cutHandle.add(shaft, tipA, tipB, knob, hitZone);
+    cutHandle.children.forEach(o => o.renderOrder = 10);
+  }
+  cutHandle.visible = false;
+  scene.add(cutHandle);
+  const cutRay = new THREE.Raycaster();
+  const Y_AXIS = new THREE.Vector3(0, 1, 0), Z_AXIS = new THREE.Vector3(0, 0, 1);
 
+  function modelSize(){ return Math.max(S.bounds.isEmpty() ? 50 : S.bounds.getSize(new THREE.Vector3()).length(), 1); }
   function syncClipping(){
     const before = allPlanes.length;
     allPlanes.length = 0;
-    if (S.section) clipPlanes.forEach(pl => allPlanes.push(pl));
-    if (CUT.on) allPlanes.push(CUT.plane);
+    CUTS.forEach(c => { if (c.active) allPlanes.push(c.plane); });
     MATS.forEach(mt => {
       mt.clippingPlanes = allPlanes.length ? allPlanes : null;
       if (before !== allPlanes.length) mt.needsUpdate = true;
     });
     requestRender();
   }
-
+  function addCut(point, normalKeep, horiz){
+    const c = { id:++CUT.seq, label:(horiz ? "Horizontal " : "Corte ") + CUT.seq, point:point.clone(), normal:normalKeep.clone().normalize(),
+                offset:0, plane:new THREE.Plane(), active:true, show:true, horiz:!!horiz, helper:new THREE.Group() };
+    c.quad = new THREE.Mesh(cutQuadGeo, cutMat); c.edge = new THREE.LineLoop(cutEdgeGeo, cutLineCur);
+    c.helper.add(c.quad, c.edge); c.helper.renderOrder = 3;
+    scene.add(c.helper);
+    CUTS.push(c);
+    CUT.picking = false; view.classList.remove("picking");
+    selectCut(c);
+    return c;
+  }
   // El plano se coloca sobre la cara; se conserva lo que hay detrás de ella (el objeto)
   function setCutFromFace(point, normalTowardCamera){
-    CUT.point.copy(point);
-    CUT.normal.copy(normalTowardCamera).negate();     // apunta hacia dentro: lo que se conserva
-    CUT.offset = 0;
-    CUT.on = true; CUT.picking = false;
-    view.classList.remove("picking");
-    const size = Math.max(S.bounds.isEmpty() ? 50 : S.bounds.getSize(new THREE.Vector3()).length(), 1);
-    $("cutRange").min = (-size).toFixed(2); $("cutRange").max = size.toFixed(2);
-    $("cutHint").textContent = "Plano sobre la cara elegida.";
-    $("cutControls").hidden = false;
-    updateCut();
+    addCut(point, normalTowardCamera.clone().negate(), Math.abs(normalTowardCamera.y) > 0.999);
+    $("cutPanel").hidden = false; $("cutBtn").setAttribute("aria-pressed", "true");
+  }
+  function addHorizontalCut(){
+    if (S.bounds.isEmpty()){ toast("Carga primero un modelo."); return; }
+    const c = S.bounds.getCenter(new THREE.Vector3());
+    addCut(c, new THREE.Vector3(0, -1, 0), true);   // se conserva lo de abajo
+  }
+  function updateCutGeom(c){
+    const p0 = c.point.clone().addScaledVector(c.normal, c.offset);
+    c.plane.setFromNormalAndCoplanarPoint(c.normal, p0);
+    const size = modelSize() * 0.75;
+    const center = S.bounds.isEmpty() ? p0 : c.plane.projectPoint(S.bounds.getCenter(new THREE.Vector3()), new THREE.Vector3());
+    c.helper.position.copy(center);
+    c.helper.quaternion.setFromUnitVectors(Z_AXIS, c.normal);
+    c.helper.scale.set(size, size, 1);
+    c.helper.visible = c.active && c.show;
+    c.edge.material = c === CUT.cur ? cutLineCur : cutLineOtro;
   }
   function updateCut(){
-    const p0 = CUT.point.clone().addScaledVector(CUT.normal, CUT.offset);
-    CUT.plane.setFromNormalAndCoplanarPoint(CUT.normal, p0);
-    $("cutRange").value = CUT.offset; $("cutNum").value = CUT.offset.toFixed(2);
-    const size = Math.max(S.bounds.isEmpty() ? 50 : S.bounds.getSize(new THREE.Vector3()).length(), 1) * 0.75;
-    // centrado sobre el modelo, no sobre el punto pulsado
-    const center = S.bounds.isEmpty() ? p0 : CUT.plane.projectPoint(S.bounds.getCenter(new THREE.Vector3()), new THREE.Vector3());
-    cutHelper.position.copy(center);
-    cutHelper.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), CUT.normal);
-    cutHelper.scale.set(size, size, 1);
-    cutHelper.visible = CUT.on && $("cutShow").checked;
+    CUTS.forEach(updateCutGeom);
+    const c = CUT.cur;
+    $("cutControls").hidden = !c;
+    updateCutHandle();
+    const n = CUTS.filter(x => x.active).length;
+    $("cutCnt").textContent = n; $("cutCnt").hidden = !n;
     syncClipping();
+  }
+  function updateCutHandle(){
+    const c = CUT.cur;
+    cutHandle.visible = !!(c && c.active && !$("cutPanel").hidden && !DIM.on && !WALK.on);
+    if (!cutHandle.visible) view.classList.remove("cuthover");
+    if (!cutHandle.visible) return;
+    cutHandle.position.copy(c.helper.position);
+    cutHandle.quaternion.setFromUnitVectors(Y_AXIS, c.normal);
+    let k;
+    if (camera === ortho) k = (ortho.top - ortho.bottom) / ortho.zoom * 0.035;
+    else k = camera.position.distanceTo(cutHandle.position) * 0.04;
+    cutHandle.scale.setScalar(Math.max(k, 1e-3));
+  }
+  controls.addEventListener("change", () => { if (cutHandle.visible) updateCutHandle(); });
+  function selectCut(c){
+    CUT.cur = c || null;
+    renderCuts(); updateCut();
+  }
+  function removeCut(c){
+    scene.remove(c.helper);
+    CUTS.splice(CUTS.indexOf(c), 1);
+    if (CUT.cur === c) CUT.cur = CUTS[CUTS.length - 1] || null;
+    selectCut(CUT.cur);
+  }
+  function clearCuts(){
+    CUTS.slice().forEach(c => scene.remove(c.helper));
+    CUTS.length = 0; CUT.cur = null;
+    selectCut(null);
+  }
+  const CUT_IC = {
+    eye:'<svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg>',
+    eyeOff:'<svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><path d="M4 4l16 16"/></svg>',
+    flip:'<svg viewBox="0 0 24 24"><path d="M7 4v16M4 17l3 3 3-3M17 20V4M14 7l3-3 3 3"/></svg>',
+    x:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>'
+  };
+  function renderCuts(){
+    $("cutList").innerHTML = CUTS.map(c => `<div class="cutitem${c === CUT.cur ? " cur" : ""}${c.active ? "" : " off"}" data-id="${c.id}">
+      <input type="checkbox" data-a="active" ${c.active ? "checked" : ""} title="Activar o desactivar el corte">
+      <span class="lbl">${c.label}</span>
+      <button class="mini" data-a="show" title="${c.show ? "Ocultar" : "Mostrar"} el plano (el corte sigue)">${c.show ? CUT_IC.eye : CUT_IC.eyeOff}</button>
+      <button class="mini" data-a="flip" title="Invertir el lado que se conserva">${CUT_IC.flip}</button>
+      <button class="mini danger" data-a="del" title="Eliminar este corte">${CUT_IC.x}</button></div>`).join("");
+    $("cutHint").textContent = CUT.picking ? "Haz clic en una cara del modelo para crear el corte (Esc cancela)."
+      : !CUTS.length ? "Sin cortes. Crea uno sobre una cara o uno horizontal."
+      : "Clic en un corte y arrastra su flecha amarilla para moverlo.";
   }
   function startCutPick(){
     if (DIM.on) setDim(false);
     CUT.picking = true;
     view.classList.add("picking");
     $("cutPanel").hidden = false;
-    $("cutHint").textContent = "Haz clic en una cara del modelo.";
     $("cutBtn").setAttribute("aria-pressed", "true");
+    renderCuts(); updateCutHandle();
   }
-  function setCut(on){
-    if (on){ startCutPick(); return; }
-    CUT.on = false; CUT.picking = false;
-    view.classList.remove("picking");
-    $("cutPanel").hidden = true; $("cutControls").hidden = true;
+  function cancelCutPick(){
+    CUT.picking = false; view.classList.remove("picking");
+    if (!CUTS.length) setCut(false); else renderCuts();
+  }
+  // El botón abre o cierra el panel; cerrar no quita los cortes (siguen activos hasta que los desactives)
+  function setCut(open){
+    if (open){
+      $("cutPanel").hidden = false; $("cutBtn").setAttribute("aria-pressed", "true");
+      if (!CUTS.length) startCutPick(); else { renderCuts(); updateCutHandle(); requestRender(); }
+      return;
+    }
+    CUT.picking = false; view.classList.remove("picking");
+    $("cutPanel").hidden = true;
     $("cutBtn").setAttribute("aria-pressed", "false");
-    cutHelper.visible = false;
-    syncClipping();
+    updateCutHandle(); requestRender();
   }
   function lookAtCut(){
-    if (!CUT.on) return;
+    const c = CUT.cur; if (!c) return;
     if (camera !== ortho) setOrtho(true);
-    fitTo(visibleBox(), CUT.normal.clone().negate());   // desde el lado cortado, mirando la sección
+    fitTo(visibleBox(), c.normal.clone().negate());   // desde el lado cortado, mirando la sección
+    updateCutHandle();
   }
+  // Arrastrar la flecha: el plano sigue al ratón a lo largo de su normal
+  function cutAxisParam(clientX, clientY, C, n){
+    const r = renderer.domElement.getBoundingClientRect();
+    cutRay.setFromCamera(new THREE.Vector2((clientX - r.left) / r.width * 2 - 1, -(clientY - r.top) / r.height * 2 + 1), camera);
+    const o = cutRay.ray.origin, d = cutRay.ray.direction;
+    const w0 = C.clone().sub(o), b = n.dot(d), den = 1 - b * b;
+    if (den < 1e-4) return null;                       // mirando justo a lo largo de la normal
+    return (b * d.dot(w0) - n.dot(w0)) / den;
+  }
+  function cutHandleHit(clientX, clientY){
+    if (!cutHandle.visible) return false;
+    const r = renderer.domElement.getBoundingClientRect();
+    cutRay.setFromCamera(new THREE.Vector2((clientX - r.left) / r.width * 2 - 1, -(clientY - r.top) / r.height * 2 + 1), camera);
+    return cutRay.intersectObject(cutHandle, true).length > 0;
+  }
+  renderer.domElement.addEventListener("pointerdown", e => {
+    if (e.button !== 0 || WALK.on || DIM.on || !cutHandleHit(e.clientX, e.clientY)) return;
+    const c = CUT.cur, C = cutHandle.position.clone(), t0 = cutAxisParam(e.clientX, e.clientY, C, c.normal);
+    if (t0 === null){ toast("Gira un poco la vista para poder arrastrar el plano."); e.stopImmediatePropagation(); return; }
+    CUT.drag = { c, C, n:c.normal.clone(), t0, off0:c.offset };
+    controls.enabled = false;
+    view.classList.add("cutdrag");
+    try { renderer.domElement.setPointerCapture(e.pointerId); } catch (err) {}
+    e.stopImmediatePropagation(); e.preventDefault();
+  }, true);
+  renderer.domElement.addEventListener("pointermove", e => {
+    if (CUT.drag){
+      const g = CUT.drag, t = cutAxisParam(e.clientX, e.clientY, g.C, g.n);
+      if (t === null) return;
+      g.c.offset = Math.round((g.off0 + t - g.t0) * 100) / 100;
+      updateCut();
+      return;
+    }
+    if (cutHandle.visible && !WALK.on) view.classList.toggle("cuthover", cutHandleHit(e.clientX, e.clientY));
+  });
+  renderer.domElement.addEventListener("pointerup", e => {
+    if (!CUT.drag) return;
+    CUT.drag = null; controls.enabled = !WALK.on;
+    view.classList.remove("cutdrag");
+    e.stopImmediatePropagation();
+  }, true);
+  $("cutList").addEventListener("click", e => {
+    const it = e.target.closest(".cutitem"); if (!it) return;
+    const c = CUTS.find(x => x.id === +it.dataset.id); if (!c) return;
+    const b = e.target.closest("[data-a]"), a = b && b.dataset.a;
+    if (a === "active"){ c.active = b.checked; if (c.active) selectCut(c); else { renderCuts(); updateCut(); } return; }
+    if (a === "show"){ c.show = !c.show; renderCuts(); updateCut(); return; }
+    if (a === "flip"){ c.point.addScaledVector(c.normal, c.offset); c.offset = 0; c.normal.negate(); selectCut(c); return; }
+    if (a === "del"){ removeCut(c); return; }
+    selectCut(c);
+  });
 
 
   // ---------- Cotas de distancia ----------
   const SVGNS = "http://www.w3.org/2000/svg";
-  const DIM = { on:false, a:null, hover:null, list:[], seq:0, hl:null, raf:0 };
+  const DIM = { on:false, mode:"dist", a:null, b:null, hover:null, mouse:null, list:[], seq:0, seqA:0, hl:null, raf:0 };
   const fmtM = v => v.toLocaleString("es-ES", { minimumFractionDigits:2, maximumFractionDigits:3 });
   const _v = new THREE.Vector3();
 
   // Imán: vértices y aristas del elemento tocado (las aristas "reales", no las diagonales de los triángulos)
+  // Recorta un segmento con los planos de corte activos: devuelve la parte que se ve o null
+  function clipSeg(A, B){
+    for (const c of CUTS){
+      if (!c.active) continue;
+      const da = c.plane.distanceToPoint(A), db = c.plane.distanceToPoint(B);
+      if (da < -1e-6 && db < -1e-6) return null;
+      if (da < -1e-6) A = A.clone().lerp(B, da / (da - db));
+      else if (db < -1e-6) B = B.clone().lerp(A, db / (db - da));
+    }
+    return [A, B];
+  }
+  const SNAP_RING = [[5,0],[-5,0],[0,5],[0,-5],[4,4],[-4,4],[4,-4],[-4,-4],[9,0],[-9,0],[0,9],[0,-9],[7,7],[-7,7],[7,-7],[-7,-7]];
   function snapPick(clientX, clientY){
-    const hit = pick(clientX, clientY);
+    let hit = pick(clientX, clientY);
+    // justo en el borde del modelo el rayo puede no tocar nada: se busca alrededor para que el imán llegue a esquinas y contornos
+    for (let i = 0; !hit && i < SNAP_RING.length; i++) hit = pick(clientX + SNAP_RING[i][0], clientY + SNAP_RING[i][1]);
     if (!hit) return null;
     const r = renderer.domElement.getBoundingClientRect();
     const mx = clientX - r.left, my = clientY - r.top;
     const m = hit.m, e = hit.e, c = m.chunks[m.elC[e]], P = c.pos, E = c.fullEdge, off = m.group.position;
     const e0 = m.elE[e] * 2, en = m.elEN[e] * 2;
-    const scr = (x, y, z) => { _v.set(x + off.x, y + off.y, z + off.z).project(camera); return [(_v.x + 1) / 2 * r.width, (1 - _v.y) / 2 * r.height]; };
-    let bestV = null, bestVd = 12, bestE = null, bestEd = 8;
+    const scr = p => { _v.copy(p).project(camera); return [(_v.x + 1) / 2 * r.width, (1 - _v.y) / 2 * r.height]; };
+    const cortes = CUTS.some(x => x.active);
+    let bestV = null, bestVd = 12, bestVz = Infinity, bestE = null, bestEd = 8, bestEz = Infinity;
     for (let i = e0; i < e0 + en; i += 2){
       const a = E[i] * 3, b = E[i + 1] * 3;
-      const sa = scr(P[a], P[a+1], P[a+2]), sb = scr(P[b], P[b+1], P[b+2]);
-      for (const [s, k] of [[sa, a], [sb, b]]){
-        const d = Math.hypot(s[0] - mx, s[1] - my);
-        if (d < bestVd){ bestVd = d; bestV = k; }
+      let A = new THREE.Vector3(P[a] + off.x, P[a+1] + off.y, P[a+2] + off.z), B = new THREE.Vector3(P[b] + off.x, P[b+1] + off.y, P[b+2] + off.z);
+      if (cortes){ const sg = clipSeg(A, B); if (!sg) continue; [A, B] = sg; }   // solo lo que se ve; los extremos recortados son esquinas de la sección
+      const sa = scr(A), za = _v.z, sb = scr(B), zb = _v.z;
+      for (const [sp, p, z] of [[sa, A, za], [sb, B, zb]]){
+        const d = Math.hypot(sp[0] - mx, sp[1] - my);
+        if (d < bestVd - 1.5 || (d < bestVd + 1.5 && d < 12 && z < bestVz)){ bestVd = Math.min(d, bestVd); bestVz = z; bestV = p; }
       }
       if (!bestV){
         const dx = sb[0] - sa[0], dy = sb[1] - sa[1], L2 = dx*dx + dy*dy;
         if (L2 < 1) continue;
         let t = ((mx - sa[0]) * dx + (my - sa[1]) * dy) / L2; t = Math.max(0, Math.min(1, t));
-        const d = Math.hypot(sa[0] + t*dx - mx, sa[1] + t*dy - my);
-        if (d < bestEd){ bestEd = d; bestE = [a, b]; }
+        const d = Math.hypot(sa[0] + t*dx - mx, sa[1] + t*dy - my), z = za + (zb - za) * t;
+        if (d < bestEd - 1.5 || (d < bestEd + 1.5 && d < 8 && z < bestEz)){ bestEd = Math.min(d, bestEd); bestEz = z; bestE = [A, B]; }
       }
     }
-    if (bestV !== null)
-      return { point:new THREE.Vector3(P[bestV] + off.x, P[bestV+1] + off.y, P[bestV+2] + off.z), kind:"vertex" };
+    // Contorno de la sección: donde el plano corta las caras del elemento (solo como arista, sin vértices falsos de la triangulación)
+    if (cortes && !bestV){
+      const F = c.full, t0 = m.elT[e] * 3, t1 = t0 + m.elTN[e] * 3, V = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()], dd = [0, 0, 0];
+      for (const cc of CUTS){
+        if (!cc.active) continue;
+        for (let t = t0; t < t1; t += 3){
+          for (let k = 0; k < 3; k++){ const q = F[t + k] * 3; V[k].set(P[q] + off.x, P[q+1] + off.y, P[q+2] + off.z); dd[k] = cc.plane.distanceToPoint(V[k]); }
+          const pts = [];
+          for (let k = 0; k < 3; k++){
+            const k2 = (k + 1) % 3;
+            if ((dd[k] > 0) !== (dd[k2] > 0) && Math.abs(dd[k] - dd[k2]) > 1e-9) pts.push(V[k].clone().lerp(V[k2], dd[k] / (dd[k] - dd[k2])));
+          }
+          if (pts.length !== 2) continue;
+          const sg = clipSeg(pts[0], pts[1]); if (!sg) continue;
+          const sa = scr(sg[0]), za = _v.z, sb = scr(sg[1]), zb = _v.z;
+          const dx = sb[0] - sa[0], dy = sb[1] - sa[1], L2 = dx*dx + dy*dy;
+          if (L2 < 1) continue;
+          let u = ((mx - sa[0]) * dx + (my - sa[1]) * dy) / L2; u = Math.max(0, Math.min(1, u));
+          const d = Math.hypot(sa[0] + u*dx - mx, sa[1] + u*dy - my), z = za + (zb - za) * u;
+          if (d < bestEd - 1.5 || (d < bestEd + 1.5 && d < 8 && z < bestEz)){ bestEd = Math.min(d, bestEd); bestEz = z; bestE = sg; }
+        }
+      }
+    }
+    if (bestV) return { point:bestV.clone(), kind:"vertex" };
     if (bestE){
       // punto de la arista más cercano al rayo del ratón (exacto en 3D)
-      const A = new THREE.Vector3(P[bestE[0]] + off.x, P[bestE[0]+1] + off.y, P[bestE[0]+2] + off.z);
-      const B = new THREE.Vector3(P[bestE[1]] + off.x, P[bestE[1]+1] + off.y, P[bestE[1]+2] + off.z);
       const q = new THREE.Vector3();
-      ray.ray.distanceSqToSegment(A, B, null, q);
+      ray.setFromCamera(new THREE.Vector2(mx / r.width * 2 - 1, -my / r.height * 2 + 1), camera);   // el rayo del cursor (pick pudo usar uno de alrededor)
+      ray.ray.distanceSqToSegment(bestE[0], bestE[1], null, q);
       return { point:q, kind:"edge" };
     }
     return { point:hit.point.clone(), kind:"face" };
   }
 
-  function setDim(on){
+  // ---------- Ventana Medir: distancias y ángulos ----------
+  function setDim(on, modo){
     if (on && !S.models.some(m => m.ready)){ toast("Carga primero un modelo."); return; }
-    if (on && CUT.picking && !CUT.on) setCut(false);
-    else if (on && CUT.picking){ CUT.picking = false; view.classList.remove("picking"); }
-    const wasOn = DIM.on;
-    DIM.on = on; DIM.a = null; DIM.hover = null;
+    if (on && CUT.picking) cancelCutPick();
+    if (on && WALK.on) setWalk(false);
+    if (modo) DIM.mode = modo;
+    DIM.on = on; DIM.a = null; DIM.b = null; DIM.hover = null;
     view.classList.toggle("dimming", on);
-    $("dimBtn").setAttribute("aria-pressed", String(on));
-    if (on) toast("Clic en el primer punto y clic en el segundo. Se ajusta a vértices y aristas. Esc para salir.");
-    else if (wasOn && DIM.list.length) toast("Las cotas se quedan en pantalla. Bórralas con clic derecho sobre la cifra, con Supr o en el panel Cotas.");
+    if (on){ $("measPanel").hidden = false; $("dimBtn").setAttribute("aria-pressed", "true"); }
+    updateCutHandle();
+    renderMeasPanel();
     requestRender();
   }
+  function setMeasPanel(open){
+    if (open){ setDim(true, DIM.mode || "dist"); return; }
+    setDim(false);
+    $("measPanel").hidden = true;
+    $("dimBtn").setAttribute("aria-pressed", "false");
+    requestRender();
+  }
+  function angDeg(a, b, c){
+    const u = a.clone().sub(b), v = c.clone().sub(b);
+    const l = u.length() * v.length(); if (l < 1e-12) return 0;
+    return Math.acos(Math.max(-1, Math.min(1, u.dot(v) / l))) * 180 / Math.PI;
+  }
+  const fmtDeg = v => v.toLocaleString("es-ES", { minimumFractionDigits:2, maximumFractionDigits:2 }) + "°";
   function dimClick(x, y){
     const s = snapPick(x, y);
     if (!s){ toast("No has tocado el modelo. Prueba otra vez."); return; }
-    if (!DIM.a){ DIM.a = s.point; DIM.hover = s; requestRender(); return; }
+    if (!DIM.a){ DIM.a = s.point; DIM.hover = s; renderMeasPanel(); requestRender(); return; }
     if (s.point.distanceTo(DIM.a) < 1e-6) return;
-    DIM.list.push({ id:++DIM.seq, a:DIM.a, b:s.point, visible:true, els:null });
-    DIM.a = null;
-    renderDimList(); requestRender();
+    if (DIM.mode === "ang"){
+      if (!DIM.b){ DIM.b = s.point; renderMeasPanel(); requestRender(); return; }
+      if (s.point.distanceTo(DIM.b) < 1e-6) return;
+      DIM.list.push({ id:++DIM.seqA, kind:"ang", a:DIM.a, b:DIM.b, c:s.point, visible:true, els:null });
+      DIM.a = DIM.b = null;
+    } else {
+      DIM.list.push({ id:++DIM.seq, kind:"dist", a:DIM.a, b:s.point, visible:true, els:null });
+      DIM.a = null;
+    }
+    renderDimList(); renderMeasPanel(); requestRender();
   }
   renderer.domElement.addEventListener("pointermove", e => {
     if (!DIM.on || e.buttons) return;
+    const r = renderer.domElement.getBoundingClientRect();
+    DIM.mouse = [e.clientX - r.left, e.clientY - r.top];
     const x = e.clientX, y = e.clientY;
     cancelAnimationFrame(DIM.raf);
     DIM.raf = requestAnimationFrame(() => { DIM.hover = snapPick(x, y); requestRender(); });
   });
-  renderer.domElement.addEventListener("pointerleave", () => { if (DIM.on){ DIM.hover = null; requestRender(); } });
+  renderer.domElement.addEventListener("pointerleave", () => { if (DIM.on){ DIM.hover = null; DIM.mouse = null; requestRender(); } });
 
   function dimParts(d){
     // en coordenadas del proyecto: X (E-O), Y (N-S), Z (altura)
@@ -1912,9 +2185,20 @@ function workerMain(){
     $("dimSvg").appendChild(g);
     const axLabels = ["x", "y", "z"].map(k => { const d = document.createElement("div"); d.className = "dim-ax " + k; $("dimLabels").appendChild(d); return d; });
     const label = document.createElement("div");
-    label.className = "dim-label" + (cls === "rubber" ? " live" : "");
+    label.className = "dim-label" + (cls && cls.includes("rubber") ? " live" : "");
     $("dimLabels").appendChild(label);
     return { g, label, axLabels };
+  }
+  function makeAngEls(cls){
+    const g = document.createElementNS(SVGNS, "g");
+    g.setAttribute("class", "ang" + (cls ? " " + cls : ""));
+    g.innerHTML = '<path class="halo arcfill"/><line class="halo"/><line class="halo"/><line class="ln"/><line class="ln"/><path class="arc"/>' +
+                  '<circle class="end" r="4"/><circle class="end vtx" r="4.5"/><circle class="end" r="4"/>';
+    $("dimSvg").appendChild(g);
+    const label = document.createElement("div");
+    label.className = "dim-label ang" + (cls && cls.includes("rubber") ? " live" : "");
+    $("dimLabels").appendChild(label);
+    return { g, label, axLabels:[] };
   }
   function dropEls(els){ els.g.remove(); els.label.remove(); els.axLabels.forEach(l => l.remove()); }
   function removeDimEls(d){ if (d.els){ dropEls(d.els); d.els = null; } }
@@ -1960,12 +2244,44 @@ function workerMain(){
     els.label.style.top = (sa[1] + sb[1]) / 2 + "px";
     if (els.label.textContent !== text) els.label.textContent = text;
   }
-  let rubber = null, snapMark = null;
+  // Ángulo: dos tramos desde el vértice b, arco y valor en la bisectriz
+  function placeAng(els, a, b, c, w, h, text){
+    const sa = toScr(a, w, h), sb = toScr(b, w, h), sc = c ? toScr(c, w, h) : null;
+    const show = !!(sa && sb);
+    els.g.style.display = show ? "" : "none";
+    els.label.style.display = show && sc ? "" : "none";
+    if (!show) return;
+    const [arcHalo, h1, h2, l1, l2, arc, e1, ev, e2] = els.g.children;
+    const seg = (l, p, q) => { l.setAttribute("x1", p[0]); l.setAttribute("y1", p[1]); l.setAttribute("x2", q[0]); l.setAttribute("y2", q[1]); };
+    seg(h1, sb, sa); seg(l1, sb, sa);
+    e1.setAttribute("cx", sa[0]); e1.setAttribute("cy", sa[1]); ev.setAttribute("cx", sb[0]); ev.setAttribute("cy", sb[1]);
+    const vis2 = !!sc;
+    for (const o of [h2, l2, e2, arc, arcHalo]) o.style.display = vis2 ? "" : "none";
+    if (!vis2) return;
+    seg(h2, sb, sc); seg(l2, sb, sc);
+    e2.setAttribute("cx", sc[0]); e2.setAttribute("cy", sc[1]);
+    const ua = [sa[0] - sb[0], sa[1] - sb[1]], uc = [sc[0] - sb[0], sc[1] - sb[1]];
+    const la = Math.hypot(ua[0], ua[1]), lc = Math.hypot(uc[0], uc[1]);
+    if (la < 2 || lc < 2){ arc.style.display = arcHalo.style.display = "none"; els.label.style.left = sb[0] + "px"; els.label.style.top = (sb[1] - 18) + "px"; }
+    else {
+      const R = Math.max(12, Math.min(34, 0.45 * Math.min(la, lc)));
+      const pA = [sb[0] + ua[0] / la * R, sb[1] + ua[1] / la * R], pC = [sb[0] + uc[0] / lc * R, sb[1] + uc[1] / lc * R];
+      const sweep = (ua[0] * uc[1] - ua[1] * uc[0]) > 0 ? 1 : 0;
+      const dArc = `M${pA[0]} ${pA[1]}A${R} ${R} 0 0 ${sweep} ${pC[0]} ${pC[1]}`;
+      arc.setAttribute("d", dArc);
+      arcHalo.setAttribute("d", `M${sb[0]} ${sb[1]}L${pA[0]} ${pA[1]}A${R} ${R} 0 0 ${sweep} ${pC[0]} ${pC[1]}Z`);
+      let bx = ua[0] / la + uc[0] / lc, by = ua[1] / la + uc[1] / lc; const bl = Math.hypot(bx, by);
+      if (bl < 1e-3){ bx = -ua[1] / la; by = ua[0] / la; } else { bx /= bl; by /= bl; }
+      els.label.style.left = sb[0] + bx * (R + 30) + "px"; els.label.style.top = sb[1] + by * (R + 30) + "px";
+    }
+    if (els.label.textContent !== text) els.label.textContent = text;
+  }
+  let rubber = null, rubberKind = "", snapMark = null;
   function updateDims(){
     const w = view.clientWidth, h = view.clientHeight;
     for (const d of DIM.list){
       if (!d.els){
-        d.els = makeDimEls("");
+        d.els = d.kind === "ang" ? makeAngEls("") : makeDimEls("");
         const lb = d.els.label;
         lb.addEventListener("mouseenter", () => setDimHl(d));
         lb.addEventListener("mouseleave", () => setDimHl(null));
@@ -1973,16 +2289,23 @@ function workerMain(){
         lb.title = "Clic derecho para borrar";
       }
       if (!d.visible){ d.els.g.style.display = "none"; d.els.label.style.display = "none"; d.els.axLabels.forEach(l => l.style.display = "none"); continue; }
-      placeDim(d.els, d.a, d.b, w, h, fmtM(dimParts(d).total) + " m");
+      if (d.kind === "ang") placeAng(d.els, d.a, d.b, d.c, w, h, fmtDeg(angDeg(d.a, d.b, d.c)));
+      else placeDim(d.els, d.a, d.b, w, h, fmtM(dimParts(d).total) + " m");
       d.els.g.classList.toggle("hl", DIM.hl === d);
       d.els.label.classList.toggle("hl", DIM.hl === d);
     }
-    // cota en curso
+    // medición en curso
     const live = DIM.on && DIM.a && DIM.hover;
+    const kind = live ? (DIM.mode === "ang" ? "ang" : "dist") : "";
+    if (rubber && rubberKind !== kind){ dropEls(rubber); rubber = null; }
     if (live){
-      if (!rubber) rubber = makeDimEls("rubber");
-      placeDim(rubber, DIM.a, DIM.hover.point, w, h, fmtM(DIM.a.distanceTo(DIM.hover.point)) + " m");
-    } else if (rubber){ dropEls(rubber); rubber = null; }
+      if (!rubber){ rubber = kind === "ang" ? makeAngEls("rubber") : makeDimEls("rubber"); rubberKind = kind; }
+      const p = DIM.hover.point;
+      if (kind === "ang"){
+        if (DIM.b) placeAng(rubber, DIM.a, DIM.b, p, w, h, fmtDeg(angDeg(DIM.a, DIM.b, p)));
+        else placeAng(rubber, p, DIM.a, null, w, h, "");
+      } else placeDim(rubber, DIM.a, p, w, h, fmtM(DIM.a.distanceTo(p)) + " m");
+    }
     // marca del imán
     if (DIM.on && DIM.hover){
       const sp = toScr(DIM.hover.point, w, h);
@@ -1994,10 +2317,58 @@ function workerMain(){
           : `<circle class="snap" cx="${x}" cy="${y}" r="5"/>`;
       } else snapMark.innerHTML = "";
     } else if (snapMark){ snapMark.remove(); snapMark = null; }
+    drawLens(w, h);
+  }
+  // Lupa: amplía la zona del cursor mientras se mide (como en el visor IFC)
+  const LENS = { el:null, ctx:null, size:150, zoom:2.5 };
+  function drawLens(w, h){
+    const show = DIM.on && DIM.mouse && !$("measPanel").hidden;
+    if (!LENS.el) LENS.el = $("lens"), LENS.ctx = LENS.el.getContext("2d");
+    LENS.el.hidden = !show;
+    if (!show) return;
+    const S0 = LENS.size, dpr = renderer.getPixelRatio(), cv = renderer.domElement;
+    if (LENS.el.width !== S0 * dpr){ LENS.el.width = LENS.el.height = S0 * dpr; }
+    const [mx, my] = DIM.mouse, src = S0 / LENS.zoom;
+    const cx = LENS.ctx;
+    cx.setTransform(1, 0, 0, 1, 0, 0);
+    cx.fillStyle = getComputedStyle(view).getPropertyValue("--viewport") || "#DCE2E5";
+    cx.fillRect(0, 0, LENS.el.width, LENS.el.height);
+    try { cx.drawImage(cv, (mx - src / 2) * dpr, (my - src / 2) * dpr, src * dpr, src * dpr, 0, 0, S0 * dpr, S0 * dpr); } catch (e) {}
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const toL = p => { const s = toScr(p, w, h); return s ? [S0 / 2 + (s[0] - mx) * LENS.zoom, S0 / 2 + (s[1] - my) * LENS.zoom] : null; };
+    const ink = getComputedStyle(view).getPropertyValue("--ink") || "#1D2830", acc = "#F2B705";
+    // tramo en curso
+    if (DIM.a && DIM.hover){
+      const pts = (DIM.mode === "ang" && DIM.b ? [DIM.a, DIM.b, DIM.hover.point] : [DIM.a, DIM.hover.point]).map(toL);
+      if (pts.every(Boolean)){ cx.strokeStyle = acc; cx.lineWidth = 2; cx.setLineDash([6, 4]); cx.beginPath(); pts.forEach((p, i) => i ? cx.lineTo(p[0], p[1]) : cx.moveTo(p[0], p[1])); cx.stroke(); cx.setLineDash([]); }
+    }
+    // cruz del cursor
+    cx.strokeStyle = "rgba(0,0,0,.35)"; cx.lineWidth = 1;
+    cx.beginPath(); cx.moveTo(S0 / 2, 6); cx.lineTo(S0 / 2, S0 - 6); cx.moveTo(6, S0 / 2); cx.lineTo(S0 - 6, S0 / 2); cx.stroke();
+    // punto donde se engancha
+    if (DIM.hover){
+      const p = toL(DIM.hover.point);
+      if (p){
+        cx.strokeStyle = ink; cx.lineWidth = 2; cx.fillStyle = acc;
+        cx.beginPath();
+        if (DIM.hover.kind === "vertex") cx.rect(p[0] - 7, p[1] - 7, 14, 14);
+        else if (DIM.hover.kind === "edge"){ cx.moveTo(p[0], p[1] - 8); cx.lineTo(p[0] + 8, p[1]); cx.lineTo(p[0], p[1] + 8); cx.lineTo(p[0] - 8, p[1]); cx.closePath(); }
+        else cx.arc(p[0], p[1], 5, 0, Math.PI * 2);
+        cx.stroke();
+        cx.beginPath(); cx.arc(p[0], p[1], 2.5, 0, Math.PI * 2); cx.fill();
+      }
+    }
+    // colocación: arriba a la izquierda del cursor; si no cabe, al otro lado
+    let lx = mx - S0 - 24, ly = my - S0 - 24;
+    if (lx < 8) lx = mx + 24;
+    if (ly < 8) ly = my + 24;
+    if (lx + S0 > w - 8) lx = w - S0 - 8;
+    if (ly + S0 > h - 8) ly = h - S0 - 8;
+    LENS.el.style.left = lx + "px"; LENS.el.style.top = ly + "px";
   }
   function setDimHl(d){
     DIM.hl = d;
-    document.querySelectorAll("#dimList li").forEach(li => li.classList.toggle("hl", !!d && +li.dataset.id === d.id));
+    document.querySelectorAll("#dimList li").forEach(li => li.classList.toggle("hl", !!d && li.dataset.key === d.kind + d.id));
     requestRender();
   }
   function deleteDim(d){
@@ -2007,21 +2378,35 @@ function workerMain(){
     renderDimList(); requestRender();
   }
   function clearDims(){
-    DIM.list.forEach(removeDimEls); DIM.list.length = 0; DIM.hl = null; DIM.a = null;
+    DIM.list.forEach(removeDimEls); DIM.list.length = 0; DIM.hl = null; DIM.a = DIM.b = null;
     renderDimList(); requestRender();
   }
+  function renderMeasPanel(){
+    $("measPanel").querySelectorAll("[data-mm]").forEach(b => b.setAttribute("aria-pressed", String(DIM.on && b.dataset.mm === DIM.mode)));
+    const ang = DIM.mode === "ang";
+    $("measHint").textContent = !DIM.on ? "Elige Distancia o Ángulo para medir. Las cotas se quedan en pantalla."
+      : ang ? (!DIM.a ? "Clic en el primer punto." : !DIM.b ? "Clic en el vértice del ángulo." : "Clic en el tercer punto.")
+            : (!DIM.a ? "Clic en el primer punto." : "Clic en el segundo punto.");
+    $("dimAxesChk").hidden = ang && DIM.on;
+  }
   function renderDimList(){
-    $("dimSection").hidden = !DIM.list.length;
-    $("dimCount").textContent = DIM.list.length ? "(" + DIM.list.length + ")" : "";
+    const n = DIM.list.length;
+    $("dimCount").textContent = n ? "(" + n + ")" : "";
+    $("dimCnt").textContent = n; $("dimCnt").hidden = !n;
+    $("dimListWrap").hidden = !n;
     const ul = $("dimList"); ul.innerHTML = "";
     DIM.list.forEach(d => {
-      const p = dimParts(d);
-      const li = document.createElement("li"); li.dataset.id = d.id;
-      li.innerHTML = `<div class="dim-info"><div><span class="dim-val">${fmtM(p.total)} m</span> <span class="count">Cota ${d.id}</span></div>
-        <div class="dim-sub">Horizontal ${fmtM(p.horiz)} m · Vertical ${fmtM(Math.abs(p.dz))} m</div>
-        <div class="dim-sub">X ${fmtM(Math.abs(p.dx))} · Y ${fmtM(Math.abs(p.dy))} · Z ${fmtM(Math.abs(p.dz))} m</div></div>
-        <button class="ibtn" data-a="vis" title="${d.visible ? "Ocultar" : "Mostrar"}">${d.visible ? "👁" : "◌"}</button>
-        <button class="ibtn" data-a="del" title="Borrar cota">✕</button>`;
+      const li = document.createElement("li"); li.dataset.key = d.kind + d.id;
+      if (d.kind === "ang"){
+        li.innerHTML = `<span class="dim-ic">∠</span><div class="dim-info"><div><span class="dim-val">${fmtDeg(angDeg(d.a, d.b, d.c))}</span> <span class="count">Ángulo ${d.id}</span></div></div>`;
+      } else {
+        const p = dimParts(d);
+        li.innerHTML = `<span class="dim-ic">↔</span><div class="dim-info"><div><span class="dim-val">${fmtM(p.total)} m</span> <span class="count">Cota ${d.id}</span></div>
+          <div class="dim-sub">Horiz. ${fmtM(p.horiz)} · Vert. ${fmtM(Math.abs(p.dz))} m</div>
+          <div class="dim-sub">X ${fmtM(Math.abs(p.dx))} · Y ${fmtM(Math.abs(p.dy))} · Z ${fmtM(Math.abs(p.dz))} m</div></div>`;
+      }
+      li.insertAdjacentHTML("beforeend", `<button class="ibtn" data-a="vis" title="${d.visible ? "Ocultar" : "Mostrar"}">${d.visible ? "👁" : "◌"}</button>
+        <button class="ibtn" data-a="del" title="Borrar">✕</button>`);
       li.addEventListener("mouseenter", () => setDimHl(d));
       li.addEventListener("mouseleave", () => setDimHl(null));
       li.addEventListener("click", ev => {
@@ -2048,54 +2433,15 @@ function workerMain(){
   }
   function closeDimMenu(){ if (dimMenu){ dimMenu.remove(); dimMenu = null; } }
   document.addEventListener("pointerdown", e => { if (dimMenu && !dimMenu.contains(e.target)) closeDimMenu(); });
-  $("dimBtn").addEventListener("click", () => setDim(!DIM.on));
+  $("dimBtn").addEventListener("click", () => setMeasPanel($("measPanel").hidden));
+  $("measClose").addEventListener("click", () => setMeasPanel(false));
+  $("measPanel").querySelectorAll("[data-mm]").forEach(b => b.addEventListener("click", () => {
+    if (DIM.on && DIM.mode === b.dataset.mm) setDim(false); else setDim(true, b.dataset.mm);
+  }));
   $("dimClear").addEventListener("click", clearDims);
   $("dimAxes").addEventListener("change", () => { savePref("visorDimAxes", $("dimAxes").checked ? "1" : "0"); requestRender(); });
   $("dimAxes").checked = loadPref("visorDimAxes", "1") === "1";
 
-  // ---------- Sección ----------
-  function setSection(on){
-    S.section = on;
-    $("sectionBtn").setAttribute("aria-pressed", String(on));
-    $("sectionPanel").hidden = !on;
-    if (on) applySection();
-    syncClipping();
-    sectionHelper.visible = on;
-    requestRender();
-  }
-  function sliderVal(id){ return +$(id).value / 1000; }
-  function applySection(){
-    const B = S.bounds;
-    if (B.isEmpty()) return;
-    const pad = 0.01;
-    const lerp = (a, b, t) => a + (b - a) * t;
-    // Rangos en coordenadas del proyecto: X = x, Y = -z, Z = y
-    const X0 = B.min.x - pad, X1 = B.max.x + pad, Y0 = -B.max.z - pad, Y1 = -B.min.z + pad, Z0 = B.min.y - pad, Z1 = B.max.y + pad;
-    let x0 = lerp(X0, X1, sliderVal("sx0")), x1 = lerp(X0, X1, sliderVal("sx1"));
-    let y0 = lerp(Y0, Y1, sliderVal("sy0")), y1 = lerp(Y0, Y1, sliderVal("sy1"));
-    let z0 = lerp(Z0, Z1, sliderVal("sz0")), z1 = lerp(Z0, Z1, sliderVal("sz1"));
-    if (x1 < x0) [x0, x1] = [x1, x0]; if (y1 < y0) [y0, y1] = [y1, y0]; if (z1 < z0) [z0, z1] = [z1, z0];
-    clipPlanes.length = 0;
-    clipPlanes.push(
-      new THREE.Plane(new THREE.Vector3(1, 0, 0), -x0), new THREE.Plane(new THREE.Vector3(-1, 0, 0), x1),
-      new THREE.Plane(new THREE.Vector3(0, 0, -1), -y0), new THREE.Plane(new THREE.Vector3(0, 0, 1), y1),
-      new THREE.Plane(new THREE.Vector3(0, 1, 0), -z0), new THREE.Plane(new THREE.Vector3(0, -1, 0), z1)
-    );
-    S.sectionBox.set(new THREE.Vector3(x0, z0, -y1), new THREE.Vector3(x1, z1, -y0));
-    sectionHelper.box.copy(S.sectionBox);
-    syncClipping();
-  }
-  function sectionToSelection(){
-    if (!selCount() || S.bounds.isEmpty()) return;
-    const SB = selBox3(), B = [SB.min.x, SB.min.y, SB.min.z, SB.max.x, SB.max.y, SB.max.z], i = 0, o = { x:0, y:0, z:0 }, R = S.bounds, pad = 0.5;
-    const X0 = R.min.x - 0.01, X1 = R.max.x + 0.01, Y0 = -R.max.z - 0.01, Y1 = -R.min.z + 0.01, Z0 = R.min.y - 0.01, Z1 = R.max.y + 0.01;
-    const t = (v, a, b) => Math.round(Math.min(1, Math.max(0, (v - a) / (b - a))) * 1000);
-    $("sx0").value = t(B[i] + o.x - pad, X0, X1); $("sx1").value = t(B[i+3] + o.x + pad, X0, X1);
-    $("sy0").value = t(-(B[i+5] + o.z) - pad, Y0, Y1); $("sy1").value = t(-(B[i+2] + o.z) + pad, Y0, Y1);
-    $("sz0").value = t(B[i+1] + o.y - pad, Z0, Z1); $("sz1").value = t(B[i+4] + o.y + pad, Z0, Z1);
-    applySection();
-  }
-  function sectionReset(){ ["sx0","sy0","sz0"].forEach(id => $(id).value = 0); ["sx1","sy1","sz1"].forEach(id => $(id).value = 1000); applySection(); }
 
   // ---------- Búsqueda y suma ----------
   function allColumns(){
@@ -4304,13 +4650,255 @@ function workerMain(){
     $("modoSeg").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.modo === MS.modo)));
     MostrarEstado(MS.modo === "tecnico" ? "Selecciona filas (Ctrl / Mayús para varias) y asigna partida. Doble clic en una fila la muestra en el modelo."
                                         : "Modo sencillo: consulta de la medición. Doble clic en una fila la muestra en el modelo. Para asignar partidas cambia a Avanzado.", 0);
-    // En Sencillo no hay sección ni rayos X: si estaban activos se quitan
+    // En Sencillo no hay rayos X: si estaban activos se quitan
     if (MS.modo !== "tecnico"){
-      if (S.section) setSection(false);
       if (S.xray) $("xrayBtn").click();
     }
     if (MS.open) refreshMeasure();
   }
+
+  // ---------- Modo caminar ----------
+  // Recorrido a pie: las puertas y ventanas se atraviesan, los muros no; el suelo y las escaleras marcan la altura.
+  // Lógica común del paseo: el visor da walkRay(origen, dirección, distMax) -> {t, n} y walkPonerCamara()
+  const WALK = { on:false, placing:false, feet:[0, 0, 0], yaw:0, pitch:0, vy:0, keys:new Set(), last:0, raf:0, grav:true,
+                 drag:null, dirty:true, sinSuelo:false, eye:1.60, radius:0.25, step:0.45, alturas:[0.5, 1.0, 1.55] };
+  const WALK_KEYS = new Set(["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright", "shift", "q", "e", " ", "c"]);
+  function walkBloqueo(dx, dz, dist){
+    let min = null;
+    for (const h of WALK.alturas){
+      const r = walkRay([WALK.feet[0], WALK.feet[1] + h, WALK.feet[2]], [dx, 0, dz], dist + WALK.radius);
+      if (r && (!min || r.t < min.t)) min = r;
+    }
+    return min;
+  }
+  // Avanza sin atravesar muros; si choca, se desliza a lo largo de la pared
+  function walkMover(mx, mz){
+    const len = Math.hypot(mx, mz);
+    if (len < 1e-7) return false;
+    if (!WALK.grav){ WALK.feet[0] += mx; WALK.feet[2] += mz; return true; }
+    const dx = mx / len, dz = mz / len;
+    const hit = walkBloqueo(dx, dz, len);
+    if (!hit){ WALK.feet[0] += mx; WALK.feet[2] += mz; return true; }
+    const ok = Math.max(0, hit.t - WALK.radius);
+    WALK.feet[0] += dx * ok; WALK.feet[2] += dz * ok;
+    if (!hit.n) return ok > 0;
+    let nx = hit.n[0], nz = hit.n[2];
+    const nl = Math.hypot(nx, nz);
+    if (nl < 1e-6) return ok > 0;
+    nx /= nl; nz /= nl;
+    const p = dx * nx + dz * nz;
+    let sx = dx - nx * p, sz = dz - nz * p;
+    const sl = Math.hypot(sx, sz);
+    if (sl < 0.05) return ok > 0;
+    sx /= sl; sz /= sl;
+    const resto = (len - ok) * sl, h2 = walkBloqueo(sx, sz, resto);
+    const ok2 = h2 ? Math.max(0, h2.t - WALK.radius) : resto;
+    WALK.feet[0] += sx * ok2; WALK.feet[2] += sz * ok2;
+    return ok > 0 || ok2 > 0;
+  }
+  // El suelo (o el peldaño) bajo los pies fija la altura; si no hay nada justo debajo, cae
+  function walkSuelo(dt){
+    if (!WALK.grav) return false;
+    const y0 = WALK.feet[1];
+    const o = [WALK.feet[0], WALK.feet[1] + WALK.step + 0.05, WALK.feet[2]];
+    const r = walkRay(o, [0, -1, 0], WALK.step + 0.05 + 100);
+    if (!r){ WALK.vy = 0; WALK.sinSuelo = true; return false; }
+    WALK.sinSuelo = false;
+    const gy = o[1] - r.t;
+    if (gy >= WALK.feet[1] - 0.01){                  // subir peldaño (suavizado)
+      WALK.feet[1] += (gy - WALK.feet[1]) * Math.min(1, dt * 14);
+      if (Math.abs(gy - WALK.feet[1]) < 0.003) WALK.feet[1] = gy;
+      WALK.vy = 0;
+    } else {                                         // caer o bajar escaleras
+      WALK.vy -= 9.8 * dt;
+      WALK.feet[1] = Math.max(gy, WALK.feet[1] + WALK.vy * dt);
+      if (WALK.feet[1] === gy) WALK.vy = 0;
+    }
+    return Math.abs(WALK.feet[1] - y0) > 1e-5;
+  }
+  function walkTick(t){
+    if (!WALK.on) return;
+    WALK.raf = requestAnimationFrame(walkTick);
+    const dt = WALK.last ? Math.min(0.05, (t - WALK.last) / 1000) : 0;
+    WALK.last = t;
+    if (WALK.placing || !dt) return;
+    walkPaso(dt);
+  }
+  function walkPaso(dt){
+    const K = WALK.keys;
+    const f = ((K.has("w") || K.has("arrowup")) ? 1 : 0) - ((K.has("s") || K.has("arrowdown")) ? 1 : 0);
+    const s = (K.has("d") ? 1 : 0) - (K.has("a") ? 1 : 0);
+    const giro = (K.has("arrowleft") ? 1 : 0) - (K.has("arrowright") ? 1 : 0);
+    const vel = K.has("shift") ? 4.0 : 1.4;
+    let cambio = WALK.dirty;
+    if (giro){ WALK.yaw += giro * 1.6 * dt; cambio = true; }
+    if (f || s){
+      const fx = -Math.sin(WALK.yaw), fz = -Math.cos(WALK.yaw), rx = Math.cos(WALK.yaw), rz = -Math.sin(WALK.yaw);
+      let mx = fx * f + rx * s, mz = fz * f + rz * s;
+      const l = Math.hypot(mx, mz);
+      if (walkMover(mx / l * vel * dt, mz / l * vel * dt)){ cambio = true; WALK.asentado = false; }
+    }
+    if (!WALK.grav){
+      const v = ((K.has(" ") || K.has("e")) ? 1 : 0) - ((K.has("c") || K.has("q")) ? 1 : 0);
+      if (v){ WALK.feet[1] += v * vel * dt; cambio = true; }
+    } else if (!WALK.asentado){                      // quieto y apoyado: no hace falta volver a lanzar rayos
+      if (walkSuelo(dt)) cambio = true;
+      else WALK.asentado = WALK.vy === 0;
+    }
+    if (cambio){ WALK.dirty = false; walkPonerCamara(); walkEstado(); }
+  }
+  function walkEstado(){
+    const st = document.getElementById("walkSt"); if (!st) return;
+    const cota = WALK.feet[1].toLocaleString("es-ES", { minimumFractionDigits:2, maximumFractionDigits:2 });
+    st.textContent = (WALK.grav ? "Gravedad y colisiones activadas" : "Vuelo libre: atraviesa todo (G para volver a caminar)") +
+      " · cota de los pies " + cota + " m" + (WALK.grav && WALK.sinSuelo ? " · no hay suelo debajo" : "");
+  }
+  function walkMsg(html){ const m = document.getElementById("walkMsg"); if (m){ m.innerHTML = html; m.hidden = !html; } }
+  // Colocar al usuario en un punto del modelo (clic al entrar o doble clic paseando)
+  function walkColocar(p, n, dirCam){
+    let x = p[0], y = p[1], z = p[2];
+    if (n && Math.abs(n[1]) < 0.7){                 // clic en un muro: un poco separado de él
+      const l = Math.hypot(n[0], n[2]) || 1;
+      x += n[0] / l * (WALK.radius + 0.15); z += n[2] / l * (WALK.radius + 0.15);
+      y -= 1.0;                                     // y busca el suelo por debajo
+    }
+    WALK.feet = [x, y, z]; WALK.vy = 0; WALK.asentado = false;
+    if (dirCam){ WALK.yaw = Math.atan2(-dirCam[0], -dirCam[2]); WALK.pitch = 0; }
+    WALK.placing = false; WALK.dirty = true;
+    walkMsg("");
+  }
+  function walkTeclaAbajo(e){
+    if (!WALK.on || e.target.matches("input, select, textarea")) return;
+    const k = e.key.toLowerCase();
+    if (k === "escape"){ e.preventDefault(); e.stopImmediatePropagation(); setWalk(false); return; }
+    if (k === "g"){ e.preventDefault(); e.stopImmediatePropagation(); WALK.grav = !WALK.grav; WALK.vy = 0; WALK.asentado = false; WALK.dirty = true; walkEstado(); return; }
+    if (WALK_KEYS.has(k)){ e.preventDefault(); e.stopImmediatePropagation(); WALK.keys.add(k); }
+    else if (/^[a-z]$/.test(k) && !"hit".includes(k)) e.stopImmediatePropagation();   // que no salten los atajos del visor (salvo ocultar, aislar y transparentar)
+  }
+  function walkTeclaArriba(e){ if (WALK.on) WALK.keys.delete(e.key.toLowerCase()); }
+  window.addEventListener("keydown", walkTeclaAbajo, true);
+  window.addEventListener("keyup", walkTeclaArriba, true);
+  window.addEventListener("blur", () => WALK.keys.clear());
+  function walkMirar(dx, dy){
+    WALK.yaw -= dx * 0.0035;
+    WALK.pitch = Math.max(-1.45, Math.min(1.45, WALK.pitch - dy * 0.0035));
+    WALK.dirty = true;
+  }
+  const PASA_CAT = /^(puertas|ventanas|doors|windows|habitaciones|espacios|rooms|spaces|zonas de climatizacion|hvac zones)$/;
+  let walkG = null, walkStampN = 0;
+  // Rejilla en planta (celdas de 2 m) para lanzar rayos solo contra los elementos cercanos
+  function walkPrepararRejilla(){
+    const CELL = 2, map = new Map(), big = [];
+    const key = (ix, iz) => (ix + 32768) * 65536 + (iz + 32768);
+    S.models.forEach(m => {
+      if (!m.ready) return;
+      m.walkPass = new Uint8Array(m.n);
+      m.walkStamp = new Uint32Array(m.n);
+      const o = m.group.position, B = m.bbox;
+      for (let e = 0; e < m.n; e++){
+        if (PASA_CAT.test(plain(catName(m, e)))){ m.walkPass[e] = 1; continue; }
+        const j = e * 6;
+        const x0 = Math.floor((B[j] + o.x) / CELL), x1 = Math.floor((B[j + 3] + o.x) / CELL);
+        const z0 = Math.floor((B[j + 2] + o.z) / CELL), z1 = Math.floor((B[j + 5] + o.z) / CELL);
+        if (!isFinite(x0 + x1 + z0 + z1)) continue;
+        if ((x1 - x0 + 1) * (z1 - z0 + 1) > 2500){ big.push(m, e); continue; }
+        for (let ix = x0; ix <= x1; ix++) for (let iz = z0; iz <= z1; iz++){
+          const k = key(ix, iz); let L = map.get(k);
+          if (!L){ L = []; map.set(k, L); }
+          L.push(m, e);
+        }
+      }
+    });
+    walkG = { CELL, map, big, key };
+  }
+  const wLo = new THREE.Vector3(), wD = new THREE.Vector3();
+  function walkRay(o, d, maxDist){
+    if (!walkG) return null;
+    const G = walkG, stamp = ++walkStampN;
+    wD.set(d[0], d[1], d[2]);
+    const ex = o[0] + d[0] * maxDist, ez = o[2] + d[2] * maxDist;
+    const x0 = Math.floor(Math.min(o[0], ex) / G.CELL), x1 = Math.floor(Math.max(o[0], ex) / G.CELL);
+    const z0 = Math.floor(Math.min(o[2], ez) / G.CELL), z1 = Math.floor(Math.max(o[2], ez) / G.CELL);
+    let best = null;
+    const probar = (m, e) => {
+      if (m.walkStamp[e] === stamp) return;
+      m.walkStamp[e] = stamp;
+      if (!stateOf(m, e)) return;                     // oculto, categoría apagada o fuera del aislamiento
+      const off = m.group.position;
+      wLo.set(o[0] - off.x, o[1] - off.y, o[2] - off.z);
+      const tb = rayBox(wLo, wD, m.bbox, e * 6);
+      if (tb === null || tb > maxDist || (best && tb > best.t)) return;
+      lastHitNormal = null;
+      const t = rayElement(m, e, wLo, wD, off);
+      if (t !== null && t <= maxDist && (!best || t < best.t)) best = { t, n: lastHitNormal ? lastHitNormal.slice() : null };
+    };
+    for (let ix = x0; ix <= x1; ix++) for (let iz = z0; iz <= z1; iz++){
+      const L = G.map.get(G.key(ix, iz));
+      if (L) for (let i = 0; i < L.length; i += 2) probar(L[i], L[i + 1]);
+    }
+    for (let i = 0; i < G.big.length; i += 2) probar(G.big[i], G.big[i + 1]);
+    return best;
+  }
+  const wLook = new THREE.Vector3();
+  function walkPonerCamara(){
+    const cp = Math.cos(WALK.pitch);
+    camera.position.set(WALK.feet[0], WALK.feet[1] + WALK.eye, WALK.feet[2]);
+    wLook.set(camera.position.x - Math.sin(WALK.yaw) * cp, camera.position.y + Math.sin(WALK.pitch), camera.position.z - Math.cos(WALK.yaw) * cp);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(wLook);
+    requestRender();
+  }
+  function setWalk(on){
+    if (on === WALK.on) return;
+    if (on){
+      if (!S.models.some(m => m.ready)){ toast("Carga antes un modelo."); return; }
+      if (DIM.on) setDim(false);
+      if (CUT.picking) cancelCutPick();
+      if (camera === ortho) setOrtho(false);
+      walkPrepararRejilla();
+      WALK.fov = persp.fov; WALK.near = persp.near;
+      persp.fov = 65; persp.near = 0.05; persp.updateProjectionMatrix();
+      controls.enabled = false;
+      Object.assign(WALK, { on:true, placing:true, vy:0, last:0, drag:null, grav:true });
+      WALK.keys.clear();
+      view.classList.add("walking");
+      $("walkHud").hidden = false;
+      walkMsg("<b>Haz clic en el suelo</b> donde quieres empezar a caminar. Si cae en la cubierta, oculta antes las plantas de arriba o usa un plano de corte horizontal.");
+      walkEstado();
+      WALK.raf = requestAnimationFrame(walkTick);
+    } else {
+      WALK.on = false; WALK.placing = false;
+      cancelAnimationFrame(WALK.raf); WALK.keys.clear();
+      persp.fov = WALK.fov || 45; persp.near = WALK.near || 0.1; persp.updateProjectionMatrix();
+      const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
+      controls.target.copy(camera.position).addScaledVector(dir, 3);
+      controls.enabled = true; controls.update();
+      view.classList.remove("walking");
+      $("walkHud").hidden = true;
+      walkG = null;
+    }
+    $("walkBtn").setAttribute("aria-pressed", String(on));
+    updateCutHandle();
+    requestRender();
+  }
+  function walkPuntoDesdeClic(clientX, clientY){
+    const hit = pick(clientX, clientY);
+    if (!hit){ toast("Haz clic sobre el modelo (un suelo, una escalera...)."); return; }
+    const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
+    walkColocar([hit.point.x, hit.point.y, hit.point.z], [hit.normal.x, hit.normal.y, hit.normal.z], [dir.x, dir.y, dir.z]);
+  }
+  renderer.domElement.addEventListener("pointerdown", e => {
+    if (!WALK.on || WALK.placing || e.button !== 0) return;
+    WALK.drag = { x:e.clientX, y:e.clientY };
+    try{ renderer.domElement.setPointerCapture(e.pointerId); } catch(err){}
+  });
+  renderer.domElement.addEventListener("pointermove", e => {
+    if (!WALK.on || !WALK.drag) return;
+    walkMirar(e.clientX - WALK.drag.x, e.clientY - WALK.drag.y);
+    WALK.drag.x = e.clientX; WALK.drag.y = e.clientY;
+  });
+  renderer.domElement.addEventListener("pointerup", () => { if (WALK.on) WALK.drag = null; });
+  renderer.domElement.addEventListener("dblclick", e => { if (WALK.on && !WALK.placing) walkPuntoDesdeClic(e.clientX, e.clientY); });
 
   // ---------- Varios ----------
   let toastT = null;
@@ -4338,20 +4926,17 @@ function workerMain(){
   view.addEventListener("dragleave", () => { if (--dragDepth <= 0){ dragDepth = 0; view.classList.remove("drag"); } });
   view.addEventListener("drop", e => { e.preventDefault(); dragDepth = 0; view.classList.remove("drag"); handleFiles(e.dataTransfer.files); });
 
-  $("viewSel").addEventListener("change", e => setView(e.target.value));
-  $("orthoBtn").addEventListener("click", () => setOrtho(camera !== ortho));
-  $("fitBtn").addEventListener("click", fitAll);
-  $("sectionBtn").addEventListener("click", () => setSection(!S.section));
-  $("cutBtn").addEventListener("click", () => setCut(!(CUT.on || CUT.picking)));
-  $("cutRange").addEventListener("input", e => { CUT.offset = +e.target.value; updateCut(); });
-  $("cutNum").addEventListener("change", e => { const v = parseNum(e.target.value); if (!isNaN(v)){ CUT.offset = v; updateCut(); } });
-  $("cutFlip").addEventListener("click", () => { CUT.point.addScaledVector(CUT.normal, CUT.offset); CUT.offset = 0; CUT.normal.negate(); updateCut(); });
-  $("cutShow").addEventListener("change", updateCut);
+  $("viewSel").addEventListener("change", e => { setWalk(false); setView(e.target.value); });
+  $("orthoBtn").addEventListener("click", () => { setWalk(false); setOrtho(camera !== ortho); });
+  $("fitBtn").addEventListener("click", () => { setWalk(false); fitAll(); });
+  $("walkBtn").addEventListener("click", () => setWalk(!WALK.on));
+  $("walkExit").addEventListener("click", () => setWalk(false));
+  $("cutBtn").addEventListener("click", () => setCut($("cutPanel").hidden));
+  $("cutClose").addEventListener("click", () => setCut(false));
   $("cutLook").addEventListener("click", lookAtCut);
-  $("cutNew").addEventListener("click", () => { CUT.on = false; cutHelper.visible = false; syncClipping(); $("cutControls").hidden = true; startCutPick(); });
-  ["sx0","sx1","sy0","sy1","sz0","sz1"].forEach(id => $(id).addEventListener("input", applySection));
-  $("sectionSel").addEventListener("click", sectionToSelection);
-  $("sectionReset").addEventListener("click", sectionReset);
+  $("cutNew").addEventListener("click", startCutPick);
+  $("cutHoriz").addEventListener("click", addHorizontalCut);
+  $("cutClear").addEventListener("click", () => { clearCuts(); renderCuts(); });
   $("xrayBtn").addEventListener("click", () => {
     S.xray = !S.xray;
     $("xrayBtn").setAttribute("aria-pressed", String(S.xray));
@@ -4440,10 +5025,10 @@ function workerMain(){
   window.addEventListener("keydown", e => {
     if (e.target.matches("input, select, textarea")) return;
     const k = e.key.toLowerCase();
-    if (k === "escape" && (DIM.on || dimMenu)){ closeDimMenu(); if (DIM.a){ DIM.a = null; requestRender(); } else if (DIM.on) setDim(false); return; }
+    if (k === "escape" && (DIM.on || dimMenu)){ closeDimMenu(); if (DIM.a){ DIM.a = DIM.b = null; renderMeasPanel(); requestRender(); } else if (DIM.on) setDim(false); return; }
     if ((k === "delete" || k === "backspace") && DIM.hl){ deleteDim(DIM.hl); return; }
-    if (k === "d"){ setDim(!DIM.on); return; }
-    if (k === "escape"){ if (CUT.picking && !CUT.on) setCut(false); else if (CUT.picking){ CUT.picking = false; view.classList.remove("picking"); } else select(null); }
+    if (k === "d"){ if (DIM.on) setDim(false); else setDim(true, "dist"); return; }
+    if (k === "escape"){ if (CUT.picking) cancelCutPick(); else select(null); }
     else if (k === "h") hideSelected();
     else if (k === "i") isolateSelected();
     else if (k === "f") fitSelection();
@@ -4452,7 +5037,7 @@ function workerMain(){
 
   applyTheme();
   resize();
-  window.__visor = { CUT, MS, S, DIM, PJ, sincronizar, setModo, snapPick, setDim, handleFiles, pick, select, setView, setSection, fitAll, renderer, get camera(){ return camera; } };
+  window.__visor = { CUT, MS, S, DIM, PJ, WALK, setWalk, walkRay, walkColocar, walkPaso, sincronizar, setModo, snapPick, setDim, handleFiles, pick, select, setView, CUTS, addCut, selectCut, fitAll, renderer, get camera(){ return camera; } };
 })();
 </script>
 </body>

@@ -24,6 +24,12 @@ Al entrar en la página principal se elige el visor:
   - **Peso** = volumen × densidad: acero 7.850, hormigón en masa 2.300, hormigón armado 2.500, madera 500,
     aluminio 2.700 kg/m³ o una densidad propia (se recuerda en el navegador).
   - **Distancia** y **ángulo** con imán a vértices y aristas. Resultados fijados copiables y lista de cotas.
+- **Modo caminar** (botón Caminar): clic en un suelo para empezar y pasear por dentro como en primera persona.
+  Muros, forjados, mobiliario y barandillas no se atraviesan (se desliza a lo largo de la pared); puertas, ventanas, huecos y espacios sí.
+  El suelo y las escaleras fijan la altura de la vista (ojos a 1,60 m; sube peldaños de hasta 45 cm y cae por los huecos).
+  W A S D o flechas para andar, ← → girar, arrastrar para mirar, Mayús correr, doble clic para ir a un punto,
+  G para volar sin colisiones, Esc para salir. Un clic selecciona el elemento y muestra sus propiedades (también puertas y ventanas);
+  H oculta, I aísla y T transparenta sin salir del paseo, y el clic derecho abre el menú contextual.
 - Tema claro u oscuro.
 
 Librerías desde CDN: xeokit-sdk 2.6.114 y web-ifc 0.0.77.
@@ -40,14 +46,23 @@ Funciones:
 - Propiedades por elemento y coordenadas del punto pulsado.
 - Búsqueda en parámetros, suma de parámetros numéricos, aislar resultados.
 - Colorear por categoría, por modelo o por cualquier parámetro.
-- Caja de sección y plano de corte alineado a una cara del modelo, vistas en planta y alzados, proyección ortogonal, rayos X, aristas.
+- **Planos de corte** (como en el visor IFC): clic en una cara para crear un corte alineado con ella, o "+ Horizontal" a media altura.
+  Se pueden crear varios a la vez; cada uno se mueve arrastrando la flecha amarilla en el modelo,
+  se activa o desactiva con su casilla, se invierte el lado y se borra. El ojo oculta el plano dibujado sin quitar
+  el corte. Cerrar el panel no quita los cortes; el botón muestra cuántos hay activos.
+  Con cortes activos las cotas se ajustan al contorno de la sección (esquinas y bordes cortados), como si el corte estuviera relleno.
+- Vistas en planta y alzados, proyección ortogonal, rayos X, aristas. Iconos en todos los comandos de la barra.
 - Ocultar (H), aislar (I), encuadrar (F), deseleccionar (Esc).
+- **Modo caminar** (botón Caminar, también en modo Sencillo): igual que en el visor IFC (clic para ver propiedades, H ocultar, I aislar). Se atraviesan puertas, ventanas,
+  habitaciones y espacios; muros, suelos, escaleras, mobiliario, etc. no. Lo que esté oculto o fuera del aislamiento tampoco choca.
 - Selección múltiple: Ctrl+clic añade o quita; Ctrl+arrastrar hace ventana (hacia la derecha, elementos enteros dentro;
   hacia la izquierda, los que toque; con Mayús quita). Resumen por tipo con nº de elementos, longitud, área, volumen y peso,
   y botones para aislar, ocultar, medir solo la selección o exportarla a Excel.
-- Cotas de distancia entre dos puntos (D), con imán a vértices y aristas; muestran distancia total, horizontal y vertical,
-  y en las cotas oblicuas dibujan las componentes X, Y, Z (se pueden ocultar).
-  Se borran con clic derecho sobre la cifra, con Supr o desde el panel Cotas.
+- **Medir** (D): ventana propia junto a la de planos de corte (no ocupa la paleta izquierda) con **Distancia** (dos puntos)
+  y **Ángulo** (tres puntos, el segundo es el vértice). Imán a vértices y aristas (también a las esquinas y bordes de la sección)
+  y **lupa** junto al cursor para afinar. Las distancias muestran total, horizontal y vertical, y en las oblicuas las componentes
+  X, Y, Z (se pueden ocultar). Las cotas y ángulos se quedan en pantalla y en la lista de la ventana, donde se ocultan o borran;
+  también con clic derecho sobre la cifra o con Supr. Cerrar la ventana no las borra y el botón Medir muestra cuántas hay.
 - Carpeta de proyectos (Chrome / Edge): se elige una vez una carpeta (por ejemplo, la de SharePoint sincronizada con
   OneDrive) con una subcarpeta por proyecto, y el visor la recuerda. "Proyectos" lista las subcarpetas con modelos .dae
   y se abren con un clic (también "Abrir «último proyecto»" en la pantalla de inicio).
@@ -57,7 +72,7 @@ Funciones:
     todo el equipo. Si dos personas editan a la vez se fusionan los cambios; el visor comprueba cada 20 s y al volver a la pestaña.
   - Un BC3 abierto a mano dentro de un proyecto se puede copiar a la carpeta para que todos usen el mismo.
 - Modo Sencillo / Avanzado (se recuerda en el navegador). Sencillo: navegar, buscar, propiedades, plano de corte, cotas y la
-  medición en consulta (tabla, importe, Excel/CSV). Avanzado: además sección, rayos X, abrir BC3, asignar partidas, cambiar unidades, fórmulas, exportar BC3
+  medición en consulta (tabla, importe, Excel/CSV). Avanzado: además rayos X, abrir BC3, asignar partidas, cambiar unidades, fórmulas, exportar BC3
   y compartir datos.
 - Medición con la misma lógica que la macro BECSA BoQ v2.9, pero sin escribir nada en Revit:
   - Una fila por modelo, categoría, familia, tipo y tamaño (instalaciones por tamaño, aislamientos por espesor).
