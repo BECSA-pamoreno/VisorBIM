@@ -1,6 +1,6 @@
-# BECSA Visores
+# BECSA Visor BIM
 
-Tres visores web (modelos BIM y planos CAD) que funcionan en el navegador, sin instalar nada. Los archivos se leen en local: no se suben a ningún servidor.
+Dos visores web de modelos BIM que funcionan en el navegador, sin instalar nada. Los archivos se leen en local: no se suben a ningún servidor.
 
 Al entrar en la página principal se elige el visor:
 
@@ -8,7 +8,6 @@ Al entrar en la página principal se elige el visor:
 |---|---|---|
 | **Visor IFC** | `ifc/` | IFC2X3, IFC4, IFC4X3 |
 | **Visor Revit** | `revit/` | DAE + XLSX exportados con la macro `ExportarVisor` |
-| **Visor CAD** | `cad/` | DWG, DXF (planos 2D) |
 
 ## Visor IFC
 
@@ -85,22 +84,13 @@ Funciones:
   - Lo hecho en el visor se guarda en este navegador (y el último BC3 usado); "Datos" exporta e importa
     un .json para pasárselo a otra persona.
 
-## Visor CAD
-
-- Abre planos DWG y DXF en 2D (modelo y presentaciones), con un botón o arrastrando el archivo.
-- Capas (encender y apagar), zoom y desplazamiento, medir distancia, área, ángulo y arco, herramientas de revisión y exportar.
-- Línea de comandos al estilo AutoCAD y tema claro u oscuro.
-- Basado en [CAD-Viewer](https://github.com/mlightcad/cad-viewer) (MIT) y LibreDWG (GPL) para leer DWG.
-- `cad/` ya está compilado; el código fuente y cómo recompilarlo están en `cad-fuente/` (ver `cad-fuente/LEEME.md`).
-- No se abre con doble clic (`file://`): necesita servirse por http(s). En GitHub Pages funciona tal cual.
-- Limitaciones: no muestra XRefs ni tablas de DWG; si un DWG falla, guardarlo como DXF. Los textos usan fuentes de jsDelivr.
+Para planos DWG y DXF está el **BECSA Visor 2D**, en su propio repo (`Visor2D`); la portada enlaza a él.
 
 ## Estructura
 
-- `index.html`: página de selección de visor (BECSA Visores)
+- `index.html`: página de selección de visor (BECSA Visor BIM)
 - `ifc/index.html`: visor IFC
 - `revit/index.html`: visor Revit (three.js desde CDN; SheetJS se carga en segundo plano)
 - `revit/macro/ExportadorVisor.cs`: macro de Revit que exporta DAE + XLSX
-- `cad/`: visor CAD compilado; `cad-fuente/`: su código fuente
 - `revit/ejemplo/`: tres modelos ficticios (arquitectura, estructura e instalaciones) con orígenes distintos con «Fase de creación» y «Certificación» (meses 13-15) para probar los filtros, y un BC3 de prueba (`Ejemplo_banco.bc3`)
 - `.nojekyll`: evita que GitHub Pages procese el sitio con Jekyll
