@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- BECSATools - Exportador al Visor BIM para Civil 3D 2027 (.NET 10)  v1.2 -->
+  <PropertyGroup>
+    <!-- -windows + WPF: necesarios para la pestana de la cinta (AdWindows) y los iconos -->
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>BecsaVisorC3D</AssemblyName>
+    <RootNamespace>BecsaTools</RootNamespace>
+    <Version>1.2.0</Version>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <PlatformTarget>x64</PlatformTarget>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>MSB3277;CA1416</NoWarn>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <!-- Carpeta de instalacion de Civil 3D. Se puede cambiar desde el .bat -->
+    <AcadDir Condition="'$(AcadDir)' == ''">C:\Program Files\Autodesk\AutoCAD 2027</AcadDir>
+    <C3dDir Condition="'$(C3dDir)' == ''">$(AcadDir)\C3D</C3dDir>
+    <AcaDir Condition="'$(AcaDir)' == ''">$(AcadDir)\ACA</AcaDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="acdbmgd"><HintPath>$(AcadDir)\acdbmgd.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="accoremgd"><HintPath>$(AcadDir)\accoremgd.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="acmgd"><HintPath>$(AcadDir)\acmgd.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="AdWindows"><HintPath>$(AcadDir)\AdWindows.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="AeccDbMgd"><HintPath>$(C3dDir)\AeccDbMgd.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="AecBaseMgd"><HintPath>$(AcaDir)\AecBaseMgd.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+</Project>

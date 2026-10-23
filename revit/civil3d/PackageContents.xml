@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage
+  SchemaVersion="1.0"
+  AutodeskProduct="AutoCAD"
+  ProductType="Application"
+  Name="BECSATools Visor BIM C3D"
+  Description="Exporta el dibujo de Civil 3D al Visor BIM (DAE + XLSX), federable con Revit"
+  AppVersion="1.2.0"
+  Author="BECSA"
+  ProductCode="{4B7F9C07-4FB4-4BD0-8C0C-4BED16903D66}"
+  UpgradeCode="{B8208AD8-4C07-49FC-A3A0-B8320D2A7459}">
+
+  <CompanyDetails Name="BECSA" />
+
+  <!-- Civil 3D 2027 = R26.0 (.NET 10). Una DLL de .NET 10 no carga en 2025/2026 (.NET 8). -->
+  <RuntimeRequirements OS="Win64" Platform="Civil3D" SeriesMin="R26.0" SeriesMax="R26.9" />
+
+  <Components Description="Civil 3D 2027">
+    <RuntimeRequirements OS="Win64" Platform="Civil3D" SeriesMin="R26.0" SeriesMax="R26.9" />
+    <ComponentEntry
+      AppName="BecsaVisorC3D"
+      Version="1.2.0"
+      ModuleName="./Contents/BecsaVisorC3D.dll"
+      AppDescription="Exportar al Visor BIM"
+      LoadOnAutoCADStartup="True">
+      <Commands GroupName="BECSATOOLS_C3D_VISOR">
+        <Command Global="BECSA_EXPORTARVISOR" Local="BECSA_EXPORTARVISOR" />
+        <Command Global="BECSA_CINTA_VISOR" Local="BECSA_CINTA_VISOR" />
+      </Commands>
+    </ComponentEntry>
+  </Components>
+</ApplicationPackage>

@@ -108,6 +108,30 @@ input[type=text],select{width:100%;padding:6px 9px;border:1px solid var(--line);
 #measPanel .mini:hover{background:var(--soft);color:var(--ink)}
 .dim-ic{width:18px;text-align:center;color:var(--muted);font-weight:700;flex:none}
 #view #lens[hidden]{display:none}
+#pkLabels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:4}
+#pkLabels[hidden]{display:none}
+.pk-lbl{position:absolute;transform:translate(-50%,calc(-100% - 6px));font-size:11px;font-weight:600;color:#fff;background:#D62F6E;padding:1px 5px;border-radius:4px;white-space:nowrap;font-variant-numeric:tabular-nums;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.pk-lbl::after{content:"";position:absolute;left:50%;bottom:-7px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#D62F6E;border:1.5px solid #fff}
+.pk-nom{position:absolute;transform:translate(8px,6px);font-size:12px;font-weight:700;color:#D62F6E;background:color-mix(in srgb,var(--panel) 85%,transparent);padding:1px 6px;border-radius:4px;white-space:nowrap}
+.dim-label.pt{white-space:pre;text-align:left;transform:translate(12px,-50%);font-size:12px;line-height:1.35}
+#dimSvg .pt .end{fill:var(--panel);stroke:var(--ink);stroke-width:2}
+#measPanel .mm-vol{display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:6px}
+#measPanel .mm-vol svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.modal.vol{width:min(860px,calc(100vw - 24px))}
+.vol-body{padding:12px 16px;overflow:auto;min-height:0}
+.vol-body .check{display:flex;gap:8px;align-items:flex-start;margin:4px 0}
+.vol-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:8px 0}
+.vol-grid label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.vol-grid select,.vol-grid input{padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--soft);color:var(--ink);font:inherit}
+.vol-grid[hidden]{display:none}
+.vol-tab{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0;font-variant-numeric:tabular-nums}
+.vol-tab th,.vol-tab td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:left}
+.vol-tab .num{text-align:right}
+.vol-tab tbody tr:first-child td,.vol-tab tbody tr:nth-child(2) td{font-weight:600}
+.vol-secc{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:6px}
+.vol-secc .vol-tab{margin:0}
+.vol-secc .vol-tab tbody tr td{font-weight:400}
+.vol-secc thead th{position:sticky;top:0;background:var(--panel)}
 #view #lens{position:absolute;width:150px;height:150px;border-radius:50%;border:2px solid var(--accent);box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none;z-index:9;background:var(--viewport)}
 #dimSvg .ang .arc{fill:none;stroke:var(--accent);stroke-width:2}
 #dimSvg .ang .arcfill{fill:color-mix(in srgb,var(--accent) 22%,transparent);stroke:none;opacity:1}
@@ -466,6 +490,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
       <span class="sep"></span>
       <button class="btn" id="dimBtn" aria-pressed="false" title="Medir distancias y ángulos, con imán a vértices y aristas y lupa (D)"><svg viewBox="0 0 24 24"><path d="M3 17 17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/></svg><span>Medir</span><b class="cnt" id="dimCnt" hidden title="Cotas y ángulos en el modelo"></b></button>
       <button class="btn" id="walkBtn" aria-pressed="false" title="Recorrer el modelo a pie: W A S D para andar, arrastrar para mirar, clic para ver propiedades"><svg viewBox="0 0 24 24"><circle cx="13" cy="4.5" r="2"/><path d="M10 21l2-6 3 3v3M9 11l3-3 3 3 3 1M12 8l-1 6"/></svg><span>Caminar</span></button>
+      <button class="btn" id="ejesBtn" hidden aria-pressed="true" title="Mostrar u ocultar los ejes de Civil 3D con sus PK"><svg viewBox="0 0 24 24"><path d="M7 21 10 3M17 21 14 3"/><path d="M12 5v2M12 11v2M12 17v2"/></svg><span>Ejes PK</span></button>
       <button class="btn" id="measureBtn" aria-pressed="false" title="Tabla de medición y presupuesto"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 18h2M12 18h2M16 15v3"/></svg><span>Medición</span></button>
     </div>
     <div id="clipPanels">
@@ -474,7 +499,9 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
       <div class="mm-modes">
         <button class="btn small" data-mm="dist" aria-pressed="false" title="Distancia entre dos puntos (D)"><svg viewBox="0 0 24 24"><path d="M4 12h16M4 8v8M20 8v8"/><path d="M8 10l-3 2 3 2M16 10l3 2-3 2"/></svg>Distancia</button>
         <button class="btn small" data-mm="ang" aria-pressed="false" title="Ángulo entre tres puntos: el segundo es el vértice"><svg viewBox="0 0 24 24"><path d="M4 20 18 5M4 20h16"/><path d="M11 20a7 7 0 0 0-2.2-5.1"/></svg>Ángulo</button>
+        <button class="btn small" data-mm="pt" aria-pressed="false" title="Coordenadas X, Y, Z de un punto (y su PK si hay ejes)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v5M12 16v5M3 12h5M16 12h5"/></svg>Punto</button>
       </div>
+      <button class="btn small mm-vol" id="volBtn" title="Desmonte y terraplén entre dos superficies (prismoides o secciones por PK)"><svg viewBox="0 0 24 24"><path d="M3 15c3-4 6-4 9-1s6 3 9-1"/><path d="M3 19c3-2 6-2 9 0s6 2 9 0" stroke-dasharray="2 2"/><path d="M12 4v7M9 8l3 3 3-3"/></svg>Volumen entre superficies</button>
       <p class="muted" id="measHint"></p>
       <label class="check" id="dimAxesChk"><input type="checkbox" id="dimAxes" checked> Componentes X, Y, Z en cotas oblicuas</label>
       <div id="dimListWrap" hidden>
@@ -499,6 +526,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
     <canvas id="lens" hidden></canvas>
     <svg id="dimSvg"></svg>
     <div id="dimLabels"></div>
+    <div id="pkLabels" hidden></div>
     <div id="toast" hidden></div>
     <div id="walkHud" hidden>
       <div class="wh-head"><b>Modo caminar</b><span class="spacer"></span><button class="btn small" id="walkExit">Salir <kbd>Esc</kbd></button></div>
@@ -840,7 +868,9 @@ function workerMain(){
         var wb = self.XLSX.read(buf, { type:"array" });
         var ws = wb.Sheets[wb.SheetNames[0]];
         var aoa = self.XLSX.utils.sheet_to_json(ws, { header:1, defval:"", raw:false });
-        self.postMessage({ type:"done", res:{ header:(aoa[0] || []).map(String), rows:aoa.slice(1) } });
+        var wsE = wb.Sheets["Ejes"];   // Civil 3D: puntos de los ejes con su PK
+        var ejes = wsE ? self.XLSX.utils.sheet_to_json(wsE, { header:1, defval:"", raw:true }) : null;
+        self.postMessage({ type:"done", res:{ header:(aoa[0] || []).map(String), rows:aoa.slice(1), ejes:ejes } });
       }
     } catch(err){
       self.postMessage({ type:"error", message:String(err && err.message || err) });
@@ -915,7 +945,7 @@ function workerMain(){
   function requestRender(){
     if (pending) return;
     pending = true;
-    requestAnimationFrame(() => { pending = false; renderer.render(scene, camera); updateDims(); });
+    requestAnimationFrame(() => { pending = false; renderer.render(scene, camera); updateDims(); updatePK(); });
   }
   controls.addEventListener("change", requestRender);
 
@@ -955,7 +985,7 @@ function workerMain(){
       if (ext === "dae") groups.get(k).dae = f;
       else if (ext === "xlsx" || ext === "xls" || ext === "csv") groups.get(k).data = f;
     });
-    if (!groups.size){ toast("Añade archivos .dae y .xlsx exportados con la macro."); return; }
+    if (!groups.size){ toast("Añade archivos .dae y .xlsx exportados de Revit o de Civil 3D."); return; }
     groups.forEach((g, k) => {
       if (g.dae){
         const old = S.models.find(m => m.key === k);
@@ -1023,6 +1053,7 @@ function workerMain(){
       linked
     };
     m.data.mc = measureColumns(H);
+    m.ejes = res.ejes ? leerEjes(res.ejes) : null;
   }
 
   function buildModel(m, res){
@@ -1206,6 +1237,7 @@ function workerMain(){
     if (fit) fitAll();
     showProps();
     refreshMeasure();
+    try { rebuildEjes(); } catch(err){}
   }
 
   function computeBounds(){
@@ -2039,7 +2071,7 @@ function workerMain(){
 
   // ---------- Cotas de distancia ----------
   const SVGNS = "http://www.w3.org/2000/svg";
-  const DIM = { on:false, mode:"dist", a:null, b:null, hover:null, mouse:null, list:[], seq:0, seqA:0, hl:null, raf:0 };
+  const DIM = { on:false, mode:"dist", a:null, b:null, hover:null, mouse:null, list:[], seq:0, seqA:0, seqP:0, hl:null, raf:0 };
   const fmtM = v => v.toLocaleString("es-ES", { minimumFractionDigits:2, maximumFractionDigits:3 });
   const _v = new THREE.Vector3();
 
@@ -2148,6 +2180,10 @@ function workerMain(){
   function dimClick(x, y){
     const s = snapPick(x, y);
     if (!s){ toast("No has tocado el modelo. Prueba otra vez."); return; }
+    if (DIM.mode === "pt"){
+      DIM.list.push({ id:++DIM.seqP, kind:"pt", a:s.point.clone(), visible:true, els:null });
+      renderDimList(); renderMeasPanel(); requestRender(); return;
+    }
     if (!DIM.a){ DIM.a = s.point; DIM.hover = s; renderMeasPanel(); requestRender(); return; }
     if (s.point.distanceTo(DIM.a) < 1e-6) return;
     if (DIM.mode === "ang"){
@@ -2199,6 +2235,35 @@ function workerMain(){
     label.className = "dim-label ang" + (cls && cls.includes("rubber") ? " live" : "");
     $("dimLabels").appendChild(label);
     return { g, label, axLabels:[] };
+  }
+  function makePtEls(){
+    const g = document.createElementNS(SVGNS, "g");
+    g.setAttribute("class", "pt");
+    g.innerHTML = '<line class="halo"/><line class="halo"/><line class="ln"/><line class="ln"/><circle class="end" r="5"/>';
+    $("dimSvg").appendChild(g);
+    const label = document.createElement("div");
+    label.className = "dim-label pt";
+    $("dimLabels").appendChild(label);
+    return { g, label, axLabels:[] };
+  }
+  function placePt(els, p, w, h, text){
+    const sp = toScr(p, w, h);
+    els.g.style.display = sp ? "" : "none";
+    els.label.style.display = sp ? "" : "none";
+    if (!sp) return;
+    const [h1, h2, l1, l2, c] = els.g.children, x = sp[0], y = sp[1];
+    for (const l of [h1, l1]){ l.setAttribute("x1", x - 9); l.setAttribute("y1", y); l.setAttribute("x2", x + 9); l.setAttribute("y2", y); }
+    for (const l of [h2, l2]){ l.setAttribute("x1", x); l.setAttribute("y1", y - 9); l.setAttribute("x2", x); l.setAttribute("y2", y + 9); }
+    c.setAttribute("cx", x); c.setAttribute("cy", y);
+    els.label.style.left = x + "px"; els.label.style.top = y + "px";
+    if (els.label.textContent !== text) els.label.textContent = text;
+  }
+  // Coordenadas del proyecto (X este, Y norte, Z cota) y PK respecto al eje más cercano
+  function textoPunto(p, unaLinea){
+    const [X, Y, Z] = toShared(p);
+    const pk = typeof textoPK === "function" ? textoPK(X, Y) : "";
+    const partes = ["X " + fmtCoord(X), "Y " + fmtCoord(Y), "Z " + fmtCoord(Z)];
+    return unaLinea ? partes.join("  ·  ") + (pk ? "  ·  " + pk : "") : partes.join("\n") + (pk ? "\n" + pk : "");
   }
   function dropEls(els){ els.g.remove(); els.label.remove(); els.axLabels.forEach(l => l.remove()); }
   function removeDimEls(d){ if (d.els){ dropEls(d.els); d.els = null; } }
@@ -2281,7 +2346,7 @@ function workerMain(){
     const w = view.clientWidth, h = view.clientHeight;
     for (const d of DIM.list){
       if (!d.els){
-        d.els = d.kind === "ang" ? makeAngEls("") : makeDimEls("");
+        d.els = d.kind === "ang" ? makeAngEls("") : d.kind === "pt" ? makePtEls() : makeDimEls("");
         const lb = d.els.label;
         lb.addEventListener("mouseenter", () => setDimHl(d));
         lb.addEventListener("mouseleave", () => setDimHl(null));
@@ -2289,7 +2354,8 @@ function workerMain(){
         lb.title = "Clic derecho para borrar";
       }
       if (!d.visible){ d.els.g.style.display = "none"; d.els.label.style.display = "none"; d.els.axLabels.forEach(l => l.style.display = "none"); continue; }
-      if (d.kind === "ang") placeAng(d.els, d.a, d.b, d.c, w, h, fmtDeg(angDeg(d.a, d.b, d.c)));
+      if (d.kind === "pt") placePt(d.els, d.a, w, h, textoPunto(d.a));
+      else if (d.kind === "ang") placeAng(d.els, d.a, d.b, d.c, w, h, fmtDeg(angDeg(d.a, d.b, d.c)));
       else placeDim(d.els, d.a, d.b, w, h, fmtM(dimParts(d).total) + " m");
       d.els.g.classList.toggle("hl", DIM.hl === d);
       d.els.label.classList.toggle("hl", DIM.hl === d);
@@ -2305,6 +2371,10 @@ function workerMain(){
         if (DIM.b) placeAng(rubber, DIM.a, DIM.b, p, w, h, fmtDeg(angDeg(DIM.a, DIM.b, p)));
         else placeAng(rubber, p, DIM.a, null, w, h, "");
       } else placeDim(rubber, DIM.a, p, w, h, fmtM(DIM.a.distanceTo(p)) + " m");
+    }
+    // modo punto: coordenadas del punto bajo el cursor en la ventana
+    if (DIM.on && DIM.mode === "pt" && !$("measPanel").hidden){
+      $("measHint").textContent = DIM.hover ? textoPunto(DIM.hover.point, true) : "Clic en un punto del modelo para fijarlo y ver sus coordenadas.";
     }
     // marca del imán
     if (DIM.on && DIM.hover){
@@ -2384,10 +2454,11 @@ function workerMain(){
   function renderMeasPanel(){
     $("measPanel").querySelectorAll("[data-mm]").forEach(b => b.setAttribute("aria-pressed", String(DIM.on && b.dataset.mm === DIM.mode)));
     const ang = DIM.mode === "ang";
-    $("measHint").textContent = !DIM.on ? "Elige Distancia o Ángulo para medir. Las cotas se quedan en pantalla."
+    $("measHint").textContent = !DIM.on ? "Elige Distancia, Ángulo o Punto para medir. Las cotas se quedan en pantalla."
+      : DIM.mode === "pt" ? "Clic en un punto del modelo para fijarlo y ver sus coordenadas."
       : ang ? (!DIM.a ? "Clic en el primer punto." : !DIM.b ? "Clic en el vértice del ángulo." : "Clic en el tercer punto.")
             : (!DIM.a ? "Clic en el primer punto." : "Clic en el segundo punto.");
-    $("dimAxesChk").hidden = ang && DIM.on;
+    $("dimAxesChk").hidden = (ang || DIM.mode === "pt") && DIM.on;
   }
   function renderDimList(){
     const n = DIM.list.length;
@@ -2397,7 +2468,12 @@ function workerMain(){
     const ul = $("dimList"); ul.innerHTML = "";
     DIM.list.forEach(d => {
       const li = document.createElement("li"); li.dataset.key = d.kind + d.id;
-      if (d.kind === "ang"){
+      if (d.kind === "pt"){
+        const [X, Y, Z] = toShared(d.a), pk = textoPK(X, Y);
+        li.innerHTML = `<span class="dim-ic">⌖</span><div class="dim-info"><div><span class="dim-val">Punto ${d.id}</span></div>
+          <div class="dim-sub">X ${fmtCoord(X)} · Y ${fmtCoord(Y)} · Z ${fmtCoord(Z)}</div>${pk ? `<div class="dim-sub">${pk}</div>` : ""}</div>
+          <button class="ibtn" data-a="copy" title="Copiar X, Y, Z (para pegar en Excel)">⧉</button>`;
+      } else if (d.kind === "ang"){
         li.innerHTML = `<span class="dim-ic">∠</span><div class="dim-info"><div><span class="dim-val">${fmtDeg(angDeg(d.a, d.b, d.c))}</span> <span class="count">Ángulo ${d.id}</span></div></div>`;
       } else {
         const p = dimParts(d);
@@ -2412,6 +2488,11 @@ function workerMain(){
       li.addEventListener("click", ev => {
         const b = ev.target.closest("[data-a]"); if (!b) return;
         if (b.dataset.a === "del") deleteDim(d);
+        else if (b.dataset.a === "copy"){
+          const c = toShared(d.a).map(v => v.toFixed(3).replace(".", ",")).join("\t");
+          if (navigator.clipboard) navigator.clipboard.writeText(c).then(() => toast("Coordenadas copiadas."), () => toast(c));
+          else toast(c);
+        }
         else { d.visible = !d.visible; renderDimList(); requestRender(); }
       });
       ul.appendChild(li);
@@ -2441,6 +2522,474 @@ function workerMain(){
   $("dimClear").addEventListener("click", clearDims);
   $("dimAxes").addEventListener("change", () => { savePref("visorDimAxes", $("dimAxes").checked ? "1" : "0"); requestRender(); });
   $("dimAxes").checked = loadPref("visorDimAxes", "1") === "1";
+
+  // ---------- Ejes con PK (hoja "Ejes" del Excel de Civil 3D) ----------
+  const EJES = { on:true, list:[], group:new THREE.Group(), pool:[], dots:[] };
+  EJES.group.renderOrder = 6;
+  scene.add(EJES.group);
+  const ejeMat = new THREE.LineBasicMaterial({ color:0xD62F6E, depthTest:false, transparent:true, opacity:0.95 });
+  const PK_PASOS = [5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000];
+  const fmtCoord = v => v.toLocaleString("es-ES", { minimumFractionDigits:3, maximumFractionDigits:3 });
+  function formatoPK(pk, corto){
+    const a = Math.abs(pk); let km = Math.floor(a / 1000 + 1e-9), r = a - km * 1000;
+    if (r >= 999.995){ km++; r = 0; }
+    const dec = corto && Math.abs(r - Math.round(r)) < 0.005 ? 0 : 2;
+    return (pk < 0 ? "-" : "") + km + "+" + r.toLocaleString("es-ES", { minimumIntegerDigits:3, minimumFractionDigits:dec, maximumFractionDigits:dec, useGrouping:false });
+  }
+  function leerEjes(filas){
+    if (!filas || filas.length < 2) return [];
+    const H = filas[0].map(h => plain(String(h)));
+    const ci = n => H.indexOf(n);
+    const cE = ci("eje"), cP = ci("pk"), cX = ci("x"), cY = ci("y"), cZ = ci("z");
+    if (cE < 0 || cP < 0 || cX < 0 || cY < 0) return [];
+    const num = v => typeof v === "number" ? v : parseFloat(String(v).replace(",", "."));
+    const porEje = new Map();
+    for (let i = 1; i < filas.length; i++){
+      const f = filas[i], nom = String(f[cE] || "").trim(); if (!nom) continue;
+      const pk = num(f[cP]), x = num(f[cX]), y = num(f[cY]), z = cZ >= 0 ? num(f[cZ]) : NaN;
+      if (!isFinite(pk) || !isFinite(x) || !isFinite(y)) continue;
+      if (!porEje.has(nom)) porEje.set(nom, []);
+      porEje.get(nom).push([pk, x, y, z]);
+    }
+    const out = [];
+    porEje.forEach((pts, nom) => {
+      pts.sort((a, b) => a[0] - b[0]);
+      if (pts.length < 2) return;
+      const n = pts.length, pk = new Float64Array(n), X = new Float64Array(n), Y = new Float64Array(n), Z = new Float64Array(n);
+      let zRef = NaN;
+      pts.forEach((p, i) => { pk[i] = p[0]; X[i] = p[1]; Y[i] = p[2]; Z[i] = p[3]; if (isFinite(p[3]) && !isFinite(zRef)) zRef = p[3]; });
+      for (let i = 0; i < n; i++) if (!isFinite(Z[i])) Z[i] = isFinite(zRef) ? zRef : 0;
+      out.push({ nombre:nom, pk, X, Y, Z, visible:true });
+    });
+    return out;
+  }
+  function rebuildEjes(){
+    while (EJES.group.children.length){ const c = EJES.group.children.pop(); c.geometry.dispose(); }
+    EJES.list = [];
+    const o = S.sceneOrigin;
+    if (o) S.models.forEach(m => {
+      if (!m.ready || !m.visible || !m.ejes) return;
+      m.ejes.forEach(e => {
+        e.modelo = m.name;
+        const n = e.pk.length, p = new Float32Array(n * 3);
+        for (let i = 0; i < n; i++){ p[3*i] = e.X[i] - o[0]; p[3*i+1] = e.Z[i] - o[2]; p[3*i+2] = -(e.Y[i] - o[1]); }
+        const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(p, 3));
+        const line = new THREE.Line(g, ejeMat); line.renderOrder = 6; line.frustumCulled = false;
+        EJES.group.add(line);
+        EJES.list.push(e);
+      });
+    });
+    EJES.group.visible = EJES.on;
+    $("ejesBtn").hidden = !EJES.list.length;
+    $("ejesBtn").setAttribute("aria-pressed", String(EJES.on));
+    requestRender();
+  }
+  // Punto (escena) del eje en un PK
+  function puntoEje(e, pk){
+    const P = e.pk; let lo = 0, hi = P.length - 1;
+    if (pk <= P[0]) hi = 1; else if (pk >= P[hi]) lo = hi - 1;
+    else while (hi - lo > 1){ const mid = (lo + hi) >> 1; if (P[mid] <= pk) lo = mid; else hi = mid; }
+    const t = (pk - P[lo]) / ((P[hi] - P[lo]) || 1), o = S.sceneOrigin || [0, 0, 0];
+    const X = e.X[lo] + (e.X[hi] - e.X[lo]) * t, Y = e.Y[lo] + (e.Y[hi] - e.Y[lo]) * t, Z = e.Z[lo] + (e.Z[hi] - e.Z[lo]) * t;
+    return { v:new THREE.Vector3(X - o[0], Z - o[2], -(Y - o[1])), X, Y, Z, tx:e.X[hi] - e.X[lo], ty:e.Y[hi] - e.Y[lo] };
+  }
+  // PK y desplazamiento (positivo a la derecha) del punto real (X, Y) respecto al eje más cercano
+  function pkDe(X, Y){
+    let best = null;
+    EJES.list.forEach(e => {
+      const n = e.pk.length;
+      for (let i = 0; i < n - 1; i++){
+        const ax = e.X[i], ay = e.Y[i], dx = e.X[i+1] - ax, dy = e.Y[i+1] - ay, L2 = dx*dx + dy*dy;
+        if (L2 < 1e-12) continue;
+        let t = ((X - ax) * dx + (Y - ay) * dy) / L2; t = Math.max(0, Math.min(1, t));
+        const px = ax + dx * t, py = ay + dy * t, dd = Math.hypot(X - px, Y - py);
+        if (!best || dd < best.dist){
+          const lado = dx * (Y - ay) - dy * (X - ax);   // > 0: a la izquierda
+          best = { eje:e, pk:e.pk[i] + (e.pk[i+1] - e.pk[i]) * t, dist:dd, off:lado > 0 ? -dd : dd };
+        }
+      }
+    });
+    return best;
+  }
+  function textoPK(X, Y){
+    if (!EJES.list.length) return "";
+    const r = pkDe(X, Y);
+    if (!r || r.dist > 2000) return "";
+    const lado = Math.abs(r.off) < 0.0005 ? "en el eje" : fmtM(Math.abs(r.off)) + " m a la " + (r.off > 0 ? "derecha" : "izquierda");
+    return "PK " + formatoPK(r.pk) + " · " + lado + (EJES.list.length > 1 ? " (" + r.eje.nombre + ")" : "");
+  }
+  function updatePK(){
+    const cont = $("pkLabels");
+    const show = EJES.on && EJES.list.length && !WALK.on;
+    cont.hidden = !show;
+    if (!show) return;
+    const w = view.clientWidth, h = view.clientHeight;
+    let k = 0;
+    const etiqueta = (x, y, txt, cls) => {
+      let d = EJES.pool[k];
+      if (!d){ d = document.createElement("div"); cont.appendChild(d); EJES.pool.push(d); }
+      d.className = cls; d.style.display = ""; d.style.left = x + "px"; d.style.top = y + "px";
+      if (d.textContent !== txt) d.textContent = txt;
+      k++;
+    };
+    for (const e of EJES.list){
+      if (!e.visible) continue;
+      const pk0 = e.pk[0], pk1 = e.pk[e.pk.length - 1], L = pk1 - pk0;
+      // Escala de pantalla en el centro del eje para elegir cada cuántos metros se rotula
+      const a = puntoEje(e, pk0 + L * 0.5), b = puntoEje(e, Math.min(pk1, pk0 + L * 0.5 + Math.max(1, L / 100)));
+      const sa = toScr(a.v, w, h), sb = toScr(b.v, w, h);
+      let pxm = sa && sb ? Math.hypot(sb[0] - sa[0], sb[1] - sa[1]) / Math.max(1e-9, Math.max(1, L / 100)) : 0;
+      if (!(pxm > 0)) pxm = 0.05;
+      const paso = PK_PASOS.find(p => p * pxm >= 85) || PK_PASOS[PK_PASOS.length - 1];
+      const s0 = toScr(puntoEje(e, pk0).v, w, h);
+      if (s0 && s0[0] > -50 && s0[0] < w + 50 && s0[1] > -20 && s0[1] < h + 20) etiqueta(s0[0], s0[1], e.nombre, "pk-nom");
+      for (let pk = Math.ceil(pk0 / paso - 1e-9) * paso; pk <= pk1 + 1e-6 && k < 600; pk += paso){
+        const s = toScr(puntoEje(e, pk).v, w, h);
+        if (!s || s[0] < -40 || s[0] > w + 40 || s[1] < -20 || s[1] > h + 20) continue;
+        etiqueta(s[0], s[1], formatoPK(pk, true), "pk-lbl");
+      }
+    }
+    for (let i = k; i < EJES.pool.length; i++) EJES.pool[i].style.display = "none";
+  }
+  $("ejesBtn").addEventListener("click", () => {
+    EJES.on = !EJES.on; EJES.group.visible = EJES.on;
+    $("ejesBtn").setAttribute("aria-pressed", String(EJES.on));
+    requestRender();
+  });
+
+  // ---------- Volumen entre superficies (desmonte y terraplén) ----------
+  const VOL = { ultimo:null };
+  const fmtV = v => v.toLocaleString("es-ES", { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const RE_SUP = /superficie|topograf|toposol|terreno|emplazamiento|rasante|explanaci/;
+  function candidatasSuperficie(){
+    const out = [], vistos = new Set();
+    const add = (m, e) => {
+      const k = m.id + ":" + e; if (vistos.has(k)) return; vistos.add(k);
+      const d = m.data, row = d && d.rowOf[e] >= 0 ? d.rows[d.rowOf[e]] : null;
+      const col = n => { if (!row) return ""; const i = d.header.findIndex(h => plain(String(h)) === n); return i >= 0 ? String(row[i] || "") : ""; };
+      const nombre = col("nombre") || col("tipo") || ("Id " + m.ids[e]);
+      out.push({ m, e, label: nombre + "  ·  " + catName(m, e) + (S.models.length > 1 ? "  ·  " + m.name : "") });
+    };
+    S.models.forEach(m => { if (!m.ready || !m.visible) return; for (let e = 0; e < m.n; e++) if (RE_SUP.test(plain(catName(m, e)))) add(m, e); });
+    eachSel((m, e) => add(m, e));
+    return out;
+  }
+  // Triángulos de un elemento en planta: [x, y, z] x 3, relativos al origen de la escena (x este, y norte, z cota)
+  function triangulosPlanta(m, e){
+    const c = m.chunks[m.elC[e]], P = c.pos, F = c.full, g = m.group.position;
+    const t0 = m.elT[e] * 3, nt = m.elTN[e];
+    const T = new Float64Array(nt * 9);
+    let up = 0, dn = 0;
+    const sa = new Float64Array(nt);
+    for (let t = 0; t < nt; t++){
+      for (let k = 0; k < 3; k++){
+        const i = F[t0 + 3*t + k] * 3;
+        T[9*t + 3*k] = P[i] + g.x; T[9*t + 3*k + 1] = -(P[i+2] + g.z); T[9*t + 3*k + 2] = P[i+1] + g.y;
+      }
+      const ax = T[9*t], ay = T[9*t+1], s = ((T[9*t+3] - ax) * (T[9*t+7] - ay) - (T[9*t+4] - ay) * (T[9*t+6] - ax)) / 2;
+      sa[t] = s; if (s > 0) up += s; else dn -= s;
+    }
+    // Sólido cerrado (cara de arriba y de abajo): solo cuenta la de arriba. Superficie: todas.
+    const soloArriba = up > 0.2 * (up + dn) && dn > 0.2 * (up + dn);
+    const keep = [];
+    for (let t = 0; t < nt; t++){ if (Math.abs(sa[t]) < 1e-9) continue; if (soloArriba && sa[t] <= 0) continue; keep.push(t); }
+    const out = new Float64Array(keep.length * 9);
+    keep.forEach((t, j) => {
+      let a = 0, b = 3, cc = 6;
+      if (sa[t] < 0){ b = 6; cc = 3; }   // todos en sentido antihorario en planta
+      for (let k = 0; k < 3; k++){ out[9*j + k] = T[9*t + a + k]; out[9*j + 3 + k] = T[9*t + b + k]; out[9*j + 6 + k] = T[9*t + cc + k]; }
+    });
+    return out;
+  }
+  function prepararSuperficie(T){
+    const n = T.length / 9, pl = new Float64Array(n * 3), bb = new Float64Array(n * 4);
+    let area = 0, mnx = Infinity, mny = Infinity, mxx = -Infinity, mxy = -Infinity;
+    for (let t = 0; t < n; t++){
+      const o = 9 * t;
+      const x1 = T[o], y1 = T[o+1], z1 = T[o+2], x2 = T[o+3], y2 = T[o+4], z2 = T[o+5], x3 = T[o+6], y3 = T[o+7], z3 = T[o+8];
+      const ux = x2 - x1, uy = y2 - y1, uz = z2 - z1, vx = x3 - x1, vy = y3 - y1, vz = z3 - z1;
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      pl[3*t] = -nx / nz; pl[3*t+1] = -ny / nz; pl[3*t+2] = z1 - pl[3*t] * x1 - pl[3*t+1] * y1;   // z = a x + b y + c
+      area += nz / 2;
+      const bx0 = Math.min(x1, x2, x3), by0 = Math.min(y1, y2, y3), bx1 = Math.max(x1, x2, x3), by1 = Math.max(y1, y2, y3);
+      bb[4*t] = bx0; bb[4*t+1] = by0; bb[4*t+2] = bx1; bb[4*t+3] = by1;
+      if (bx0 < mnx) mnx = bx0; if (by0 < mny) mny = by0; if (bx1 > mxx) mxx = bx1; if (by1 > mxy) mxy = by1;
+    }
+    const cell = Math.max(0.25, Math.sqrt(Math.max(area, 1e-6) / Math.max(1, n)) * 2);
+    const grid = new Map();
+    for (let t = 0; t < n; t++){
+      const i0 = Math.floor((bb[4*t] - mnx) / cell), j0 = Math.floor((bb[4*t+1] - mny) / cell);
+      const i1 = Math.floor((bb[4*t+2] - mnx) / cell), j1 = Math.floor((bb[4*t+3] - mny) / cell);
+      for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++){
+        const k = i * 1048576 + j; let a = grid.get(k); if (!a){ a = []; grid.set(k, a); } a.push(t);
+      }
+    }
+    return { T, n, pl, bb, grid, cell, mnx, mny, area, stamp:new Int32Array(n), sn:0 };
+  }
+  function candidatos(S0, x0, y0, x1, y1, fn){
+    S0.sn++;
+    const i0 = Math.floor((x0 - S0.mnx) / S0.cell), j0 = Math.floor((y0 - S0.mny) / S0.cell);
+    const i1 = Math.floor((x1 - S0.mnx) / S0.cell), j1 = Math.floor((y1 - S0.mny) / S0.cell);
+    for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++){
+      const a = S0.grid.get(i * 1048576 + j); if (!a) continue;
+      for (const t of a){
+        if (S0.stamp[t] === S0.sn) continue; S0.stamp[t] = S0.sn;
+        const b = S0.bb;
+        if (b[4*t] > x1 || b[4*t+2] < x0 || b[4*t+1] > y1 || b[4*t+3] < y0) continue;
+        fn(t);
+      }
+    }
+  }
+  // Recorte de un polígono convexo por el semiplano f(x,y) = a x + b y + c >= 0
+  function recortar(poly, a, b, c){
+    const out = [], n = poly.length;
+    for (let i = 0; i < n; i++){
+      const p = poly[i], q = poly[(i + 1) % n];
+      const fp = a * p[0] + b * p[1] + c, fq = a * q[0] + b * q[1] + c;
+      if (fp >= 0) out.push(p);
+      if ((fp >= 0) !== (fq >= 0)){ const t = fp / (fp - fq); out.push([p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]); }
+    }
+    return out;
+  }
+  function areaCentro(poly){
+    let a = 0, cx = 0, cy = 0;
+    for (let i = 0, n = poly.length; i < n; i++){
+      const p = poly[i], q = poly[(i + 1) % n], k = p[0] * q[1] - q[0] * p[1];
+      a += k; cx += (p[0] + q[0]) * k; cy += (p[1] + q[1]) * k;
+    }
+    if (Math.abs(a) < 1e-14) return [0, 0, 0];
+    return [a / 2, cx / (3 * a), cy / (3 * a)];
+  }
+  // Método exacto (prismoides triángulo a triángulo, como "Volumen por prismoides"):
+  // se superponen en planta los triángulos de las dos superficies; en cada trozo común las dos son planas,
+  // así que la diferencia de cotas es lineal y su integral es exacta (área x diferencia en el centroide).
+  async function volumenPrismoides(A, B, progreso){
+    let corte = 0, relleno = 0, aComun = 0, aCorte = 0, aRelleno = 0, t0 = performance.now();
+    const TB = B.T;
+    for (let tb = 0; tb < B.n; tb++){
+      if (performance.now() - t0 > 40){ progreso(tb / B.n); await new Promise(r => setTimeout(r)); t0 = performance.now(); }
+      const o = 9 * tb;
+      const triB = [[TB[o], TB[o+1]], [TB[o+3], TB[o+4]], [TB[o+6], TB[o+7]]];
+      const aB = B.pl[3*tb], bB = B.pl[3*tb+1], cB = B.pl[3*tb+2];
+      candidatos(A, B.bb[4*tb], B.bb[4*tb+1], B.bb[4*tb+2], B.bb[4*tb+3], ta => {
+        const q = 9 * ta, TA = A.T;
+        let poly = triB;
+        for (let k = 0; k < 3 && poly.length >= 3; k++){
+          const x1 = TA[q + 3*k], y1 = TA[q + 3*k + 1], x2 = TA[q + 3*((k + 1) % 3)], y2 = TA[q + 3*((k + 1) % 3) + 1];
+          // interior a la izquierda de cada arista (triángulo antihorario)
+          poly = recortar(poly, -(y2 - y1), x2 - x1, (y2 - y1) * x1 - (x2 - x1) * y1);
+        }
+        if (poly.length < 3) return;
+        const [ar] = areaCentro(poly);
+        if (ar < 1e-10) return;
+        aComun += ar;
+        const al = aB - A.pl[3*ta], be = bB - A.pl[3*ta+1], ga = cB - A.pl[3*ta+2];   // diferencia final - inicial
+        const pos = recortar(poly, al, be, ga), neg = recortar(poly, -al, -be, -ga);
+        if (pos.length >= 3){ const [a1, cx, cy] = areaCentro(pos); if (a1 > 0){ relleno += a1 * (al * cx + be * cy + ga); aRelleno += a1; } }
+        if (neg.length >= 3){ const [a2, cx, cy] = areaCentro(neg); if (a2 > 0){ corte -= a2 * (al * cx + be * cy + ga); aCorte += a2; } }
+      });
+    }
+    progreso(1);
+    return { corte:Math.max(0, corte), relleno:Math.max(0, relleno), aComun, aCorte, aRelleno };
+  }
+  // Perfil de una superficie a lo largo de la línea P + o·n (o en [-W, W]): tramos [o1, z1, o2, z2]
+  function perfilSeccion(S0, px, py, nx, ny, W){
+    const x0 = px - Math.abs(nx) * W, x1 = px + Math.abs(nx) * W, y0 = py - Math.abs(ny) * W, y1 = py + Math.abs(ny) * W;
+    const tramos = [];
+    candidatos(S0, x0, y0, x1, y1, t => {
+      const o = 9 * t, T = S0.T;
+      let lo = -W, hi = W;
+      for (let k = 0; k < 3; k++){
+        const ax = T[o + 3*k], ay = T[o + 3*k + 1], bx = T[o + 3*((k + 1) % 3)], by = T[o + 3*((k + 1) % 3) + 1];
+        const ex = bx - ax, ey = by - ay;
+        const f0 = ex * (py - ay) - ey * (px - ax), f1 = ex * ny - ey * nx;   // f0 + o f1 >= 0 dentro
+        if (Math.abs(f1) < 1e-14){ if (f0 < 0){ lo = 1; hi = 0; break; } continue; }
+        const r = -f0 / f1;
+        if (f1 > 0){ if (r > lo) lo = r; } else { if (r < hi) hi = r; }
+      }
+      if (hi - lo < 1e-9) return;
+      const a = S0.pl[3*t], b = S0.pl[3*t+1], c = S0.pl[3*t+2];
+      const z = s => a * (px + nx * s) + b * (py + ny * s) + c;
+      tramos.push([lo, z(lo), hi, z(hi)]);
+    });
+    return tramos;
+  }
+  function cotaEn(tramos, s){
+    let best = NaN, tb = null;
+    for (const t of tramos){
+      if (s < t[0] - 1e-9 || s > t[2] + 1e-9) continue;
+      const z = t[1] + (t[3] - t[1]) * ((s - t[0]) / ((t[2] - t[0]) || 1));
+      if (!(z <= best)){ best = z; tb = t; }   // si se solapan (sólido), la de arriba
+    }
+    return tb ? { z:best, t:tb } : null;
+  }
+  // Áreas de desmonte y terraplén de una sección
+  function seccion(A, B, px, py, nx, ny, W){
+    const ta = perfilSeccion(A, px, py, nx, ny, W), tb = perfilSeccion(B, px, py, nx, ny, W);
+    if (!ta.length || !tb.length) return { corte:0, relleno:0, ancho:0 };
+    const cortes = new Set();
+    ta.concat(tb).forEach(t => { cortes.add(t[0]); cortes.add(t[2]); });
+    const s = [...cortes].filter(v => v >= -W && v <= W).sort((a, b) => a - b);
+    let corte = 0, relleno = 0, ancho = 0;
+    for (let i = 0; i < s.length - 1; i++){
+      const u = s[i], v = s[i + 1]; if (v - u < 1e-9) continue;
+      const mid = (u + v) / 2, pa = cotaEn(ta, mid), pb = cotaEn(tb, mid);
+      if (!pa || !pb) continue;
+      const lz = (t, x) => t[1] + (t[3] - t[1]) * ((x - t[0]) / ((t[2] - t[0]) || 1));
+      const du = lz(pb.t, u) - lz(pa.t, u), dv = lz(pb.t, v) - lz(pa.t, v);
+      ancho += v - u;
+      if (du >= 0 && dv >= 0) relleno += (du + dv) / 2 * (v - u);
+      else if (du <= 0 && dv <= 0) corte -= (du + dv) / 2 * (v - u);
+      else {
+        const tc = du / (du - dv), xc = (v - u) * tc;
+        if (du > 0){ relleno += du * xc / 2; corte -= dv * (v - u - xc) / 2; }
+        else { corte -= du * xc / 2; relleno += dv * (v - u - xc) / 2; }
+      }
+    }
+    return { corte, relleno, ancho };
+  }
+  async function volumenSecciones(A, B, eje, paso, W, progreso){
+    const o = S.sceneOrigin || [0, 0, 0];
+    const pk0 = eje.pk[0], pk1 = eje.pk[eje.pk.length - 1];
+    const pks = [];
+    for (let p = Math.ceil(pk0 / paso - 1e-9) * paso; p < pk1 - 1e-6; p += paso) if (p > pk0 + 1e-6) pks.push(p);
+    pks.unshift(pk0); pks.push(pk1);
+    const secc = pk => {
+      const q = puntoEje(eje, pk), L = Math.hypot(q.tx, q.ty) || 1;
+      const tx = q.tx / L, ty = q.ty / L;
+      return seccion(A, B, q.X - o[0], q.Y - o[1], ty, -tx, W);   // normal hacia la derecha del eje
+    };
+    const filas = [];
+    let t0 = performance.now(), vc = 0, vr = 0, vcm = 0, vrm = 0;
+    let s1 = secc(pks[0]);
+    filas.push({ pk:pks[0], ac:s1.corte, ar:s1.relleno, vc:0, vr:0, cc:0, cr:0 });
+    for (let i = 1; i < pks.length; i++){
+      if (performance.now() - t0 > 40){ progreso(i / pks.length); await new Promise(r => setTimeout(r)); t0 = performance.now(); }
+      const d = pks[i] - pks[i - 1];
+      const sm = secc((pks[i] + pks[i - 1]) / 2), s2 = secc(pks[i]);
+      const dc = d / 6 * (s1.corte + 4 * sm.corte + s2.corte), dr = d / 6 * (s1.relleno + 4 * sm.relleno + s2.relleno);
+      vc += dc; vr += dr;
+      vcm += d / 2 * (s1.corte + s2.corte); vrm += d / 2 * (s1.relleno + s2.relleno);
+      filas.push({ pk:pks[i], ac:s2.corte, ar:s2.relleno, vc:dc, vr:dr, cc:vc, cr:vr });
+      s1 = s2;
+    }
+    progreso(1);
+    return { filas, corte:vc, relleno:vr, corteMedia:vcm, rellenoMedia:vrm };
+  }
+  function abrirVolumen(){
+    const cands = candidatasSuperficie();
+    const M = abrirModal("vol");
+    M.box.innerHTML = `
+      <div class="md-head"><div><h2>Volumen entre superficies</h2><p class="md-sub">Desmonte y terraplén entre la superficie inicial (terreno) y la final (diseño o excavación)</p></div><button class="ibtn md-x" aria-label="Cerrar">✕</button></div>
+      <div class="vol-body">
+        <div class="vol-grid">
+          <label>Superficie inicial<select class="v-a"></select></label>
+          <label>Superficie final<select class="v-b"></select></label>
+        </div>
+        <div class="lbl">Método</div>
+        <label class="check"><input type="radio" name="vmet" value="p" checked> <span><b>Prismoides</b>: exacto, triángulo a triángulo en toda la zona común de las dos superficies</span></label>
+        <label class="check"><input type="radio" name="vmet" value="s"> <span><b>Secciones por PK</b> a lo largo de un eje, con la fórmula del prismoide V = d/6·(A1 + 4·Am + A2)</span></label>
+        <div class="vol-grid v-sec" hidden>
+          <label>Eje<select class="v-eje"></select></label>
+          <label>Cada (m)<input type="text" class="v-paso" value="20"></label>
+          <label>Ancho a cada lado (m)<input type="text" class="v-w" value="50"></label>
+        </div>
+        <div class="vol-grid">
+          <label>Factor de esponjamiento (desmonte)<input type="text" class="v-fe" value="1,00"></label>
+          <label>Factor de compactación (terraplén)<input type="text" class="v-fc" value="1,00"></label>
+        </div>
+        <p class="muted v-nota"></p>
+        <div class="v-res"></div>
+      </div>
+      <div class="md-foot"><span class="muted v-prog"></span><span class="spacer"></span><button class="btn v-xls" disabled>Exportar a Excel</button><button class="btn primary v-go">Calcular</button></div>`;
+    const q = s => M.box.querySelector(s);
+    q(".md-x").onclick = M.cerrar;
+    const sa = q(".v-a"), sb = q(".v-b");
+    cands.forEach((c, i) => { sa.append(new Option(c.label, i)); sb.append(new Option(c.label, i)); });
+    if (cands.length > 1) sb.selectedIndex = 1;
+    const ej = q(".v-eje");
+    EJES.list.forEach((e, i) => ej.append(new Option(e.nombre + "  (" + formatoPK(e.pk[0]) + " a " + formatoPK(e.pk[e.pk.length - 1]) + ")", i)));
+    const nota = q(".v-nota");
+    nota.textContent = cands.length < 2
+      ? "Hacen falta dos superficies. Salen las de categoría Superficies / Topografía / Toposólidos; también puedes seleccionar antes en el modelo los elementos que quieras comparar."
+      : "Desmonte: donde la final queda por debajo de la inicial. Terraplén: donde queda por encima. Solo cuenta la zona que cubren las dos.";
+    M.box.querySelectorAll("input[name=vmet]").forEach(r => r.onchange = () => {
+      const sec = q("input[name=vmet]:checked").value === "s";
+      q(".v-sec").hidden = !sec;
+      if (sec && !EJES.list.length) nota.textContent = "No hay ejes cargados: exporta desde Civil 3D (hoja «Ejes» del Excel) para medir por secciones.";
+    });
+    const num = (s, def) => { const v = parseFloat(String(s).replace(/\./g, "").replace(",", ".")); return isFinite(v) && v > 0 ? v : def; };
+    q(".v-go").onclick = async () => {
+      if (cands.length < 2 || sa.value === sb.value){ nota.textContent = "Elige dos superficies distintas."; return; }
+      const ca = cands[+sa.value], cb = cands[+sb.value];
+      const fe = num(q(".v-fe").value, 1), fc = num(q(".v-fc").value, 1);
+      const sec = q("input[name=vmet]:checked").value === "s";
+      if (sec && !EJES.list.length){ nota.textContent = "No hay ejes cargados para medir por secciones."; return; }
+      q(".v-go").disabled = true; q(".v-xls").disabled = true;
+      const prog = p => { q(".v-prog").textContent = "Calculando… " + Math.round(p * 100) + " %"; };
+      prog(0); await new Promise(r => setTimeout(r, 30));
+      try {
+        const A = prepararSuperficie(triangulosPlanta(ca.m, ca.e)), B = prepararSuperficie(triangulosPlanta(cb.m, cb.e));
+        let r;
+        if (sec){
+          const eje = EJES.list[+ej.value], paso = num(q(".v-paso").value, 20), W = num(q(".v-w").value, 50);
+          r = await volumenSecciones(A, B, eje, paso, W, prog);
+          r.metodo = "Secciones por PK (prismoide) en " + eje.nombre + ", cada " + fmtM(paso) + " m, ancho ±" + fmtM(W) + " m";
+        } else {
+          r = await volumenPrismoides(A, B, prog);
+          r.metodo = "Prismoides (exacto, triángulo a triángulo)";
+        }
+        Object.assign(r, { ini:ca.label, fin:cb.label, fe, fc });
+        VOL.ultimo = r;
+        pintarResultadoVol(q(".v-res"), r);
+        q(".v-xls").disabled = false;
+        q(".v-prog").textContent = "";
+      } catch(err){
+        q(".v-prog").textContent = "Error: " + err.message;
+      }
+      q(".v-go").disabled = false;
+    };
+    q(".v-xls").onclick = () => exportarVolumen(VOL.ultimo);
+  }
+  function pintarResultadoVol(box, r){
+    const fila = (t, v, f) => `<tr><td>${t}</td><td class="num">${fmtV(v)}</td>${f !== undefined ? `<td class="num">${fmtV(f)}</td>` : "<td></td>"}</tr>`;
+    let h = `<table class="vol-tab"><thead><tr><th></th><th class="num">m³</th><th class="num">Con factor</th></tr></thead><tbody>
+      ${fila("Desmonte (corte)", r.corte, r.corte * r.fe)}
+      ${fila("Terraplén (relleno)", r.relleno, r.relleno * r.fc)}
+      ${fila("Terraplén − desmonte", r.relleno - r.corte, r.relleno * r.fc - r.corte * r.fe)}
+      </tbody></table>`;
+    if (r.aComun === 0) h += `<p class="muted"><b>Las dos superficies no coinciden en planta</b>: no hay zona común que comparar.</p>`;
+    else if (r.aComun !== undefined) h += `<p class="muted">Área común en planta: ${fmtV(r.aComun)} m² (desmonte ${fmtV(r.aCorte)} m², terraplén ${fmtV(r.aRelleno)} m²).</p>`;
+    if (r.filas && !r.filas.some(f => f.ac > 0 || f.ar > 0)) h += `<p class="muted"><b>Ninguna sección corta a las dos superficies</b>: revisa el eje y el ancho.</p>`;
+    if (r.filas){
+      h += `<p class="muted">Por áreas medias saldría: desmonte ${fmtV(r.corteMedia)} m³ y terraplén ${fmtV(r.rellenoMedia)} m³. La sección intermedia es la real a mitad de cada tramo.</p>`;
+      h += `<div class="vol-secc"><table class="vol-tab"><thead><tr><th>PK</th><th class="num">Área desmonte (m²)</th><th class="num">Área terraplén (m²)</th><th class="num">Vol. desmonte (m³)</th><th class="num">Vol. terraplén (m³)</th><th class="num">Desmonte a origen</th><th class="num">Terraplén a origen</th></tr></thead><tbody>` +
+        r.filas.map(f => `<tr><td>${formatoPK(f.pk)}</td><td class="num">${fmtV(f.ac)}</td><td class="num">${fmtV(f.ar)}</td><td class="num">${fmtV(f.vc)}</td><td class="num">${fmtV(f.vr)}</td><td class="num">${fmtV(f.cc)}</td><td class="num">${fmtV(f.cr)}</td></tr>`).join("") +
+        `</tbody></table></div>`;
+    }
+    box.innerHTML = h;
+  }
+  function exportarVolumen(r){
+    if (!r) return;
+    loadXlsxLib().then(X => {
+      const wb = X.utils.book_new();
+      const res = [["Volumen entre superficies"], [], ["Superficie inicial", r.ini], ["Superficie final", r.fin], ["Método", r.metodo],
+        ["Factor de esponjamiento", r.fe], ["Factor de compactación", r.fc], [],
+        ["", "m³", "Con factor"], ["Desmonte (corte)", +r.corte.toFixed(3), +(r.corte * r.fe).toFixed(3)],
+        ["Terraplén (relleno)", +r.relleno.toFixed(3), +(r.relleno * r.fc).toFixed(3)],
+        ["Terraplén − desmonte", +(r.relleno - r.corte).toFixed(3), +(r.relleno * r.fc - r.corte * r.fe).toFixed(3)]];
+      if (r.aComun !== undefined) res.push([], ["Área común en planta (m²)", +r.aComun.toFixed(3)], ["Área en desmonte (m²)", +r.aCorte.toFixed(3)], ["Área en terraplén (m²)", +r.aRelleno.toFixed(3)]);
+      if (r.filas) res.push([], ["Por áreas medias: desmonte (m³)", +r.corteMedia.toFixed(3)], ["Por áreas medias: terraplén (m³)", +r.rellenoMedia.toFixed(3)]);
+      X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(res), "Resumen");
+      if (r.filas){
+        const t = [["PK", "Área desmonte (m²)", "Área terraplén (m²)", "Vol. desmonte (m³)", "Vol. terraplén (m³)", "Desmonte a origen (m³)", "Terraplén a origen (m³)"]]
+          .concat(r.filas.map(f => [formatoPK(f.pk), +f.ac.toFixed(3), +f.ar.toFixed(3), +f.vc.toFixed(3), +f.vr.toFixed(3), +f.cc.toFixed(3), +f.cr.toFixed(3)]));
+        X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(t), "Secciones");
+      }
+      X.writeFile(wb, "Volumen_" + stamp() + ".xlsx");
+    }).catch(err => toast(err.message));
+  }
+  $("volBtn").addEventListener("click", abrirVolumen);
 
 
   // ---------- Búsqueda y suma ----------
@@ -2735,9 +3284,9 @@ function workerMain(){
   }
 
   // Medida automática por categoría (misma regla que la macro)
-  const CAT_SUP = /^(muros|suelos|cubiertas|techos|sistemas de muro cortina|paneles de muro cortina|regiones de emplazamiento|walls|floors|roofs|ceilings|curtain systems|curtain panels|site regions?)$/;
-  const CAT_LIN = /^(tuberias|tuberias flexibles|conductos|conductos flexibles|bandejas de cables|tubos|barandillas|barandillas de escalera|montantes de muro cortina|armazon estructural|pipes|flex pipes|ducts|flex ducts|cable trays|conduits|railings|stair railings|curtain wall mullions|structural framing)$/;
-  const CAT_VOL = /^(cimentacion estructural|structural foundations)$/;
+  const CAT_SUP = /^(muros|suelos|cubiertas|techos|sistemas de muro cortina|paneles de muro cortina|regiones de emplazamiento|superficies|superficies de autocad|walls|floors|roofs|ceilings|curtain systems|curtain panels|site regions?)$/;
+  const CAT_LIN = /^(tuberias|tuberias flexibles|conductos|conductos flexibles|bandejas de cables|tubos|barandillas|barandillas de escalera|montantes de muro cortina|armazon estructural|tuberias a presion|pipes|flex pipes|ducts|flex ducts|cable trays|conduits|railings|stair railings|curtain wall mullions|structural framing)$/;
+  const CAT_VOL = /^(cimentacion estructural|obras lineales|solidos 3d|structural foundations)$/;   // + Civil 3D
   const CAT_DUCT = /^(conductos|conductos flexibles|ducts|flex ducts)$/;
   function udDefecto(g){
     const c = plain(g.cat);
@@ -5037,7 +5586,7 @@ function workerMain(){
 
   applyTheme();
   resize();
-  window.__visor = { CUT, MS, S, DIM, PJ, WALK, setWalk, walkRay, walkColocar, walkPaso, sincronizar, setModo, snapPick, setDim, handleFiles, pick, select, setView, CUTS, addCut, selectCut, fitAll, renderer, get camera(){ return camera; } };
+  window.__visor = { EJES, VOL, pkDe, prepararSuperficie, volumenPrismoides, CUT, MS, S, DIM, PJ, WALK, setWalk, walkRay, walkColocar, walkPaso, sincronizar, setModo, snapPick, setDim, handleFiles, pick, select, setView, CUTS, addCut, selectCut, fitAll, renderer, get camera(){ return camera; } };
 })();
 </script>
 </body>

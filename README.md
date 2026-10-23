@@ -40,6 +40,14 @@ Librerías desde CDN: xeokit-sdk 2.6.114 y web-ifc 0.0.77.
    Se generan `<modelo>.dae` y `<modelo>.xlsx` en `Escritorio\ExportVisor`.
 2. Abre el visor y arrastra los archivos. Cada .dae se empareja con el .xlsx del mismo nombre.
 
+**Civil 3D 2027** (`revit/civil3d/`): add-in con el botón *BECSATools > Visor BIM > Exportar visor*
+(comando `BECSA_EXPORTARVISOR`). Saca el dibujo con el mismo formato (DAE + XLSX en la carpeta que elijas; recuerda la última, la misma que en Revit):
+superficies TIN, obras lineales por capa de subensamblaje (con PK y volumen por prismoides), ejes con sus PK, redes de tuberías y a presión, sólidos, mallas, bloques y el contenido
+de las referencias externas, con sus propiedades de Civil 3D, datos de pieza y conjuntos de propiedades. Va en las
+coordenadas del dibujo; si el proyecto de Revit adquirió las coordenadas de ese dibujo, los dos modelos caen en su
+sitio y se miden juntos. Para instalarlo: doble clic en `build.bat` (descarga el SDK de .NET 10 portable la primera
+vez, compila e instala el bundle en `%APPDATA%\Autodesk\ApplicationPlugins`, sin permisos de administrador).
+
 Funciones:
 
 - Varios modelos federados por coordenadas compartidas; se pueden ocultar y quitar para liberar memoria.
@@ -63,6 +71,16 @@ Funciones:
   y **lupa** junto al cursor para afinar. Las distancias muestran total, horizontal y vertical, y en las oblicuas las componentes
   X, Y, Z (se pueden ocultar). Las cotas y ángulos se quedan en pantalla y en la lista de la ventana, donde se ocultan o borran;
   también con clic derecho sobre la cifra o con Supr. Cerrar la ventana no las borra y el botón Medir muestra cuántas hay.
+  - **Punto**: clic en el modelo y fija sus coordenadas reales X, Y, Z (las compartidas) y, si hay ejes de Civil 3D,
+    su **PK y desplazamiento** al eje más cercano (izquierda / derecha). Se copian para pegarlas en Excel.
+  - **Volumen entre superficies** (desmonte y terraplén, excavación): se eligen la superficie inicial (terreno) y la final
+    (diseño, rasante, fondo de excavación). Dos métodos:
+    - **Prismoides**: exacto, como el "Volumen por prismoides" de InRoads: superpone en planta los triángulos de las dos
+      superficies y suma el volumen de cada prisma (en cada trozo común las dos son planas, la integral es exacta).
+    - **Secciones por PK** a lo largo de un eje, cada X metros y con un ancho a cada lado: V = d/6·(A1 + 4·Am + A2) con la
+      sección intermedia real a mitad de cada tramo; también da el resultado por áreas medias y la tabla de cubicación por PK.
+    Factores de esponjamiento (desmonte) y compactación (terraplén). Exporta a Excel.
+- **Ejes PK** (modelos de Civil 3D): dibuja los ejes con sus PK rotulados; el intervalo se adapta al zoom.
 - Carpeta de proyectos (Chrome / Edge): se elige una vez una carpeta (por ejemplo, la de SharePoint sincronizada con
   OneDrive) con una subcarpeta por proyecto, y el visor la recuerda. "Proyectos" lista las subcarpetas con modelos .dae
   y se abren con un clic (también "Abrir «último proyecto»" en la pantalla de inicio).
@@ -107,5 +125,6 @@ Para planos DWG y DXF está el **BECSA Visor 2D**, en su propio repo (`Visor2D`)
 - `ifc/index.html`: visor IFC
 - `revit/index.html`: visor Revit (three.js desde CDN; SheetJS se carga en segundo plano)
 - `revit/macro/ExportadorVisor.cs`: macro de Revit que exporta DAE + XLSX
+- `revit/civil3d/`: add-in de Civil 3D 2027 que exporta DAE + XLSX con el mismo formato (`build.bat` compila e instala)
 - `revit/ejemplo/`: tres modelos ficticios (arquitectura, estructura e instalaciones) con orígenes distintos con «Fase de creación» y «Certificación» (meses 13-15) para probar los filtros, y un BC3 de prueba (`Ejemplo_banco.bc3`)
 - `.nojekyll`: evita que GitHub Pages procese el sitio con Jekyll
