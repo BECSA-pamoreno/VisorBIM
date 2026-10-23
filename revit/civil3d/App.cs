@@ -1,5 +1,5 @@
 // ============================================================================
-// BECSATools - Visor BIM para Civil 3D 2027  v1.2  (2026-10-23)
+// BECSATools - Visor BIM para Civil 3D 2027  v1.4  (2026-10-23)
 // ----------------------------------------------------------------------------
 // - Se carga solo al abrir Civil 3D (bundle en %APPDATA%\Autodesk\ApplicationPlugins)
 // - Anade el panel "Visor BIM" a la pestana "BECSATools" de la cinta (la misma que usa

@@ -1,4 +1,4 @@
-BECSATools - Exportador al Visor BIM para Civil 3D 2027 (.NET 10)  v1.2
+BECSATools - Exportador al Visor BIM para Civil 3D 2027 (.NET 10)  v1.4
 =======================================================================
 
 Hace en Civil 3D lo mismo que Exportar Visor en Revit: saca el dibujo a
@@ -27,11 +27,14 @@ Que exporta (categoria en el visor)
                            secciones: Tipo = codigo de forma, con Subensamblaje, Region,
                            PK inicial/final y volumen por prismoides (seccion intermedia
                            con las dimensiones promediadas) y por areas medias.
+                           Longitud (ml) por el centro de la capa (bordillos, cunetas)
+                           y Area (m2) = ancho medio x longitud (rodadura, riegos).
                            Si la API no da las secciones: sus solidos (como "Extraer solidos")
   Ejes                     hoja "Ejes" del Excel: puntos cada pocos metros con su PK
                            (cota del perfil de rasante o de la superficie). En el visor
                            se ven los PK y el PK de cualquier punto.
-  Tuberias / Estructuras   redes de tuberias por gravedad
+  Tuberias / Estructuras   redes de tuberias por gravedad (en estructuras, la
+                           Longitud es la profundidad tapa - fondo, para medir en ml)
   Tuberias a presion, Accesorios a presion, Dispositivos a presion
   Solidos 3D, Superficies de AutoCAD, Mallas
   Bloques                  un objeto por insercion, con sus atributos
@@ -44,6 +47,15 @@ Datos (Excel)
   Nombre, Descripcion, Estilo, Longitud (m), Area (m2), Area en planta (m2), Volumen (m3),
   todas las propiedades de Civil 3D del objeto, los datos de pieza del catalogo
   y los conjuntos de propiedades. Entra en la Medicion del visor como lo de Revit.
+
+Unidades para la Medicion
+  Todo lo exportado lleva las cuatro unidades siempre que se puedan calcular:
+    ud   siempre
+    ml   Longitud (m): la del objeto (tubo, capa por su centro, profundidad del pozo,
+         perimetro de la superficie) o, si no tiene, su dimension mayor en planta
+    m2   Area (m2): la real en superficies; en el resto, el area en planta (huella)
+    m3   Volumen (m3): el del solido
+  Columna extra "Superficie exterior (m2)" para formulas (pintura, impermeabilizacion...).
 
 Coordenadas
   Las del dibujo (SCU) en metros, marcadas como compartidas. El proyecto de Revit

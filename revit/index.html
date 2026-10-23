@@ -3288,8 +3288,11 @@ function workerMain(){
   const CAT_LIN = /^(tuberias|tuberias flexibles|conductos|conductos flexibles|bandejas de cables|tubos|barandillas|barandillas de escalera|montantes de muro cortina|armazon estructural|tuberias a presion|pipes|flex pipes|ducts|flex ducts|cable trays|conduits|railings|stair railings|curtain wall mullions|structural framing)$/;
   const CAT_VOL = /^(cimentacion estructural|obras lineales|solidos 3d|structural foundations)$/;   // + Civil 3D
   const CAT_DUCT = /^(conductos|conductos flexibles|ducts|flex ducts)$/;
+  // Elementos lineales por nombre (bordillos, rigolas, cunetas, barreras...): por metro lineal aunque tengan volumen
+  const RE_LINEAL = /bordillo|curb|rigola|gutter|cuneta|ditch|caz\b|barrera|bionda|guardrail|pretil|valla|imposta|encintado/;
   function udDefecto(g){
     const c = plain(g.cat);
+    if (g.has.ml && RE_LINEAL.test(plain(g.tipo + " " + g.fam + " " + (g.sub || "")))) return "ml";
     const ductoRect = CAT_DUCT.test(c) && !/[øØ⌀]/.test(g.size);
     if (g.has.kg) return "kg";
     if (ductoRect && g.has.m2) return "m2";
@@ -3566,7 +3569,9 @@ function workerMain(){
         const key = tkey + "|" + size;
         let g = byKey.get(key);
         if (!g){
+          const iSub = mc.lower.get("subensamblaje");   // Civil 3D: capa de obra lineal
           g = { key, tkey, oldKey: cat + "|" + fam + "|" + tipo + (size ? "|" + size : ""), model:m.name, cat, fam, tipo, size, n:0, els:[],
+                sub: iSub !== undefined ? String(row[iSub] || "") : "",
                 sums:{ ml:0, m2:0, m3:0, kg:0, m2b:0 }, has:{ ml:false, m2:false, m3:false, kg:false, m2b:false },
                 mCode:"", mRes:"", mRes2:"", mPrecio:null };
           byKey.set(key, g);

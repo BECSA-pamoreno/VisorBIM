@@ -42,7 +42,7 @@ Librerías desde CDN: xeokit-sdk 2.6.114 y web-ifc 0.0.77.
 
 **Civil 3D 2027** (`revit/civil3d/`): add-in con el botón *BECSATools > Visor BIM > Exportar visor*
 (comando `BECSA_EXPORTARVISOR`). Saca el dibujo con el mismo formato (DAE + XLSX en la carpeta que elijas; recuerda la última, la misma que en Revit):
-superficies TIN, obras lineales por capa de subensamblaje (con PK y volumen por prismoides), ejes con sus PK, redes de tuberías y a presión, sólidos, mallas, bloques y el contenido
+superficies TIN, obras lineales por capa de subensamblaje (con PK, volumen por prismoides, longitud por el centro de la capa y área), ejes con sus PK, redes de tuberías y a presión, sólidos, mallas, bloques y el contenido
 de las referencias externas, con sus propiedades de Civil 3D, datos de pieza y conjuntos de propiedades. Va en las
 coordenadas del dibujo; si el proyecto de Revit adquirió las coordenadas de ese dibujo, los dos modelos caen en su
 sitio y se miden juntos. Para instalarlo: doble clic en `build.bat` (descarga el SDK de .NET 10 portable la primera
@@ -80,6 +80,12 @@ Funciones:
     - **Secciones por PK** a lo largo de un eje, cada X metros y con un ancho a cada lado: V = d/6·(A1 + 4·Am + A2) con la
       sección intermedia real a mitad de cada tramo; también da el resultado por áreas medias y la tabla de cubicación por PK.
     Factores de esponjamiento (desmonte) y compactación (terraplén). Exporta a Excel.
+- Todo lo que viene de Civil 3D lleva las cuatro unidades (ud, ml, m², m³) siempre que se puedan calcular: ml = longitud
+  propia (tubo, capa por su centro, profundidad de pozo, perímetro de superficie) o la dimensión mayor en planta;
+  m² = área real en superficies y área en planta en el resto; m³ = volumen de los sólidos cerrados.
+- Unidad por defecto en la Medición para lo que viene de Civil 3D: superficies en m², tuberías en ml, capas de obra lineal
+  y sólidos en m³, y bordillos, rigolas, cunetas, barreras... en ml (por el nombre de la capa o del subensamblaje).
+  Las estructuras llevan como longitud su profundidad, por si se miden por metro de altura. Todo se puede cambiar por fila.
 - **Ejes PK** (modelos de Civil 3D): dibuja los ejes con sus PK rotulados; el intervalo se adapta al zoom.
 - Carpeta de proyectos (Chrome / Edge): se elige una vez una carpeta (por ejemplo, la de SharePoint sincronizada con
   OneDrive) con una subcarpeta por proyecto, y el visor la recuerda. "Proyectos" lista las subcarpetas con modelos .dae

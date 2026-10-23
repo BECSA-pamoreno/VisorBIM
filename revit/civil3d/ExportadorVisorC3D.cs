@@ -1,5 +1,5 @@
 // ============================================================================
-// BECSATools - Exportador al Visor BIM para Civil 3D 2027  v1.2  (2026-10-23)
+// BECSATools - Exportador al Visor BIM para Civil 3D 2027  v1.4  (2026-10-23)
 // ----------------------------------------------------------------------------
 // Comando BECSA_EXPORTARVISOR
 //
@@ -62,7 +62,7 @@ namespace BecsaTools
 {
     public class ExportadorVisorC3D
     {
-        public const string VERSION = "v1.2";
+        public const string VERSION = "v1.4";
 
         // Columnas de medicion: las mismas que escribe la macro de Revit (el visor las reconoce)
         private const string COL_LONG = "Longitud (m)";
@@ -546,11 +546,11 @@ namespace BecsaTools
                     return;
                 }
                 Dictionary<string, string> d = FilaBase(ent, cx, cat, NombreTipoAutoCad(ent), ent.Layer);
-                d[COL_VOL] = Num(m.Volumen());
                 if (ent is AcSurface || ent is AcFace)
                 {
-                    d[COL_AREA] = Num(m.Area());
+                    d[COL_AREA] = Num(m.Area());   // superficie abierta: su area real
                 }
+                MedidasSolido(d, m);
                 ConjuntosDePropiedades(ent, tr, d);
                 Emitir(IdDe(ent, cx), m, d, cat);
                 return;
@@ -627,6 +627,7 @@ namespace BecsaTools
             Dictionary<string, string> d = FilaBase(s, cx, "Superficies", Texto(Prop(s, "StyleName")), s.Name);
             d[COL_AREA] = Num(m.Area());
             d[COL_AREA_PLANTA] = Num(m.AreaPlanta());
+            d[COL_LONG] = Num(m.Perimetro());   // ml: perimetro de la superficie
             Campo(d, "Nº de triángulos", m.Triangulos.ToString(INV));
             Campo(d, "Cota mínima (m)", (zmin * _k).ToString("0.###", ES));
             Campo(d, "Cota máxima (m)", (zmax * _k).ToString("0.###", ES));
@@ -682,6 +683,7 @@ namespace BecsaTools
             Dictionary<string, string> d = FilaBase(s, cx, "Superficies", Texto(Prop(s, "StyleName")), s.Name);
             d[COL_AREA] = Num(m.Area());
             d[COL_AREA_PLANTA] = Num(m.AreaPlanta());
+            d[COL_LONG] = Num(m.Perimetro());
             Campo(d, "Nº de triángulos", m.Triangulos.ToString(INV));
             PropiedadesCivil(s, d);
             Emitir(IdDe(s, cx), m, d, "Superficies");
@@ -999,12 +1001,20 @@ namespace BecsaTools
                 return false;
             }
             Malla m = new Malla(_k);
-            double vPrisma = 0, vMedia = 0;
+            double vPrisma = 0, vMedia = 0, longitud = 0, areaPlanta = 0;
             bool abierto = false;
             for (int i = 0; i < ss.Count - 1; i++)
             {
                 SeccionForma a = ss[i], b = ss[i + 1];
-                double d = b.PK - a.PK;
+                // Distancia entre los centros de las dos secciones (en planta): en curva, una capa desplazada
+                // del eje (bordillo, cuneta...) mide distinto que el PK del eje
+                double d = DistanciaCentros(a, b);
+                if (d < 1e-6)
+                {
+                    d = b.PK - a.PK;
+                }
+                longitud += d;
+                areaPlanta += d * (Ancho(a) + Ancho(b)) / 2;
                 double a1 = Math.Abs(AreaConSigno(a.OE)), a2 = Math.Abs(AreaConSigno(b.OE)), am;
                 bool unidas = a.OE.Count == b.OE.Count;
                 if (unidas)
@@ -1060,7 +1070,8 @@ namespace BecsaTools
             string tipo = !string.IsNullOrEmpty(t.Codigos) ? t.Codigos : (!string.IsNullOrEmpty(t.Subensamblaje) ? t.Subensamblaje : "Forma");
             Dictionary<string, string> d0 = FilaBase(obra, cx, "Obras lineales", obra.Name, tipo);
             d0[COL_VOL] = Num(vPrisma);
-            d0[COL_LONG] = Num(pk1 - pk0);
+            d0[COL_LONG] = Num(longitud);       // ml: bordillos, rigolas, cunetas...
+            d0[COL_AREA] = Num(areaPlanta);     // m2: ancho medio x longitud (rodadura, riegos...)
             Campo(d0, "Obra lineal", obra.Name);
             Campo(d0, "Subensamblaje", t.Subensamblaje);
             Campo(d0, "Código de forma", t.Codigos);
@@ -1072,9 +1083,32 @@ namespace BecsaTools
             Campo(d0, "Nº de secciones", ss.Count.ToString(INV));
             Campo(d0, "Volumen por prismoides (m³)", vPrisma.ToString("0.###", ES));
             Campo(d0, "Volumen por áreas medias (m³)", vMedia.ToString("0.###", ES));
-            Campo(d0, "Área media de sección (m²)", (pk1 > pk0 ? vPrisma / (pk1 - pk0) : 0).ToString("0.###", ES));
+            Campo(d0, "Área media de sección (m²)", (longitud > 0 ? vPrisma / longitud : 0).ToString("0.###", ES));
+            Campo(d0, "Ancho medio (m)", (longitud > 0 ? areaPlanta / longitud : 0).ToString("0.###", ES));
             Emitir(IdDe(obra, cx) + "-" + indice.ToString(INV), m, d0, "Obras lineales");
             return true;
+        }
+
+        // Centro de la seccion en planta (media de sus vertices, en metros)
+        private double DistanciaCentros(SeccionForma a, SeccionForma b)
+        {
+            double ax = 0, ay = 0, bx = 0, by = 0;
+            foreach (Point3d p in a.Mundo) { ax += p.X; ay += p.Y; }
+            foreach (Point3d p in b.Mundo) { bx += p.X; by += p.Y; }
+            ax /= a.Mundo.Count; ay /= a.Mundo.Count; bx /= b.Mundo.Count; by /= b.Mundo.Count;
+            return Math.Sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay)) * _k;
+        }
+
+        // Ancho de la seccion (desplazamiento maximo - minimo)
+        private static double Ancho(SeccionForma s)
+        {
+            double mn = double.MaxValue, mx = double.MinValue;
+            foreach (Point2d p in s.OE)
+            {
+                if (p.X < mn) mn = p.X;
+                if (p.X > mx) mx = p.X;
+            }
+            return mx > mn ? mx - mn : 0;
         }
 
         private static int MejorDesfase(List<Point2d> a, List<Point2d> b)
@@ -1563,7 +1597,7 @@ namespace BecsaTools
             }
             Dictionary<string, string> d = FilaBase(obra, cx, "Obras lineales", nombre, tipo);
             d["ElementId"] = "";   // se pone en Emitir
-            d[COL_VOL] = Num(m.Volumen());
+            MedidasSolido(d, m);
             Campo(d, "Obra lineal", nombre);
             Campo(d, "Capa del sólido", sol.Layer);
             foreach (KeyValuePair<string, string> kv in extra)
@@ -1644,7 +1678,17 @@ namespace BecsaTools
             {
                 d[COL_LONG] = Num(lon * _k);
             }
-            d[COL_VOL] = Num(m.Volumen());
+            // Pozos y arquetas: la longitud es su profundidad (tapa - fondo), para medir por metro de altura
+            if (pieza is C3D.Structure)
+            {
+                double tapa = PrimerNumero(pieza, "RimElevation"), fondo = PrimerNumero(pieza, "SumpElevation");
+                if (!double.IsNaN(tapa) && !double.IsNaN(fondo) && tapa > fondo)
+                {
+                    d[COL_LONG] = Num((tapa - fondo) * _k);
+                    Campo(d, "Profundidad (m)", ((tapa - fondo) * _k).ToString("0.###", ES));
+                }
+            }
+            MedidasSolido(d, m);
 
             DatosDePieza(pieza, d);
             PropiedadesCivil(pieza, d);
@@ -1815,7 +1859,7 @@ namespace BecsaTools
             }
             Dictionary<string, string> d = FilaBase(br, cx, "Bloques", nombre, br.Layer);
             d["Nombre"] = nombre;
-            d[COL_VOL] = Num(m.Volumen());
+            MedidasSolido(d, m);
             try
             {
                 foreach (ObjectId aid in br.AttributeCollection)
@@ -2254,6 +2298,27 @@ namespace BecsaTools
             Campo(d, "Tipo de objeto", ent.GetType().Name);
             Campo(d, "Dibujo", _nombreDibujo);
             return d;
+        }
+
+        // Las cuatro unidades para todo lo que tiene volumen: ud siempre; ml = longitud (la propia del objeto
+        // si la tiene, si no su dimension mayor en planta); m2 = area en planta (huella); m3 = volumen
+        private void MedidasSolido(Dictionary<string, string> d, Malla m)
+        {
+            string v;
+            // Volumen solo si la malla es cerrada (una superficie o malla abierta no encierra volumen)
+            if ((!d.TryGetValue(COL_VOL, out v) || string.IsNullOrEmpty(v)) && m.Perimetro() < 0.001)
+            {
+                d[COL_VOL] = Num(m.Volumen());
+            }
+            if (!d.TryGetValue(COL_AREA, out v) || string.IsNullOrEmpty(v))
+            {
+                d[COL_AREA] = Num(m.AreaHuella());
+            }
+            if (!d.TryGetValue(COL_LONG, out v) || string.IsNullOrEmpty(v))
+            {
+                d[COL_LONG] = Num(m.LongitudPrincipal());
+            }
+            Campo(d, "Superficie exterior (m²)", m.Area().ToString("0.###", ES));
         }
 
         private void Campo(Dictionary<string, string> d, string columna, string valor)
@@ -3091,6 +3156,96 @@ namespace BecsaTools
                 s += Math.Abs(ux * vy - uy * vx) / 2;
             }
             return s;
+        }
+
+        // Huella: area proyectada en planta (en un solido cerrado, la de las caras de arriba)
+        public double AreaHuella()
+        {
+            double pos = 0, neg = 0;
+            for (int t = 0; t < T.Count; t += 3)
+            {
+                int a = T[t] * 3, b = T[t + 1] * 3, c = T[t + 2] * 3;
+                double s = ((V[b] - V[a]) * (V[c + 1] - V[a + 1]) - (V[b + 1] - V[a + 1]) * (V[c] - V[a])) / 2;
+                if (s > 0) pos += s; else neg -= s;
+            }
+            return Math.Max(pos, neg);
+        }
+
+        // Dimension mayor en planta, en la direccion principal de los vertices (vale aunque este girado)
+        public double LongitudPrincipal()
+        {
+            int n = Vertices;
+            if (n < 2)
+            {
+                return 0;
+            }
+            double cx = 0, cy = 0;
+            for (int i = 0; i < n; i++) { cx += V[3 * i]; cy += V[3 * i + 1]; }
+            cx /= n; cy /= n;
+            double sxx = 0, sxy = 0, syy = 0;
+            for (int i = 0; i < n; i++)
+            {
+                double x = V[3 * i] - cx, y = V[3 * i + 1] - cy;
+                sxx += x * x; sxy += x * y; syy += y * y;
+            }
+            double ang = 0.5 * Math.Atan2(2 * sxy, sxx - syy), ux = Math.Cos(ang), uy = Math.Sin(ang);
+            double mn = double.MaxValue, mx = double.MinValue;
+            for (int i = 0; i < n; i++)
+            {
+                double p = (V[3 * i] - cx) * ux + (V[3 * i + 1] - cy) * uy;
+                if (p < mn) mn = p;
+                if (p > mx) mx = p;
+            }
+            return mx - mn;
+        }
+
+        // Perimetro: aristas que solo tiene un triangulo (borde de una superficie). Se comparan posiciones,
+        // no indices, porque en los solidos las caras con distinta orientacion no comparten vertices.
+        public double Perimetro()
+        {
+            Dictionary<(long, long, long), int> pos = new Dictionary<(long, long, long), int>();
+            int[] idp = new int[Vertices];
+            int[] rep = new int[Vertices];
+            for (int i = 0; i < idp.Length; i++)
+            {
+                (long, long, long) k = ((long)Math.Round(V[3 * i] * 1e4), (long)Math.Round(V[3 * i + 1] * 1e4), (long)Math.Round(V[3 * i + 2] * 1e4));
+                int j;
+                if (!pos.TryGetValue(k, out j))
+                {
+                    j = pos.Count;
+                    pos[k] = j;
+                }
+                idp[i] = j;
+                rep[j] = i;
+            }
+            Dictionary<long, int> cuenta = new Dictionary<long, int>();
+            for (int t = 0; t < T.Count; t += 3)
+            {
+                for (int k = 0; k < 3; k++)
+                {
+                    int a = idp[T[t + k]], b = idp[T[t + (k + 1) % 3]];
+                    if (a == b)
+                    {
+                        continue;
+                    }
+                    long key = a < b ? ((long)a << 32) | (uint)b : ((long)b << 32) | (uint)a;
+                    int c;
+                    cuenta.TryGetValue(key, out c);
+                    cuenta[key] = c + 1;
+                }
+            }
+            double l = 0;
+            foreach (KeyValuePair<long, int> kv in cuenta)
+            {
+                if (kv.Value != 1)
+                {
+                    continue;
+                }
+                int a = rep[(int)(kv.Key >> 32)] * 3, b = rep[(int)(kv.Key & 0xFFFFFFFF)] * 3;
+                double dx = V[b] - V[a], dy = V[b + 1] - V[a + 1], dz = V[b + 2] - V[a + 2];
+                l += Math.Sqrt(dx * dx + dy * dy + dz * dz);
+            }
+            return l;
         }
 
         // Volumen encerrado (teorema de la divergencia); solo tiene sentido en solidos cerrados
