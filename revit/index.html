@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Visor de modelos</title>
+<title>Visor BIM · BECSA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -222,6 +222,83 @@ td:last-child{font-variant-numeric:tabular-nums;word-break:break-word}
 kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;padding:0 4px;background:var(--soft)}
 
 #center{display:flex;flex-direction:column;min-height:0;min-width:0}
+/* Modo Civil */
+body.civil main{grid-template-columns:330px minmax(0,1fr) 0}
+body.civil:not(.civsel) aside.right{display:none}
+body.civil.civsel main{grid-template-columns:330px minmax(0,1fr) 300px}
+.civ-only{display:none} body.civil .civ-only{display:inline-block;float:right}
+.civ-tit .civ-tg{display:inline-flex;align-items:center;gap:3px;text-transform:none;letter-spacing:0;font-weight:600}
+.civ-tit .civ-tg[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.civ-tit #civSecBorrar{text-transform:none;letter-spacing:0;font-weight:600;color:#D81B60}
+#civSecOv{touch-action:none} #civSecOv.sobre{cursor:pointer} #civSecOv.med{cursor:crosshair}
+.civ-info hr{border:0;border-top:1px solid var(--line);margin:5px 0}
+.civ-tramo{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--muted);margin:0 0 8px;white-space:nowrap}
+#civPanel .civ-tramo input{width:82px;min-width:0;flex:none;padding:3px 6px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+.civ-tramo .btn{margin-left:auto}
+#civPanel .civ-tabs{gap:3px}
+#civPanel .civ-tabs button{flex:1 1 0;min-width:0;font-size:12px;padding:4px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#civPanel .civ-tabs button:disabled{opacity:.4;cursor:default}
+.or-desp{display:flex;align-items:center;gap:6px;margin-top:3px}
+#civPanel .or-desp input{width:100px;min-width:0;flex:1 1 0;text-align:right;font-variant-numeric:tabular-nums}
+#civOrto{position:absolute;left:0;top:0;max-width:none;pointer-events:none;user-select:none}
+#civOrto[hidden]{display:none}
+.m-tramo{display:inline-flex;align-items:center;gap:5px;font-size:13px;padding:2px 8px;border:1px solid #1E88E5;border-radius:6px;background:color-mix(in srgb,#1E88E5 8%,transparent)}
+.m-tramo[hidden]{display:none}
+#measure .m-tramo input{width:84px;min-width:0;flex:none;padding:2px 6px;font-size:13px;text-align:right}
+#measure .m-tramo #mTrD{width:46px}
+#measure .m-tramo select{width:auto;flex:none;max-width:160px;padding:2px 4px;font-size:13px}
+.modal.imp .i-nota.err{color:var(--warn)}
+.civ-info{max-width:min(260px,55%);max-height:calc(100% - 70px);overflow:hidden;font-size:11.5px;line-height:1.4}
+#civSecInfo{top:34px;background:var(--panel)} #civSecInfo.oculta{display:none}
+#civSecPos{bottom:auto;top:34px;left:52px}
+body.civil #center{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1.2fr) minmax(0,1fr) auto;gap:1px;background:var(--line)}
+body.civil #center #view{grid-row:1;grid-column:2}
+#civPlan{grid-row:1;grid-column:1} #civPerfil{grid-row:2;grid-column:1} #civSec{grid-row:2;grid-column:2} #civBar{grid-row:3;grid-column:1 / span 2}
+.civ-cell{position:relative;background:var(--viewport);min-height:0;min-width:0;overflow:hidden}
+.civ-cell[hidden],#civBar[hidden]{display:none}
+.civ-cell canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#civPerfil,#civSec{background:var(--panel)}
+#civPlanOv{cursor:grab;touch-action:none}
+#civPerfCv{cursor:crosshair;touch-action:none}
+.civ-tit{position:absolute;left:8px;top:6px;z-index:3;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:color-mix(in srgb,var(--panel) 80%,transparent);padding:2px 6px;border-radius:5px;pointer-events:auto}
+.civ-tit select{width:auto;padding:1px 4px;font-size:11px;text-transform:none;letter-spacing:0}
+.civ-tit .ibtn{font-size:13px}
+.civ-pos{position:absolute;left:8px;bottom:6px;z-index:3;font-size:11.5px;color:var(--ink);background:color-mix(in srgb,var(--panel) 80%,transparent);padding:1px 6px;border-radius:4px;pointer-events:none;font-variant-numeric:tabular-nums}
+.civ-pos:empty{display:none}
+.civ-info{position:absolute;right:8px;top:6px;z-index:3;font-size:12px;line-height:1.45;background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-variant-numeric:tabular-nums;pointer-events:none}
+.civ-info:empty{display:none}
+#civBar{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);flex-wrap:wrap}
+#civBar input[type=range]{flex:1 1 220px;min-width:120px}
+#civBar #civPkTxt{width:110px;text-align:right;font-variant-numeric:tabular-nums}
+#civBar select{width:auto}
+#civBar .check{margin:0}
+.civ-stat{flex:1 1 100%;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.civ-stat:empty{display:none}
+.civ-tabs{display:flex;gap:4px;margin:4px 0 8px}
+.civ-tabs button{flex:1;border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:4px 6px;font-size:13px;cursor:pointer;color:var(--ink)}
+.civ-tabs button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.civ-lbl{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted);margin:6px 0}
+.civ-geot,.civ-cubt{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:6px}
+#civGeo,.civ-cubt table{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}
+#civGeo th,#civGeo td,.civ-cubt th,.civ-cubt td{padding:3px 4px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+#civGeo .num,.civ-cubt .num{text-align:right}
+#civGeo thead th,.civ-cubt thead th{position:sticky;top:0;background:var(--panel)}
+#civGeo tbody tr,.civ-cubt tbody tr{cursor:pointer}
+#civGeo tbody tr:hover,.civ-cubt tbody tr:hover{background:var(--soft)}
+.civ-cubt thead th{line-height:1.2;vertical-align:bottom}
+.gsw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:baseline}
+.gsw.g-r{background:#7DA7D9} .gsw.g-c{background:#B48BD8} .gsw.g-a{background:#E7875A}
+body.civil .toolbar .btn>span{display:none}
+@media (max-width:1000px){
+  body.civil{height:auto} body.civil main{grid-template-columns:1fr;grid-template-rows:auto;flex:none}
+  body.civil #center{grid-template-columns:1fr;grid-template-rows:auto}
+  body.civil #center #view{grid-row:auto;grid-column:1;height:55vh}
+  body.civil #civPlan,body.civil #civPerfil,body.civil #civSec,body.civil #civBar{grid-row:auto;grid-column:1}
+  body.civil #civPlan{height:45vh} body.civil #civPerfil,body.civil #civSec{height:38vh}
+  body.civil #center #view{order:1} body.civil #civBar{order:2} body.civil #civPlan{order:3} body.civil #civPerfil{order:4} body.civil #civSec{order:5}
+}
+body.civil #pkLabels{display:none}
+
 #center #view{flex:1}
 #measure{grid-column:1 / -1;grid-row:2;height:44vh;min-height:260px;display:flex;flex-direction:column;background:var(--panel);border-top:1px solid var(--line)}
 #measure.big{height:78vh}
@@ -407,13 +484,14 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
 <body>
 <header>
   <a class="btn small back" href="../index.html" title="Elegir otro visor">← Visores</a>
-  <h1>Visor de modelos</h1>
+  <h1>Visor BIM</h1>
   <span id="stats"></span>
   <span class="spacer"></span>
   <button class="projchip" id="projChip" hidden><b></b><span class="mstatus"></span></button>
   <div class="seg" id="modoSeg" role="group" aria-label="Modo de uso">
     <button type="button" data-modo="sencillo" title="Lo esencial: navegar, buscar, plano de corte, cotas y consultar la medición">Sencillo</button>
     <button type="button" data-modo="tecnico" title="Todas las herramientas: rayos X, abrir BC3, asignar partidas, fórmulas y exportar a BC3">Avanzado</button>
+    <button type="button" data-modo="civil" title="Obra civil: planta, perfil longitudinal, secciones por PK y modelo 3D (con todas las herramientas de Avanzado)">Civil</button>
   </div>
   <button class="btn primary" id="projBtn" title="Abrir un proyecto de la carpeta de proyectos">Proyectos</button>
   <button class="btn" id="openBtn">Añadir modelos</button>
@@ -422,6 +500,70 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
 
 <main>
   <aside class="left">
+    <section id="civPanel" hidden>
+      <h2>Obra civil</h2>
+      <p class="muted" id="civVacio" style="font-size:13px">No hay ejes: para perfil, secciones y cubicación exporta desde Civil 3D con BECSATools &gt; Exportar visor (el Excel trae la hoja «Ejes»). La planta y la ortofoto funcionan igual.</p>
+      <div id="civCont">
+        <div class="row"><select id="civEje" aria-label="Eje"></select></div>
+        <div class="muted" id="civEjeInfo" style="font-size:13px;margin-bottom:6px"></div>
+        <div class="civ-tramo" title="Tramo para cubicar, medir e imprimir secciones (PK como 0+120 o 120)"><span>Tramo</span><input type="text" id="civTrA" aria-label="PK inicial del tramo"><span>a</span><input type="text" id="civTrB" aria-label="PK final del tramo"><button class="btn small" id="civTrTodo" title="Todo el eje">Todo</button></div>
+      </div>
+      <div>
+        <div class="civ-tabs">
+          <button type="button" data-ct="geo" aria-pressed="true">Geometría</button>
+          <button type="button" data-ct="sup" aria-pressed="false">Superficies</button>
+          <button type="button" data-ct="cub" aria-pressed="false">Cubicación</button>
+          <button type="button" data-ct="orto" aria-pressed="false">Ortofoto</button>
+        </div>
+        <div id="civTab_geo">
+          <p class="muted" id="civGeoVacio" style="font-size:13px">Sin elementos del eje: vuelve a exportar con la v1.5 del exportador para ver rectas, clotoides y curvas.</p>
+          <div class="civ-geot"><table id="civGeo"><thead><tr><th>Elemento</th><th class="num">PK inicial</th><th class="num">L (m)</th><th class="num">R / A</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div id="civTab_sup" hidden>
+          <label class="civ-lbl">Terreno (superficie inicial)<select id="civTerreno"></select></label>
+          <label class="civ-lbl">Rasante / diseño<select id="civRasante"></select></label>
+          <label class="civ-lbl">Ancho de sección a cada lado (m)<input type="text" id="civW" value="30"></label>
+          <p class="muted" style="font-size:13px">Los elementos que salen en la planta, la sección y el 3D se filtran con las Categorías de abajo.</p>
+        </div>
+        <div id="civTab_cub" hidden>
+          <label class="civ-lbl">Secciones cada (m)<input type="text" id="civPaso" value="20"></label>
+          <div class="row" style="margin-top:6px"><button class="btn small primary" id="civCubGo">Cubicar</button><button class="btn small" id="civCubXls" disabled>Excel</button></div>
+          <div class="row"><button class="btn small" id="civMedTramo" title="Abre la Medición solo con lo que hay entre los dos PK del tramo (parte proporcional de cada elemento)">Medición del tramo</button><button class="btn small" id="civImprimir" title="Secciones transversales a escala en PDF o DXF">Imprimir secciones…</button></div>
+          <div id="civCubRes"></div>
+        </div>
+        <div id="civTab_orto" hidden>
+          <label class="check"><input type="checkbox" id="orOn"> Ortofoto en la planta</label>
+          <label class="civ-lbl">Fuente<select id="orFuente">
+            <option value="auto">Automática: ICV en la Comunitat Valenciana, PNOA fuera</option>
+            <option value="icv">ICV 2023 · Comunitat Valenciana (25 cm)</option>
+            <option value="pnoa">PNOA máxima actualidad · IGN</option>
+            <option value="catastro">Catastro (parcelas, transparente)</option>
+            <option value="wms">Otro servidor WMS…</option>
+            <option value="file">Imagen georreferenciada (archivo)…</option>
+          </select></label>
+          <div id="orWms" hidden>
+            <label class="civ-lbl">URL del servidor WMS<input type="text" id="orUrl" placeholder="https://…"></label>
+            <label class="civ-lbl">Capa<input type="text" id="orCapa"></label>
+          </div>
+          <div id="orFile" hidden>
+            <button class="btn small" id="orFileBtn">Elegir imagen y archivo de coordenadas…</button>
+            <input type="file" id="orFileIn" accept=".jpg,.jpeg,.png,.webp,.jgw,.pgw,.jpgw,.pngw,.wld,.tfw,.j2w" multiple hidden>
+            <p class="muted" id="orFileTxt" style="font-size:12.5px">JPG o PNG con su .jgw / .pgw / .wld, en las mismas coordenadas que los modelos.</p>
+          </div>
+          <label class="civ-lbl" id="orCrsL">Sistema de coordenadas de los modelos<select id="orCrs">
+            <option value="EPSG:25830">ETRS89 · UTM 30N (EPSG:25830)</option>
+            <option value="EPSG:25831">ETRS89 · UTM 31N (EPSG:25831)</option>
+            <option value="EPSG:25829">ETRS89 · UTM 29N (EPSG:25829)</option>
+            <option value="EPSG:23030">ED50 · UTM 30N (EPSG:23030)</option>
+          </select></label>
+          <div class="civ-lbl" id="orDespL">Desplazamiento a coordenadas reales, si el dibujo está en locales (m)
+            <div class="or-desp"><span>ΔX</span><input type="text" id="orDx" value="0"><span>ΔY</span><input type="text" id="orDy" value="0"></div></div>
+          <label class="civ-lbl">Posición<select id="orModo"><option value="encima">Encima del modelo, con transparencia</option><option value="debajo">Debajo del modelo</option></select></label>
+          <label class="civ-lbl">Opacidad<input type="range" id="orOp" min="0.1" max="1" step="0.05"></label>
+          <p class="muted" id="orEstado" style="font-size:12.5px"></p>
+        </div>
+      </div>
+    </section>
     <section>
       <h2>Modelos</h2>
       <ul class="models" id="models"><li class="muted">Añade el .dae y el .xlsx de cada modelo. Se colocan solos por sus coordenadas.</li></ul>
@@ -535,11 +677,48 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
       <div class="wh-st" id="walkSt"></div>
     </div>
   </div>
+  <div id="civPlan" class="civ-cell" hidden>
+    <div class="civ-tit">Planta <button class="ibtn" id="civPlanFit" title="Encuadrar el eje (también doble clic)">⤢</button><button class="ibtn civ-tg" id="civOrtoBtn" aria-pressed="false" title="Ortofoto en la planta (ICV, PNOA, Catastro o imagen propia)">Orto</button></div>
+    <canvas id="civPlanOv" title="Arrastrar: mover · rueda: zoom · clic junto al eje: ir a ese PK"></canvas>
+    <div class="civ-pos" id="civPlanPos"></div>
   </div>
+  <div id="civPerfil" class="civ-cell" hidden>
+    <div class="civ-tit">Perfil longitudinal
+      <select id="civExag" title="Exageración vertical"><option value="auto">auto</option><option value="1">×1</option><option value="2">×2</option><option value="5">×5</option><option value="10">×10</option><option value="20">×20</option><option value="50">×50</option></select>
+      <button class="ibtn" id="civPerfFit" title="Todo el eje (también doble clic)">⤢</button>
+    </div>
+    <canvas id="civPerfCv" title="Clic: ir a ese PK · arrastrar: desplazar · rueda: zoom"></canvas>
+  </div>
+  <div id="civSec" class="civ-cell" hidden>
+    <div class="civ-tit">Sección
+      <select id="civSecExag" title="Exageración vertical"><option value="auto">auto</option><option value="1">×1</option><option value="2">×2</option><option value="5">×5</option><option value="10">×10</option></select>
+      <button class="ibtn civ-tg" id="civSecFicha" aria-pressed="true" title="Mostrar u ocultar la ficha del PK y de lo seleccionado">Ficha</button>
+      <button class="ibtn civ-tg" id="civSecRot" aria-pressed="true" title="Rótulos: nombre de cada capa y superficie en la sección">Aa</button>
+      <button class="ibtn civ-tg" id="civSecMed" aria-pressed="false" title="Medir en la sección: clic en dos puntos (imán a vértices y bordes). Mayús: horizontal o vertical. Clic derecho: borrar la última. Esc: terminar"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17 17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/></svg> Medir</button>
+      <button class="ibtn" id="civSecBorrar" hidden title="Borrar las cotas de esta sección">Borrar cotas</button>
+      <button class="ibtn civ-tg" id="civSecImp" aria-pressed="false" title="Imprimir secciones a escala (PDF o DXF)">Imprimir</button>
+    </div>
+    <canvas id="civSecCv"></canvas>
+    <canvas id="civSecOv" title="Clic: propiedades del elemento o capa · Ctrl+clic: añadir a la selección"></canvas>
+    <div class="civ-info" id="civSecInfo"></div>
+    <div class="civ-pos" id="civSecPos"></div>
+  </div>
+  <div id="civBar" hidden>
+    <button class="btn small" id="civPrev" title="PK anterior (←)">◀</button>
+    <button class="btn small" id="civPlay" title="Recorrer el eje">▶</button>
+    <button class="btn small" id="civNext" title="PK siguiente (→)">▶|</button>
+    <input type="range" id="civSlider" aria-label="PK">
+    <input type="text" id="civPkTxt" aria-label="PK actual" title="Escribe un PK (p. ej. 0+545 o 545)">
+    <select id="civVel" title="Velocidad del recorrido"><option value="10">10 m/s</option><option value="20" selected>20 m/s</option><option value="50">50 m/s</option><option value="100">100 m/s</option></select>
+    <label class="check" title="La vista 3D va por el eje, a la altura de la rasante"><input type="checkbox" id="civCam"> Cámara en el eje</label>
+    <span class="civ-stat" id="civStat"></span>
+  </div>
+  </div>
+
 
   <aside class="right">
     <section>
-      <h2>Propiedades</h2>
+      <h2>Propiedades <button class="ibtn civ-only" id="propClose" title="Cerrar y deseleccionar (Esc)">✕</button></h2>
       <p class="muted" id="selHint">Haz clic en un elemento para ver sus parámetros.<br><kbd>Ctrl</kbd>+clic: añadir o quitar de la selección. <kbd>Ctrl</kbd>+arrastrar: ventana (hacia la derecha, elementos enteros dentro; hacia la izquierda, los que toque; con <kbd>Mayús</kbd> quita).<br><kbd>H</kbd> ocultar, <kbd>I</kbd> aislar, <kbd>F</kbd> encuadrar, <kbd>D</kbd> medir, <kbd>Esc</kbd> deseleccionar.</p>
       <div id="multiSel" hidden>
         <p class="sel-title"><span id="msCount"></span> elementos seleccionados</p>
@@ -579,6 +758,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
         <option value="visible">Solo lo visible</option>
         <option value="search">Resultados de búsqueda</option>
         <option value="sel">Selección (0)</option>
+        <option value="tramo">Tramo de PK (Civil)</option>
       </select>
       <span class="ktotal" id="kPresu"></span>
       <span class="kpi" id="kAsig"></span>
@@ -592,6 +772,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
       <button class="btn small" id="mClose" aria-label="Cerrar medición">Cerrar</button>
     </div>
     <div class="mh mtools">
+      <span id="mTramo" class="m-tramo" hidden><select id="mTrEje" aria-label="Eje"></select><span>PK</span><input type="text" id="mTrA" aria-label="PK inicial"><span>a</span><input type="text" id="mTrB" aria-label="PK final"><span>±</span><input type="text" id="mTrD" aria-label="Distancia máxima al eje" title="Solo cuenta lo que está a menos de esta distancia del eje"><span>m</span><span class="muted" id="mTrVacio" hidden>No hay ejes de Civil 3D cargados.</span></span>
       <select id="mCat" aria-label="Categoría"><option value="">Todas las categorías</option></select>
       <input type="text" id="mFilter" placeholder="Filtrar familia, tipo, código..." aria-label="Filtrar filas">
       <label class="check"><input type="checkbox" id="mSinPartida"> Solo sin partida</label>
@@ -870,7 +1051,8 @@ function workerMain(){
         var aoa = self.XLSX.utils.sheet_to_json(ws, { header:1, defval:"", raw:false });
         var wsE = wb.Sheets["Ejes"];   // Civil 3D: puntos de los ejes con su PK
         var ejes = wsE ? self.XLSX.utils.sheet_to_json(wsE, { header:1, defval:"", raw:true }) : null;
-        self.postMessage({ type:"done", res:{ header:(aoa[0] || []).map(String), rows:aoa.slice(1), ejes:ejes } });
+        var hoja = n => wb.Sheets[n] ? self.XLSX.utils.sheet_to_json(wb.Sheets[n], { header:1, defval:"", raw:true }) : null;
+        self.postMessage({ type:"done", res:{ header:(aoa[0] || []).map(String), rows:aoa.slice(1), ejes:ejes, ejesGeo:hoja("EjesGeometria"), perfiles:hoja("Perfiles") } });
       }
     } catch(err){
       self.postMessage({ type:"error", message:String(err && err.message || err) });
@@ -945,7 +1127,7 @@ function workerMain(){
   function requestRender(){
     if (pending) return;
     pending = true;
-    requestAnimationFrame(() => { pending = false; renderer.render(scene, camera); updateDims(); updatePK(); });
+    requestAnimationFrame(() => { pending = false; renderer.render(scene, camera); updateDims(); updatePK(); try { renderPlanta(); } catch(err){} });
   }
   controls.addEventListener("change", requestRender);
 
@@ -1054,6 +1236,8 @@ function workerMain(){
     };
     m.data.mc = measureColumns(H);
     m.ejes = res.ejes ? leerEjes(res.ejes) : null;
+    m.ejesGeo = leerTabla(res.ejesGeo);
+    m.perfiles = leerTabla(res.perfiles);
   }
 
   function buildModel(m, res){
@@ -1222,7 +1406,7 @@ function workerMain(){
     mesh.geometry.setDrawRange(0, count);
     mesh.visible = count > 0;
   }
-  function rebuildAll(){ S.models.forEach(m => rebuild(m)); requestRender(); }
+  function rebuildAll(){ S.models.forEach(m => rebuild(m)); requestRender(); try { civRefrescarCorte(); } catch(err){} }
 
   function onModelsChanged(fit){
     rebuildCats();
@@ -1609,6 +1793,7 @@ function workerMain(){
     const opt = $("mScope").querySelector('option[value="sel"]');
     if (opt) opt.textContent = "Selección (" + fmtInt(n) + ")";
     showProps();
+    try { civSelCambio(); } catch (err) {}
     if (MS.open && $("mScope").value === "sel") refreshMeasure();
   }
 
@@ -2540,16 +2725,17 @@ function workerMain(){
     if (!filas || filas.length < 2) return [];
     const H = filas[0].map(h => plain(String(h)));
     const ci = n => H.indexOf(n);
-    const cE = ci("eje"), cP = ci("pk"), cX = ci("x"), cY = ci("y"), cZ = ci("z");
+    const cE = ci("eje"), cP = ci("pk"), cX = ci("x"), cY = ci("y"), cZ = ci("z"), cF = ci("cota de");
     if (cE < 0 || cP < 0 || cX < 0 || cY < 0) return [];
     const num = v => typeof v === "number" ? v : parseFloat(String(v).replace(",", "."));
-    const porEje = new Map();
+    const porEje = new Map(), conPerfil = new Set();
     for (let i = 1; i < filas.length; i++){
       const f = filas[i], nom = String(f[cE] || "").trim(); if (!nom) continue;
       const pk = num(f[cP]), x = num(f[cX]), y = num(f[cY]), z = cZ >= 0 ? num(f[cZ]) : NaN;
       if (!isFinite(pk) || !isFinite(x) || !isFinite(y)) continue;
       if (!porEje.has(nom)) porEje.set(nom, []);
       porEje.get(nom).push([pk, x, y, z]);
+      if (cF >= 0 && /^perfil/i.test(String(f[cF] || ""))) conPerfil.add(nom);
     }
     const out = [];
     porEje.forEach((pts, nom) => {
@@ -2559,10 +2745,17 @@ function workerMain(){
       let zRef = NaN;
       pts.forEach((p, i) => { pk[i] = p[0]; X[i] = p[1]; Y[i] = p[2]; Z[i] = p[3]; if (isFinite(p[3]) && !isFinite(zRef)) zRef = p[3]; });
       for (let i = 0; i < n; i++) if (!isFinite(Z[i])) Z[i] = isFinite(zRef) ? zRef : 0;
-      out.push({ nombre:nom, pk, X, Y, Z, visible:true });
+      out.push({ nombre:nom, pk, X, Y, Z, visible:true, conPerfil:conPerfil.has(nom) || (cF < 0 && isFinite(zRef)) });
     });
     return out;
   }
+  // Hojas "EjesGeometria" y "Perfiles": filas con cabecera -> objetos por nombre de columna normalizado
+  function leerTabla(filas){
+    if (!filas || filas.length < 2) return [];
+    const H = filas[0].map(h => plain(String(h)));
+    return filas.slice(1).map(f => { const o = {}; H.forEach((h, i) => o[h] = f[i]); return o; }).filter(o => String(o.eje || "").trim());
+  }
+  const numT = v => typeof v === "number" ? v : (String(v).trim() === "" ? NaN : parseFloat(String(v).replace(",", ".")));
   function rebuildEjes(){
     while (EJES.group.children.length){ const c = EJES.group.children.pop(); c.geometry.dispose(); }
     EJES.list = [];
@@ -2576,6 +2769,14 @@ function workerMain(){
         const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(p, 3));
         const line = new THREE.Line(g, ejeMat); line.renderOrder = 6; line.frustumCulled = false;
         EJES.group.add(line);
+        e.geo = (m.ejesGeo || []).filter(g => String(g.eje).trim() === e.nombre)
+          .map(g => ({ tipo:String(g.tipo || ""), pk0:numT(g["pk inicial"]), L:numT(g.longitud), R:numT(g.radio), A:numT(g.a) }))
+          .filter(g => isFinite(g.pk0) && isFinite(g.L)).sort((a, b) => a.pk0 - b.pk0);
+        e.pvis = (m.perfiles || []).filter(p => String(p.eje).trim() === e.nombre)
+          .map(p => ({ perfil:String(p.perfil || ""), tipo:String(p["tipo de perfil"] || ""), pk:numT(p.pk), z:numT(p.cota), kv:numT(p.kv), lc:numT(p["longitud acuerdo"]) }))
+          .filter(p => isFinite(p.pk) && isFinite(p.z)).sort((a, b) => a.pk - b.pk);
+        const fg = e.pvis.find(p => /fg|layout|rasante/i.test(p.tipo)) || e.pvis[0];
+        e.perfilPrincipal = fg ? fg.perfil : "";
         EJES.list.push(e);
       });
     });
@@ -2583,6 +2784,7 @@ function workerMain(){
     $("ejesBtn").hidden = !EJES.list.length;
     $("ejesBtn").setAttribute("aria-pressed", String(EJES.on));
     requestRender();
+    try { if (CIV.on) refreshCivil(); } catch(err){}
   }
   // Punto (escena) del eje en un PK
   function puntoEje(e, pk){
@@ -2848,9 +3050,10 @@ function workerMain(){
     }
     return { corte, relleno, ancho };
   }
-  async function volumenSecciones(A, B, eje, paso, W, progreso){
+  async function volumenSecciones(A, B, eje, paso, W, progreso, rango){
     const o = S.sceneOrigin || [0, 0, 0];
-    const pk0 = eje.pk[0], pk1 = eje.pk[eje.pk.length - 1];
+    let pk0 = eje.pk[0], pk1 = eje.pk[eje.pk.length - 1];
+    if (rango){ pk0 = Math.max(pk0, rango[0]); pk1 = Math.min(pk1, rango[1]); }
     const pks = [];
     for (let p = Math.ceil(pk0 / paso - 1e-9) * paso; p < pk1 - 1e-6; p += paso) if (p > pk0 + 1e-6) pks.push(p);
     pks.unshift(pk0); pks.push(pk1);
@@ -2990,6 +3193,1634 @@ function workerMain(){
     }).catch(err => toast(err.message));
   }
   $("volBtn").addEventListener("click", abrirVolumen);
+
+  // ---------- Modo Civil: planta, perfil longitudinal, sección por PK y modelo 3D ----------
+  const CIV = { on:false, eje:0, pk:0, W:30, terreno:"", rasante:"perfil", exag:"auto", secExag:"auto", play:false, raf:0, last:0,
+                vel:20, camara:false, sup:new Map(), perf:null, win:null, planFit:"", tab:"geo", cub:null, slice:null,
+                rot:true, med:false, medA:null, meds:[], medPK:NaN, hov:null, hovPt:null };
+  const SEC_SEL = "rgba(242,183,5,.88)", SEC_SEL_B = "#8a6500", SEC_MED = "#D81B60";
+  const CIV_NARANJA = "#F28C28";
+  let planR = null, planCam = null;
+  const PV = { cx:0, cz:0, half:100 };
+  const civMarker = new THREE.LineLoop(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color:0xF28C28, depthTest:false, transparent:true }));
+  civMarker.renderOrder = 8; civMarker.visible = false; civMarker.frustumCulled = false;
+  scene.add(civMarker);
+
+  function ejeCiv(){ return EJES.list[CIV.eje] || null; }
+  function supCiv(clave){
+    if (!clave || clave === "perfil") return null;
+    if (CIV.sup.has(clave)) return CIV.sup.get(clave);
+    const [mid, e] = clave.split(":"), m = S.models.find(x => String(x.id) === mid);
+    if (!m || !m.ready) return null;
+    const p = prepararSuperficie(triangulosPlanta(m, +e));
+    CIV.sup.set(clave, p);
+    return p;
+  }
+  // Cota absoluta de una superficie en un punto en planta (x, y relativos al origen de la escena)
+  function cotaSuperficie(S0, x, y){
+    let best = NaN; const oz = (S.sceneOrigin || [0, 0, 0])[2];
+    candidatos(S0, x, y, x, y, t => {
+      const o = 9 * t, T = S0.T;
+      for (let k = 0; k < 3; k++){
+        const ax = T[o + 3*k], ay = T[o + 3*k + 1], bx = T[o + 3*((k + 1) % 3)], by = T[o + 3*((k + 1) % 3) + 1];
+        if ((bx - ax) * (y - ay) - (by - ay) * (x - ax) < -1e-9) return;
+      }
+      const z = S0.pl[3*t] * x + S0.pl[3*t+1] * y + S0.pl[3*t+2];
+      if (!(z <= best)) best = z;
+    });
+    return best + oz;
+  }
+  function relPlanta(X, Y){ const o = S.sceneOrigin || [0, 0, 0]; return [X - o[0], Y - o[1]]; }
+  // Rasante en un PK: del perfil del eje o de la superficie elegida
+  function rasanteEn(e, pk){
+    if (CIV.rasante === "perfil"){ if (!e.conPerfil) return NaN; return puntoEje(e, pk).Z; }
+    const S0 = supCiv(CIV.rasante); if (!S0) return NaN;
+    const q = puntoEje(e, pk), [x, y] = relPlanta(q.X, q.Y);
+    return cotaSuperficie(S0, x, y);
+  }
+  function terrenoEn(e, pk){
+    const S0 = supCiv(CIV.terreno); if (!S0) return NaN;
+    const q = puntoEje(e, pk), [x, y] = relPlanta(q.X, q.Y);
+    return cotaSuperficie(S0, x, y);
+  }
+
+  // ---- Paneles y selects ----
+  function refreshCivil(){
+    if (!CIV.on) return;
+    CIV.sup.clear(); CIV.perf = null; CIV.cub = null;
+    const se = $("civEje"), prevNom = ejeCiv() ? ejeCiv().nombre : "";
+    se.innerHTML = "";
+    EJES.list.forEach((e, i) => se.append(new Option(e.nombre + (S.models.length > 1 ? "  ·  " + e.modelo : ""), i)));
+    let i = EJES.list.findIndex(e => e.nombre === prevNom); if (i < 0) i = 0;
+    CIV.eje = i; se.value = i;
+    // superficies
+    const cands = candidatasSuperficie(), st = $("civTerreno"), sr = $("civRasante");
+    const pt = CIV.terreno, pr = CIV.rasante;
+    st.innerHTML = ""; sr.innerHTML = "";
+    st.append(new Option("(ninguna)", ""));
+    sr.append(new Option("Perfil del eje (rasante de Civil 3D)", "perfil"));
+    cands.forEach(c => { const k = c.m.id + ":" + c.e; st.append(new Option(c.label, k)); sr.append(new Option(c.label, k)); });
+    const claves = cands.map(c => c.m.id + ":" + c.e);
+    if (!claves.includes(pt)){
+      const t = cands.find(c => /terreno|existente|topo|natural|\beg\b/.test(plain(c.label)));
+      CIV.terreno = t ? t.m.id + ":" + t.e : (cands[0] ? claves[0] : "");
+    }
+    if (pr !== "perfil" && !claves.includes(pr)) CIV.rasante = "perfil";
+    st.value = CIV.terreno; sr.value = CIV.rasante;
+    $("civW").value = String(CIV.W).replace(".", ",");
+    const e = ejeCiv();
+    $("civVacio").hidden = !!e;
+    $("civCont").hidden = !e;
+    $("civPanel").querySelectorAll("[data-ct]").forEach(b => { if (b.dataset.ct !== "orto") b.disabled = !e; });
+    if (!e){ if (CIV.tab !== "orto") $("civPanel").querySelector("[data-ct=orto]").click(); civMarker.visible = false; dibujarTodoCiv(); return; }
+    if (CIV.planFit !== e.nombre){ CIV.planFit = e.nombre; encuadrarPlanta(); CIV.win = null; CIV.pk = e.pk[0]; CIV.tramo = null; }
+    const pk0 = e.pk[0], pk1 = e.pk[e.pk.length - 1];
+    $("civSlider").min = pk0; $("civSlider").max = pk1; $("civSlider").step = Math.max(0.01, (pk1 - pk0) / 2000);
+    $("civEjeInfo").textContent = "PK " + formatoPK(pk0) + " a " + formatoPK(pk1) + " · " + fmtM(pk1 - pk0) + " m" + (e.conPerfil ? "" : " · sin perfil de rasante");
+    pintarGeometria(e);
+    pintarTramo();
+    pintarCubicacion();
+    setPK(Math.min(pk1, Math.max(pk0, CIV.pk)));
+  }
+  function pintarGeometria(e){
+    const tb = $("civGeo").querySelector("tbody");
+    tb.innerHTML = "";
+    $("civGeoVacio").hidden = !!(e.geo && e.geo.length);
+    (e.geo || []).forEach(g => {
+      const tr = document.createElement("tr");
+      const cls = g.tipo === "Recta" ? "g-r" : g.tipo === "Clotoide" ? "g-c" : "g-a";
+      tr.innerHTML = `<td><span class="gsw ${cls}"></span>${g.tipo}</td><td class="num">${formatoPK(g.pk0)}</td><td class="num">${fmtM(g.L)}</td><td class="num">${g.tipo === "Clotoide" && isFinite(g.A) ? "A " + fmtM(g.A) : isFinite(g.R) ? "R " + fmtM(g.R) : ""}</td>`;
+      tr.onclick = () => setPK(g.pk0);
+      tb.append(tr);
+    });
+  }
+
+  // ---- PK actual ----
+  function setPK(pk){
+    const e = ejeCiv(); if (!e) return;
+    const pk0 = e.pk[0], pk1 = e.pk[e.pk.length - 1];
+    CIV.pk = Math.min(pk1, Math.max(pk0, pk));
+    $("civSlider").value = CIV.pk;
+    if (document.activeElement !== $("civPkTxt")) $("civPkTxt").value = formatoPK(CIV.pk);
+    if (CIV.medPK !== CIV.pk){ CIV.meds = []; CIV.medA = null; CIV.medPK = CIV.pk; $("civSecBorrar").hidden = true; }
+    CIV.slice = cortarSeccion(e, CIV.pk);
+    marcadorSeccion(e);
+    if (CIV.camara) camaraEnEje(e);
+    dibujarTodoCiv();
+  }
+  function marcadorSeccion(e){
+    const q = puntoEje(e, CIV.pk), L = Math.hypot(q.tx, q.ty) || 1, nx = q.ty / L, ny = -q.tx / L, o = S.sceneOrigin || [0, 0, 0];
+    const sl = CIV.slice;
+    let z0 = sl && isFinite(sl.zmin) ? sl.zmin - 1 : q.Z - 5, z1 = sl && isFinite(sl.zmax) ? sl.zmax + 1 : q.Z + 5;
+    const P = (off, z) => [q.X + nx * off - o[0], z - o[2], -(q.Y + ny * off - o[1])];
+    const pts = [P(-CIV.W, z0), P(CIV.W, z0), P(CIV.W, z1), P(-CIV.W, z1)].flat();
+    civMarker.geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(pts), 3));
+    civMarker.geometry.computeBoundingSphere();
+    civMarker.visible = CIV.on;
+    requestRender();
+  }
+  function camaraEnEje(e){
+    const q = puntoEje(e, CIV.pk), pk1 = e.pk[e.pk.length - 1];
+    const ade = puntoEje(e, Math.min(pk1, CIV.pk + 25)), o = S.sceneOrigin || [0, 0, 0];
+    let z = rasanteEn(e, CIV.pk); if (!isFinite(z)) z = terrenoEn(e, CIV.pk); if (!isFinite(z)) z = q.Z;
+    let za = rasanteEn(e, Math.min(pk1, CIV.pk + 25)); if (!isFinite(za)) za = z;
+    if (camera === ortho) setOrtho(false);
+    camera.position.set(q.X - o[0], z + 2.2 - o[2], -(q.Y - o[1]));
+    let tx = ade.X - q.X, ty = ade.Y - q.Y;
+    if (Math.hypot(tx, ty) < 0.01){ tx = q.tx; ty = q.ty; }
+    controls.target.set(q.X + tx - o[0], za + 1.2 - o[2], -(q.Y + ty - o[1]));
+    controls.update();
+    requestRender();
+  }
+
+  // ---- Sección: corte de todos los elementos visibles con el plano vertical del PK ----
+  function cortarSeccion(e, pk){
+    const q = puntoEje(e, pk), L = Math.hypot(q.tx, q.ty) || 1;
+    const tx = q.tx / L, ty = q.ty / L, nx = ty, ny = -tx, W = CIV.W;
+    const [px, py] = relPlanta(q.X, q.Y);
+    const grupos = [];
+    let zmin = Infinity, zmax = -Infinity;
+    S.models.forEach(m => {
+      if (!m.ready || !m.visible) return;
+      const B = m.bbox, g = m.group.position;
+      for (let el = 0; el < m.n; el++){
+        const st = stateOf(m, el); if (!st) continue;
+        const i6 = el * 6;
+        const x0 = B[i6] + g.x, x1 = B[i6 + 3] + g.x, y0 = -(B[i6 + 5] + g.z), y1 = -(B[i6 + 2] + g.z);
+        let dmin = Infinity, dmax = -Infinity, omin = Infinity, omax = -Infinity;
+        for (const [cx, cy] of [[x0, y0], [x1, y0], [x0, y1], [x1, y1]]){
+          const d = (cx - px) * tx + (cy - py) * ty, of = (cx - px) * nx + (cy - py) * ny;
+          if (d < dmin) dmin = d; if (d > dmax) dmax = d; if (of < omin) omin = of; if (of > omax) omax = of;
+        }
+        if (dmin > 0 || dmax < 0 || omin > W || omax < -W) continue;
+        const c = m.chunks[m.elC[el]], P = c.pos, F = c.full, col = c.col.array;
+        const t0 = m.elT[el] * 3, t1 = t0 + m.elTN[el] * 3;
+        const segs = [];
+        for (let t = t0; t < t1; t += 3){
+          const v = [F[t] * 3, F[t+1] * 3, F[t+2] * 3];
+          const d = v.map(i => { const r = (P[i] + g.x - px) * tx + (-(P[i+2] + g.z) - py) * ty; return r === 0 ? 1e-9 : r; });
+          if ((d[0] > 0 && d[1] > 0 && d[2] > 0) || (d[0] < 0 && d[1] < 0 && d[2] < 0)) continue;
+          const pts = [];
+          for (let k = 0; k < 3; k++){
+            const a = k, b = (k + 1) % 3;
+            if ((d[a] > 0) === (d[b] > 0)) continue;
+            const s = d[a] / (d[a] - d[b]), ia = v[a], ib = v[b];
+            const x = P[ia] + g.x + (P[ib] - P[ia]) * s, y = -(P[ia+2] + g.z + (P[ib+2] - P[ia+2]) * s), z = P[ia+1] + g.y + (P[ib+1] - P[ia+1]) * s;
+            pts.push((x - px) * nx + (y - py) * ny, z);
+          }
+          if (pts.length < 4) continue;
+          let [o1, z1, o2, z2] = pts;
+          if ((o1 < -W && o2 < -W) || (o1 > W && o2 > W)) continue;
+          const clip = (oa, za, ob, zb, lim) => za + (zb - za) * ((lim - oa) / ((ob - oa) || 1));
+          if (o1 < -W){ z1 = clip(o1, z1, o2, z2, -W); o1 = -W; } else if (o1 > W){ z1 = clip(o1, z1, o2, z2, W); o1 = W; }
+          if (o2 < -W){ z2 = clip(o2, z2, o1, z1, -W); o2 = -W; } else if (o2 > W){ z2 = clip(o2, z2, o1, z1, W); o2 = W; }
+          segs.push(o1, z1, o2, z2);
+          if (z1 < zmin) zmin = z1; if (z2 < zmin) zmin = z2; if (z1 > zmax) zmax = z1; if (z2 > zmax) zmax = z2;
+        }
+        if (!segs.length) continue;
+        const ci = F[t0] * 3;
+        grupos.push({ m, e:el, ghost:st === 2, rgb:[col[ci], col[ci+1], col[ci+2]], lazos:encadenar(segs), cat:catName(m, el) });
+      }
+    });
+    const o = S.sceneOrigin || [0, 0, 0];
+    return { grupos, zmin:zmin + o[2], zmax:zmax + o[2], oz:o[2], px, py, nx, ny, tx, ty, pk };
+  }
+  // Une los segmentos en polilíneas (cerradas si vuelven al inicio)
+  function encadenar(segs){
+    const key = (o, z) => Math.round(o * 1000) + "_" + Math.round(z * 1000);
+    const n = segs.length / 4, usado = new Uint8Array(n), mapa = new Map();
+    for (let i = 0; i < n; i++) for (const end of [0, 1]){
+      const k = key(segs[4*i + 2*end], segs[4*i + 2*end + 1]);
+      let a = mapa.get(k); if (!a){ a = []; mapa.set(k, a); } a.push(i * 2 + end);
+    }
+    const lazos = [];
+    for (let i = 0; i < n; i++){
+      if (usado[i]) continue;
+      usado[i] = 1;
+      const pts = [segs[4*i], segs[4*i+1], segs[4*i+2], segs[4*i+3]];
+      for (const dir of [1, -1]){
+        let guard = 0;
+        while (guard++ < 100000){
+          const lo = dir === 1 ? pts.length - 2 : 0;
+          const k = key(pts[lo], pts[lo + 1]), c = mapa.get(k);
+          let sig = -1;
+          if (c) for (const ref of c){ const j = ref >> 1; if (!usado[j]){ sig = ref; break; } }
+          if (sig < 0) break;
+          const j = sig >> 1, end = sig & 1; usado[j] = 1;
+          const ox = segs[4*j + 2*(1 - end)], oz = segs[4*j + 2*(1 - end) + 1];
+          if (dir === 1) pts.push(ox, oz); else pts.unshift(ox, oz);
+        }
+      }
+      const cerr = pts.length >= 8 && Math.abs(pts[0] - pts[pts.length - 2]) < 0.002 && Math.abs(pts[1] - pts[pts.length - 1]) < 0.002;
+      lazos.push({ pts, cerrado:cerr });
+    }
+    return lazos;
+  }
+
+  // ---- Dibujo ----
+  function lienzo(cv){
+    const r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+    if (cv.width !== w * dpr || cv.height !== h * dpr){ cv.width = w * dpr; cv.height = h * dpr; }
+    const cx = cv.getContext("2d"); cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, w, h);
+    return { cx, w, h };
+  }
+  const css = n => getComputedStyle(document.body).getPropertyValue(n).trim();
+  function pasoBonito(rango, nMax){
+    const raw = rango / Math.max(1, nMax), p = Math.pow(10, Math.floor(Math.log10(raw)));
+    for (const k of [1, 2, 2.5, 5, 10]) if (k * p >= raw) return k * p;
+    return 10 * p;
+  }
+  function dibujarTodoCiv(){
+    if (!CIV.on) return;
+    dibujarPerfil(); dibujarSeccion(); estadoCiv();
+    requestRender();
+  }
+  function estadoCiv(){
+    const e = ejeCiv(); if (!e){ $("civStat").textContent = ""; return; }
+    const r = rasanteEn(e, CIV.pk), t = terrenoEn(e, CIV.pk);
+    const p = [];
+    if (isFinite(r)) p.push("Rasante " + fmtCoord(r));
+    if (isFinite(t)) p.push("Terreno " + fmtCoord(t));
+    if (isFinite(r) && isFinite(t)) p.push((r - t >= 0 ? "Terraplén " : "Desmonte ") + fmtM(Math.abs(r - t)) + " m");
+    const d = 2, pk1 = e.pk[e.pk.length - 1], pk0 = e.pk[0];
+    const ra = rasanteEn(e, Math.max(pk0, CIV.pk - d)), rb = rasanteEn(e, Math.min(pk1, CIV.pk + d));
+    if (isFinite(ra) && isFinite(rb)) p.push("Pendiente " + ((rb - ra) / (Math.min(pk1, CIV.pk + d) - Math.max(pk0, CIV.pk - d)) * 100).toLocaleString("es-ES", { maximumFractionDigits:2 }) + " %");
+    if (CIV.cub) p.push("Desmonte total " + fmtV(CIV.cub.corte) + " m³ · Terraplén total " + fmtV(CIV.cub.relleno) + " m³");
+    $("civStat").textContent = p.join("  ·  ");
+  }
+
+  // Perfil longitudinal
+  function datosPerfil(e){
+    const clave = CIV.eje + "|" + CIV.terreno + "|" + CIV.rasante;
+    if (CIV.perf && CIV.perf.clave === clave) return CIV.perf;
+    const pk0 = e.pk[0], pk1 = e.pk[e.pk.length - 1], n = Math.min(2000, Math.max(200, Math.ceil(pk1 - pk0)));
+    const pks = new Float64Array(n + 1), zr = new Float64Array(n + 1), zt = new Float64Array(n + 1);
+    for (let i = 0; i <= n; i++){ const pk = pk0 + (pk1 - pk0) * i / n; pks[i] = pk; zr[i] = rasanteEn(e, pk); zt[i] = terrenoEn(e, pk); }
+    CIV.perf = { clave, pks, zr, zt };
+    return CIV.perf;
+  }
+  function dibujarPerfil(){
+    const cv = $("civPerfCv"), { cx, w, h } = lienzo(cv), e = ejeCiv();
+    if (!e){ cx.fillStyle = css("--muted"); cx.font = "13px sans-serif"; cx.textAlign = "center"; cx.fillText("Sin ejes de Civil 3D: no hay perfil longitudinal.", w / 2, h / 2); return; }
+    const D = datosPerfil(e), pk0 = e.pk[0], pk1 = e.pk[e.pk.length - 1];
+    if (!CIV.win) CIV.win = [pk0, pk1];
+    const [a, b] = CIV.win;
+    const ml = 54, mr = 12, mt = 30, mb = 46;
+    let zmin = Infinity, zmax = -Infinity;
+    for (let i = 0; i < D.pks.length; i++){
+      if (D.pks[i] < a || D.pks[i] > b) continue;
+      for (const z of [D.zr[i], D.zt[i]]) if (isFinite(z)){ if (z < zmin) zmin = z; if (z > zmax) zmax = z; }
+    }
+    (e.pvis || []).forEach(v => { if (v.pk >= a && v.pk <= b){ zmin = Math.min(zmin, v.z); zmax = Math.max(zmax, v.z); } });
+    if (!isFinite(zmin)){ cx.fillStyle = css("--muted"); cx.font = "13px sans-serif"; cx.fillText("Sin cotas: elige el terreno o un perfil de rasante en Superficies.", 16, h / 2); CIV.perfEsc = null; return; }
+    const sx = (w - ml - mr) / (b - a);
+    let sy;
+    const ex = CIV.exag === "auto" ? null : +CIV.exag;
+    if (ex) sy = sx * ex;
+    else { const pad = Math.max(1, (zmax - zmin) * 0.12); zmin -= pad; zmax += pad; sy = (h - mt - mb) / (zmax - zmin); }
+    const zc = (zmin + zmax) / 2;
+    const X = pk => ml + (pk - a) * sx, Y = z => mt + (h - mt - mb) / 2 - (z - zc) * sy;
+    CIV.perfEsc = { X, a, sx, ml };
+    // rejilla
+    cx.strokeStyle = css("--line"); cx.fillStyle = css("--muted"); cx.font = "11px sans-serif"; cx.lineWidth = 1;
+    const ps = pasoBonito(b - a, Math.max(2, (w - ml) / 90));
+    cx.textAlign = "center";
+    for (let p = Math.ceil(a / ps) * ps; p <= b; p += ps){ const x = X(p); cx.beginPath(); cx.moveTo(x, mt); cx.lineTo(x, h - mb); cx.stroke(); cx.fillText(formatoPK(p, true), x, h - mb + 13); }
+    const zMinVis = zc - (h - mt - mb) / 2 / sy, zMaxVis = zc + (h - mt - mb) / 2 / sy;
+    const zs = pasoBonito(zMaxVis - zMinVis, Math.max(2, (h - mt - mb) / 32));
+    cx.textAlign = "right";
+    for (let z = Math.ceil(zMinVis / zs) * zs; z <= zMaxVis; z += zs){ const y = Y(z); cx.beginPath(); cx.moveTo(ml, y); cx.lineTo(w - mr, y); cx.stroke(); cx.fillText(z.toLocaleString("es-ES", { maximumFractionDigits:2 }), ml - 4, y + 4); }
+    cx.save(); cx.beginPath(); cx.rect(ml, mt, w - ml - mr, h - mt - mb); cx.clip();
+    tramoEnPerfil(cx, X, mt, h, mb, ml, w, mr);
+    // desmonte / terraplén entre terreno y rasante
+    for (let i = 0; i < D.pks.length - 1; i++){
+      const p1 = D.pks[i], p2 = D.pks[i + 1]; if (p2 < a || p1 > b) continue;
+      const r1 = D.zr[i], r2 = D.zr[i + 1], t1 = D.zt[i], t2 = D.zt[i + 1];
+      if (![r1, r2, t1, t2].every(isFinite)) continue;
+      cx.fillStyle = (r1 + r2) / 2 < (t1 + t2) / 2 ? "rgba(214,69,61,.35)" : "rgba(47,154,72,.35)";
+      cx.beginPath(); cx.moveTo(X(p1), Y(r1)); cx.lineTo(X(p2), Y(r2)); cx.lineTo(X(p2), Y(t2)); cx.lineTo(X(p1), Y(t1)); cx.closePath(); cx.fill();
+    }
+    const linea = (zz, color, ancho) => {
+      cx.strokeStyle = color; cx.lineWidth = ancho; cx.beginPath(); let on = false;
+      for (let i = 0; i < D.pks.length; i++){
+        const z = zz[i]; if (!isFinite(z)){ on = false; continue; }
+        const x = X(D.pks[i]), y = Y(z); if (!on){ cx.moveTo(x, y); on = true; } else cx.lineTo(x, y);
+      }
+      cx.stroke();
+    };
+    linea(D.zt, "#8B5A2B", 1.6);
+    linea(D.zr, "#E0B000", 2.2);
+    // vértices del perfil (PVI)
+    cx.font = "10.5px sans-serif"; cx.textAlign = "center";
+    const pv = (e.pvis || []).filter(v => !e.perfilPrincipal || v.perfil === e.perfilPrincipal);
+    pv.forEach((v, i) => {
+      if (v.pk < a || v.pk > b) return;
+      const x = X(v.pk), y = Y(v.z);
+      cx.fillStyle = css("--panel"); cx.strokeStyle = "#7a5c00"; cx.lineWidth = 1.5;
+      cx.beginPath(); cx.arc(x, y, 4, 0, Math.PI * 2); cx.fill(); cx.stroke();
+      cx.fillStyle = css("--ink"); cx.textAlign = i === 0 ? "left" : i === pv.length - 1 ? "right" : "center";
+      cx.fillText((i === 0 ? "Inicio" : i === pv.length - 1 ? "Fin" : "PVI " + i) + "  " + v.z.toLocaleString("es-ES", { maximumFractionDigits:2 }) + (v.kv ? "  Kv " + fmtM(v.kv) : ""), x, y - 9);
+    });
+    cx.restore();
+    // banda de geometría en planta (rectas, clotoides, curvas)
+    const yb = h - 20;
+    (e.geo || []).forEach(g => {
+      const x1 = Math.max(ml, X(g.pk0)), x2 = Math.min(w - mr, X(g.pk0 + g.L)); if (x2 <= x1) return;
+      cx.fillStyle = g.tipo === "Recta" ? "#7DA7D9" : g.tipo === "Clotoide" ? "#B48BD8" : "#E7875A";
+      cx.fillRect(x1, yb - 3, x2 - x1, 6);
+      if (g.tipo === "Curva circular" && isFinite(g.R) && x2 - x1 > 50){ cx.fillStyle = css("--ink"); cx.textAlign = "center"; cx.fillText("R " + fmtM(g.R), (x1 + x2) / 2, yb - 6); }
+    });
+    // PK actual
+    const xk = X(CIV.pk);
+    if (xk >= ml && xk <= w - mr){
+      cx.strokeStyle = CIV_NARANJA; cx.lineWidth = 1.5; cx.beginPath(); cx.moveTo(xk, mt - 4); cx.lineTo(xk, h - mb); cx.stroke();
+      const r = rasanteEn(e, CIV.pk), t = terrenoEn(e, CIV.pk);
+      const txt = "PK " + formatoPK(CIV.pk) + (isFinite(r) ? "  rasante " + r.toLocaleString("es-ES", { maximumFractionDigits:2 }) : "") +
+                  (isFinite(t) ? "  terreno " + t.toLocaleString("es-ES", { maximumFractionDigits:2 }) : "") + (isFinite(r) && isFinite(t) ? "  Δ " + (r - t).toLocaleString("es-ES", { maximumFractionDigits:2 }) : "");
+      cx.font = "bold 11px sans-serif"; const dcha = xk > w / 2, tw = cx.measureText(txt).width, tx0 = dcha ? xk - 6 - tw : xk + 6;
+      cx.fillStyle = css("--panel"); cx.globalAlpha = .85; cx.fillRect(tx0 - 3, mt + 2, tw + 6, 16); cx.globalAlpha = 1;
+      cx.textAlign = "left"; cx.fillStyle = CIV_NARANJA; cx.fillText(txt, tx0, mt + 14);
+    }
+    cx.textAlign = "right"; cx.fillStyle = css("--muted"); cx.font = "10.5px sans-serif";
+    cx.fillText("Exageración vertical ×" + (sy / sx).toLocaleString("es-ES", { maximumFractionDigits:1 }), w - mr, h - 3);
+  }
+
+  // Sección transversal
+  function dibujarSeccion(){
+    const cv = $("civSecCv"), { cx, w, h } = lienzo(cv), e = ejeCiv(), sl = CIV.slice;
+    const info = $("civSecInfo");
+    if (!e || !sl){ info.innerHTML = ""; if (!e){ cx.fillStyle = css("--muted"); cx.font = "13px sans-serif"; cx.textAlign = "center"; cx.fillText("Sin ejes de Civil 3D: no hay secciones.", w / 2, h / 2); } return; }
+    const ml = 48, mr = 10, mt = 30, mb = 36, W = CIV.W;
+    const r = rasanteEn(e, CIV.pk), t = terrenoEn(e, CIV.pk);
+    let zmin = sl.zmin, zmax = sl.zmax;
+    for (const z of [r, t]) if (isFinite(z)){ zmin = Math.min(zmin, z); zmax = Math.max(zmax, z); }
+    if (!isFinite(zmin)){ zmin = 0; zmax = 10; }
+    const sx = (w - ml - mr) / (2 * W);
+    let sy;
+    if (CIV.secExag === "auto"){ const pad = Math.max(0.5, (zmax - zmin) * 0.15); sy = Math.min(sx * 10, Math.max(sx, (h - mt - mb) / (zmax - zmin + 2 * pad))); }
+    else sy = sx * +CIV.secExag;
+    const zc = (zmin + zmax) / 2;
+    const X = o => ml + (o + W) * sx, Y = z => mt + (h - mt - mb) / 2 - (z - zc) * sy;
+    CIV.secEsc = { X, Y, sx, sy, ml, mt, mr, W, zc, w, h, mb };
+    cx.strokeStyle = css("--line"); cx.fillStyle = css("--muted"); cx.font = "11px sans-serif"; cx.lineWidth = 1;
+    const os = pasoBonito(2 * W, Math.max(2, (w - ml) / 70));
+    cx.textAlign = "center";
+    for (let o = Math.ceil(-W / os) * os; o <= W; o += os){ const x = X(o); cx.beginPath(); cx.moveTo(x, mt); cx.lineTo(x, h - mb); cx.stroke(); cx.fillText(o.toLocaleString("es-ES", { maximumFractionDigits:1 }), x, h - mb + 13); }
+    const z0 = zc - (h - mt - mb) / 2 / sy, z1 = zc + (h - mt - mb) / 2 / sy, zs = pasoBonito(z1 - z0, Math.max(2, (h - mt - mb) / 30));
+    cx.textAlign = "right";
+    for (let z = Math.ceil(z0 / zs) * zs; z <= z1; z += zs){ const y = Y(z); cx.beginPath(); cx.moveTo(ml, y); cx.lineTo(w - mr, y); cx.stroke(); cx.fillText(z.toLocaleString("es-ES", { maximumFractionDigits:2 }), ml - 4, y + 4); }
+    cx.save(); cx.beginPath(); cx.rect(ml, mt, w - ml - mr, h - mt - mb); cx.clip();
+    // eje
+    cx.setLineDash([5, 4]); cx.strokeStyle = CIV_NARANJA; cx.beginPath(); cx.moveTo(X(0), mt); cx.lineTo(X(0), h - mb); cx.stroke(); cx.setLineDash([]);
+    // elementos cortados: primero los cerrados (rellenos), luego las líneas
+    const rgb = (g, a) => `rgba(${g.rgb[0]},${g.rgb[1]},${g.rgb[2]},${a})`;
+    const oscuro = g => `rgb(${Math.round(g.rgb[0] * .55)},${Math.round(g.rgb[1] * .55)},${Math.round(g.rgb[2] * .55)})`;
+    for (const pasada of [0, 1]) sl.grupos.forEach(g => {
+      const sel = isSel(g.m, g.e);
+      g.lazos.forEach(l => {
+        if ((pasada === 0) !== l.cerrado) return;
+        const p = l.pts; cx.beginPath(); cx.moveTo(X(p[0]), Y(p[1] + sl.oz));
+        for (let i = 2; i < p.length; i += 2) cx.lineTo(X(p[i]), Y(p[i + 1] + sl.oz));
+        if (l.cerrado){ cx.closePath(); cx.fillStyle = sel ? SEC_SEL : rgb(g, g.ghost ? .15 : .75); cx.fill(); cx.strokeStyle = sel ? SEC_SEL_B : oscuro(g); cx.lineWidth = sel ? 2 : 1; cx.stroke(); }
+        else { cx.strokeStyle = sel ? SEC_SEL : g.ghost ? rgb(g, .4) : oscuro(g); cx.lineWidth = sel ? 3.5 : /superficie|topograf|toposol|terreno/.test(plain(g.cat)) ? 2 : 1.4; cx.stroke(); }
+      });
+    });
+    if (CIV.rot) rotulosSeccion(cx, sl, X, Y);
+    // rasante y terreno en el eje
+    const punto = (z, color, txt, dy) => {
+      if (!isFinite(z)) return;
+      const x = X(0), y = Y(z);
+      cx.fillStyle = color; cx.strokeStyle = "#222"; cx.lineWidth = 1; cx.beginPath(); cx.arc(x, y, 4, 0, Math.PI * 2); cx.fill(); cx.stroke();
+      cx.font = "bold 11px sans-serif"; cx.textAlign = "left"; cx.fillStyle = css("--ink");
+      cx.fillText(txt + " " + z.toLocaleString("es-ES", { minimumFractionDigits:2, maximumFractionDigits:2 }), x + 7, y + dy);
+    };
+    punto(t, "#8B5A2B", "Terreno", 14);
+    punto(r, "#E0B000", "Rasante", -6);
+    cx.restore();
+    cx.textAlign = "left"; cx.fillStyle = css("--muted"); cx.font = "10.5px sans-serif";
+    cx.fillText("Desplazamiento (m)  ·  exageración ×" + (sy / sx).toLocaleString("es-ES", { maximumFractionDigits:1 }), ml, h - 4);
+    // ficha
+    let html = `<b>PK ${formatoPK(CIV.pk)}</b>`;
+    if (isFinite(r)) html += `<br>Rasante ${fmtCoord(r)}`;
+    if (isFinite(t)) html += `<br>Terreno ${fmtCoord(t)}`;
+    if (isFinite(r) && isFinite(t)) html += `<br>${r - t >= 0 ? "Terraplén" : "Desmonte"} ${fmtM(Math.abs(r - t))} m`;
+    const A = supCiv(CIV.terreno), B = supCiv(CIV.rasante);
+    if (A && B){
+      const s = seccion(A, B, sl.px, sl.py, sl.nx, sl.ny, W);
+      html += `<br>Área desmonte ${fmtV(s.corte)} m²<br>Área terraplén ${fmtV(s.relleno)} m²`;
+    }
+    const selG = sl.grupos.filter(g => isSel(g.m, g.e));
+    selG.slice(0, 4).forEach(g => {
+      const q = medidaGrupo(g, sl.oz);
+      html += `<hr><b>${escH(nombreEl(g.m, g.e))}</b>`;
+      const capa = String(cellOf(g.m, g.e, "Capa") || ""), sub = String(cellOf(g.m, g.e, "Subensamblaje") || "");
+      if (sub || capa) html += `<br><span class="muted">${escH([sub, capa].filter(Boolean).join(" · "))}</span>`;
+      if (q.area > 1e-6){
+        html += `<br>Área ${fmtV(q.area)} m² · ancho ${fmtM(q.ancho)} m<br>Espesor medio ${f3(q.area / q.ancho)} m`;
+        if (q.eje) html += `<br>En el eje: sup. ${f3(q.eje[1])} · inf. ${f3(q.eje[0])}<br>Espesor en el eje ${f3(q.eje[1] - q.eje[0])} m`;
+      } else {
+        html += `<br>Longitud en sección ${fmtM(q.lon)} m`;
+        if (q.eje) html += `<br>Cota en el eje ${f3(q.eje[1])}`;
+      }
+    });
+    if (selG.length > 4) html += `<hr>y ${selG.length - 4} más`;
+    info.innerHTML = html;
+    dibujarSecOv();
+  }
+  const f3 = v => v.toLocaleString("es-ES", { minimumFractionDigits:3, maximumFractionDigits:3 });
+  const escH = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+  function nombreEl(m, e){ return String(cellOf(m, e, "Tipo") || cellOf(m, e, "Nombre") || cellOf(m, e, "Familia") || catName(m, e)); }
+  function areaLazo(p){ let a = 0; for (let i = 0, n = p.length; i < n; i += 2){ const j = (i + 2) % n; a += p[i] * p[j + 1] - p[j] * p[i + 1]; } return a / 2; }
+  function dentroLazo(p, o, z){
+    let c = false;
+    for (let i = 0, n = p.length, j = n - 2; i < n; j = i, i += 2){
+      const xi = p[i], zi = p[i + 1], xj = p[j], zj = p[j + 1];
+      if ((zi > z) !== (zj > z) && o < (xj - xi) * (z - zi) / (zj - zi) + xi) c = !c;
+    }
+    return c;
+  }
+  function proySeg(px, py, ax, ay, bx, by){
+    const dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy;
+    let t = L2 ? ((px - ax) * dx + (py - ay) * dy) / L2 : 0; t = Math.max(0, Math.min(1, t));
+    return { t, d:Math.hypot(ax + dx * t - px, ay + dy * t - py) };
+  }
+  // Área, ancho, longitud y cotas en el eje (desplazamiento 0) de un elemento cortado
+  function medidaGrupo(g, oz){
+    let area = 0, lon = 0, omin = Infinity, omax = -Infinity, zlo = Infinity, zhi = -Infinity;
+    g.lazos.forEach(l => {
+      const p = l.pts;
+      if (l.cerrado) area += Math.abs(areaLazo(p));
+      for (let i = 0; i < p.length; i += 2){
+        if (p[i] < omin) omin = p[i]; if (p[i] > omax) omax = p[i];
+        if (i + 3 < p.length){
+          lon += Math.hypot(p[i + 2] - p[i], p[i + 3] - p[i + 1]);
+          const a = p[i], b = p[i + 2];
+          if ((a <= 0 && b >= 0) || (a >= 0 && b <= 0)){
+            const z = Math.abs(b - a) < 1e-9 ? Math.max(p[i + 1], p[i + 3]) : p[i + 1] + (p[i + 3] - p[i + 1]) * (0 - a) / (b - a);
+            if (z < zlo) zlo = z; if (z > zhi) zhi = z;
+          }
+        }
+      }
+    });
+    return { area, lon, ancho:Math.max(1e-6, omax - omin), eje:isFinite(zlo) ? [zlo + oz, zhi + oz] : null };
+  }
+  // Rótulos: cada capa cerrada con su tipo dentro (si cabe) y las superficies junto a su línea
+  function rotulosSeccion(cx, sl, X, Y){
+    const puestos = [], E = CIV.secEsc;
+    const libre = r => r[0] >= E.ml && r[0] + r[2] <= E.w - E.mr && r[1] >= E.mt && r[1] + r[3] <= E.h - E.mb &&
+      !puestos.some(q => r[0] < q[0] + q[2] && q[0] < r[0] + r[2] && r[1] < q[1] + q[3] && q[1] < r[1] + r[3]);
+    cx.font = "10.5px sans-serif"; cx.textAlign = "center"; cx.textBaseline = "middle"; cx.lineJoin = "round";
+    const poner = (txt, x, y) => {
+      const tw = cx.measureText(txt).width, r = [x - tw / 2 - 2, y - 7, tw + 4, 14];
+      if (!libre(r)) return false;
+      puestos.push(r);
+      cx.strokeStyle = "rgba(255,255,255,.85)"; cx.lineWidth = 3; cx.strokeText(txt, x, y);
+      cx.fillStyle = "#1d2228"; cx.fillText(txt, x, y);
+      return true;
+    };
+    const grupos = sl.grupos.filter(g => !g.ghost);
+    // primero las cerradas, de mayor a menor
+    const cerr = [];
+    grupos.forEach(g => g.lazos.forEach(l => { if (l.cerrado) cerr.push({ g, l, a:Math.abs(areaLazo(l.pts)) }); }));
+    cerr.sort((a, b) => b.a - a.a);
+    const hecho = new Set();
+    cerr.forEach(({ g, l }) => {
+      if (hecho.has(g)) return;
+      const p = l.pts; let xa = Infinity, xb = -Infinity, ya = Infinity, yb = -Infinity, cxo = 0, czo = 0, A = 0;
+      for (let i = 0, n = p.length; i < n; i += 2){
+        const x = X(p[i]), y = Y(p[i + 1] + sl.oz); if (x < xa) xa = x; if (x > xb) xb = x; if (y < ya) ya = y; if (y > yb) yb = y;
+        const j = (i + 2) % n, k = p[i] * p[j + 1] - p[j] * p[i + 1]; A += k; cxo += (p[i] + p[j]) * k; czo += (p[i + 1] + p[j + 1]) * k;
+      }
+      if (yb - ya < 9) return;
+      const txt = nombreEl(g.m, g.e), tw = cx.measureText(txt).width;
+      if (tw + 6 > xb - xa) return;
+      const x = A ? X(cxo / (3 * A)) : (xa + xb) / 2, y = A ? Y(czo / (3 * A) + sl.oz) : (ya + yb) / 2;
+      if (poner(txt, x, y)) hecho.add(g);
+    });
+    // superficies y líneas abiertas: junto al tramo más a la derecha que se vea
+    grupos.forEach(g => {
+      if (hecho.has(g) || g.lazos.some(l => l.cerrado)) return;
+      let mejor = null;
+      g.lazos.forEach(l => { const p = l.pts; for (let i = 0; i + 3 < p.length; i += 2){ const xm = (X(p[i]) + X(p[i + 2])) / 2; if (xm < E.w - E.mr - 60 && (!mejor || xm > mejor.x)) mejor = { x:xm, y:(Y(p[i + 1] + sl.oz) + Y(p[i + 3] + sl.oz)) / 2 }; } });
+      if (!mejor) return;
+      const txt = nombreEl(g.m, g.e);
+      if (!poner(txt, mejor.x - cx.measureText(txt).width / 2, mejor.y - 9)) poner(txt, mejor.x - cx.measureText(txt).width / 2, mejor.y + 10);
+    });
+    cx.textBaseline = "alphabetic";
+  }
+  // ---- Capa superior de la sección: elemento bajo el ratón y cotas ----
+  function secMundo(ev){
+    const E = CIV.secEsc, r = $("civSecOv").getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top;
+    return { x, y, o:(x - E.ml) / E.sx - E.W, z:E.zc - (y - E.mt - (E.h - E.mt - E.mb) / 2) / E.sy };
+  }
+  function grupoEn(ev){
+    const sl = CIV.slice, E = CIV.secEsc; if (!sl || !E) return null;
+    const q = secMundo(ev), X = E.X, Y = E.Y, z = q.z - sl.oz;
+    let cerca = null, dc = 5, cercaCerr = false, dentro = null, aMin = Infinity;
+    sl.grupos.forEach(g => g.lazos.forEach(l => {
+      const p = l.pts;
+      for (let i = 0; i + 3 < p.length; i += 2){
+        const d = proySeg(q.x, q.y, X(p[i]), Y(p[i + 1] + sl.oz), X(p[i + 2]), Y(p[i + 3] + sl.oz)).d;
+        if (d < dc){ dc = d; cerca = g; cercaCerr = l.cerrado; }
+      }
+      if (l.cerrado && dentroLazo(p, q.o, z)){ const a = Math.abs(areaLazo(p)); if (a < aMin){ aMin = a; dentro = g; } }
+    }));
+    return cerca && !cercaCerr ? cerca : (dentro || cerca);
+  }
+  function snapSec(ev){
+    const q = secMundo(ev), E = CIV.secEsc, sl = CIV.slice, X = E.X, Y = E.Y;
+    let best = null, bd = 9;
+    const prueba = (o, z) => { const d = Math.hypot(X(o) - q.x, Y(z) - q.y); if (d < bd){ bd = d; best = { o, z, snap:"v" }; } };
+    sl.grupos.forEach(g => g.lazos.forEach(l => { const p = l.pts; for (let i = 0; i < p.length; i += 2) prueba(p[i], p[i + 1] + sl.oz); }));
+    const e = ejeCiv(); if (e) for (const z of [rasanteEn(e, CIV.pk), terrenoEn(e, CIV.pk)]) if (isFinite(z)) prueba(0, z);
+    if (!best){
+      bd = 7;
+      sl.grupos.forEach(g => g.lazos.forEach(l => {
+        const p = l.pts;
+        for (let i = 0; i + 3 < p.length; i += 2){
+          const pr = proySeg(q.x, q.y, X(p[i]), Y(p[i + 1] + sl.oz), X(p[i + 2]), Y(p[i + 3] + sl.oz));
+          if (pr.d < bd){ bd = pr.d; best = { o:p[i] + (p[i + 2] - p[i]) * pr.t, z:p[i + 1] + (p[i + 3] - p[i + 1]) * pr.t + sl.oz, snap:"e" }; }
+        }
+      }));
+    }
+    best = best || { o:q.o, z:q.z, snap:null };
+    if (ev.shiftKey && CIV.medA){   // Mayús: horizontal o vertical
+      if (Math.abs(X(best.o) - X(CIV.medA[0])) > Math.abs(Y(best.z) - Y(CIV.medA[1]))) best = { o:best.o, z:CIV.medA[1], snap:best.snap };
+      else best = { o:CIV.medA[0], z:best.z, snap:best.snap };
+    }
+    return best;
+  }
+  function dibujarCota(cx, mm, X, Y){
+    let [o1, z1] = mm.a, [o2, z2] = mm.b;
+    if (o2 < o1){ [o1, o2] = [o2, o1]; [z1, z2] = [z2, z1]; }
+    const x1 = X(o1), y1 = Y(z1), x2 = X(o2), y2 = Y(z2), dh = o2 - o1, dv = z2 - z1, d = Math.hypot(dh, dv);
+    cx.setLineDash([4, 3]); cx.strokeStyle = "rgba(40,40,40,.5)"; cx.lineWidth = 1;
+    cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(x2, y1); cx.lineTo(x2, y2); cx.stroke(); cx.setLineDash([]);
+    cx.strokeStyle = SEC_MED; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(x2, y2); cx.stroke();
+    cx.fillStyle = SEC_MED; for (const [x, y] of [[x1, y1], [x2, y2]]){ cx.beginPath(); cx.arc(x, y, 3.5, 0, Math.PI * 2); cx.fill(); }
+    if (d < 1e-6) return;
+    const l1 = "d " + f3(d) + " m", l2 = "H " + f3(dh) + " · V " + (dv >= 0 ? "+" : "") + f3(dv) + (dh > 1e-4 ? " · " + (dv / dh * 100).toLocaleString("es-ES", { maximumFractionDigits:2 }) + " %" : "");
+    cx.font = "bold 11px sans-serif"; const w1 = cx.measureText(l1).width; cx.font = "10.5px sans-serif"; const w2 = cx.measureText(l2).width;
+    const bw = Math.max(w1, w2) + 10, xm = (x1 + x2) / 2, ym = (y1 + y2) / 2 - 22;
+    cx.fillStyle = mm.prov ? "rgba(255,255,255,.75)" : "rgba(255,255,255,.93)"; cx.strokeStyle = SEC_MED; cx.lineWidth = 1;
+    cx.beginPath(); cx.rect(xm - bw / 2, ym - 13, bw, 30); cx.fill(); cx.stroke();
+    cx.textAlign = "center"; cx.fillStyle = SEC_MED; cx.font = "bold 11px sans-serif"; cx.fillText(l1, xm, ym);
+    cx.fillStyle = "#333"; cx.font = "10.5px sans-serif"; cx.fillText(l2, xm, ym + 13);
+  }
+  function dibujarSecOv(){
+    const cv = $("civSecOv"), { cx, w, h } = lienzo(cv), E = CIV.secEsc, sl = CIV.slice;
+    if (!E || !sl || !CIV.on) return;
+    const X = E.X, Y = E.Y;
+    cx.save(); cx.beginPath(); cx.rect(E.ml, E.mt, w - E.ml - E.mr, h - E.mt - E.mb); cx.clip();
+    if (CIV.hov && !CIV.med){
+      cx.strokeStyle = "#F2B705"; cx.lineWidth = 3;
+      CIV.hov.lazos.forEach(l => { const p = l.pts; cx.beginPath(); cx.moveTo(X(p[0]), Y(p[1] + sl.oz)); for (let i = 2; i < p.length; i += 2) cx.lineTo(X(p[i]), Y(p[i + 1] + sl.oz)); if (l.cerrado) cx.closePath(); cx.stroke(); });
+    }
+    CIV.meds.forEach(mm => dibujarCota(cx, mm, X, Y));
+    if (CIV.med){
+      const hp = CIV.hovPt;
+      if (CIV.medA && hp) dibujarCota(cx, { a:CIV.medA, b:[hp.o, hp.z], prov:true }, X, Y);
+      if (hp){
+        const x = X(hp.o), y = Y(hp.z); cx.strokeStyle = SEC_MED; cx.lineWidth = 1.5;
+        if (hp.snap === "v") cx.strokeRect(x - 5, y - 5, 10, 10);
+        else if (hp.snap === "e"){ cx.beginPath(); cx.moveTo(x - 5, y - 5); cx.lineTo(x + 5, y + 5); cx.moveTo(x + 5, y - 5); cx.lineTo(x - 5, y + 5); cx.stroke(); }
+        else { cx.beginPath(); cx.arc(x, y, 4, 0, Math.PI * 2); cx.stroke(); }
+      }
+    }
+    cx.restore();
+  }
+  function setSecMed(on){
+    CIV.med = on; CIV.medA = null; CIV.hovPt = null; CIV.hov = null;
+    $("civSecMed").setAttribute("aria-pressed", String(on));
+    $("civSecOv").classList.toggle("med", on);
+    dibujarSecOv();
+  }
+  function civSelCambio(){
+    document.body.classList.toggle("civsel", selCount() > 0);
+    if (CIV.on && CIV.slice) dibujarSeccion();
+  }
+
+  // ---- Planta (segundo render de la misma escena, cámara cenital) ----
+  function initPlanta(){
+    if (planR) return;
+    planR = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+    planR.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    planR.localClippingEnabled = true;
+    planR.domElement.className = "civ-gl";
+    $("civPlan").insertBefore(planR.domElement, $("civPlanOv"));
+    $("civPlan").insertBefore(ortoImg, $("civPlanOv"));
+    planCam = new THREE.OrthographicCamera(-50, 50, 50, -50, 1, 4e5);
+    planCam.up.set(0, 0, -1);
+    new ResizeObserver(() => { const r = $("civPlan").getBoundingClientRect(); if (r.width && r.height){ planR.setSize(r.width, r.height, false); camaraPlanta(); requestRender(); } }).observe($("civPlan"));
+    const ov = $("civPlanOv");
+    let arr = null;
+    ov.addEventListener("pointerdown", ev => { arr = { x:ev.clientX, y:ev.clientY, cx:PV.cx, cz:PV.cz, mov:false }; ov.setPointerCapture(ev.pointerId); });
+    ov.addEventListener("pointermove", ev => {
+      const rr = ov.getBoundingClientRect(), u = (PV.half * 2) / rr.height;
+      if (arr){
+        const dx = ev.clientX - arr.x, dy = ev.clientY - arr.y;
+        if (Math.hypot(dx, dy) > 3) arr.mov = true;
+        PV.cx = arr.cx - dx * u; PV.cz = arr.cz - dy * u; camaraPlanta(); requestRender();
+      }
+      const w = planAmundo(ev.clientX - rr.left, ev.clientY - rr.top, rr), o = S.sceneOrigin || [0, 0, 0];
+      const X = w.x + o[0], Y = -w.z + o[1];
+      $("civPlanPos").textContent = "X " + fmtCoord(X) + "  Y " + fmtCoord(Y) + (EJES.list.length ? "  ·  " + textoPK(X, Y) : "");
+    });
+    ov.addEventListener("pointerup", ev => {
+      const a = arr; arr = null;
+      if (!a || a.mov) return;
+      const rr = ov.getBoundingClientRect(), e = ejeCiv(); if (!e) return;
+      const w = planAmundo(ev.clientX - rr.left, ev.clientY - rr.top, rr), o = S.sceneOrigin || [0, 0, 0];
+      const r = pkDe(w.x + o[0], -w.z + o[1]);
+      if (r && r.eje === e && r.dist / ((PV.half * 2) / rr.height) < 40) setPK(r.pk);
+    });
+    ov.addEventListener("wheel", ev => {
+      ev.preventDefault();
+      const rr = ov.getBoundingClientRect(), mx = ev.clientX - rr.left, my = ev.clientY - rr.top;
+      const antes = planAmundo(mx, my, rr), f = ev.deltaY > 0 ? 1.2 : 1 / 1.2;
+      PV.half = Math.min(2e5, Math.max(2, PV.half * f));
+      const desp = planAmundo(mx, my, rr);
+      PV.cx += antes.x - desp.x; PV.cz += antes.z - desp.z;
+      camaraPlanta(); requestRender();
+    }, { passive:false });
+    ov.addEventListener("dblclick", encuadrarPlanta);
+  }
+  function camaraPlanta(){
+    if (!planCam) return;
+    const r = $("civPlan").getBoundingClientRect(), asp = r.width / Math.max(1, r.height);
+    planCam.left = -PV.half * asp; planCam.right = PV.half * asp; planCam.top = PV.half; planCam.bottom = -PV.half;
+    planCam.position.set(PV.cx, 2e5, PV.cz); planCam.lookAt(PV.cx, 0, PV.cz);
+    planCam.updateProjectionMatrix();
+  }
+  function planAmundo(mx, my, rr){
+    const asp = rr.width / Math.max(1, rr.height);
+    return { x:PV.cx + (mx / rr.width * 2 - 1) * PV.half * asp, z:PV.cz + (my / rr.height * 2 - 1) * PV.half };
+  }
+  function encuadrarPlanta(){
+    const e = ejeCiv(), o = S.sceneOrigin || [0, 0, 0];
+    let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+    if (e){ for (let i = 0; i < e.pk.length; i++){ const x = e.X[i] - o[0], z = -(e.Y[i] - o[1]); x0 = Math.min(x0, x); x1 = Math.max(x1, x); z0 = Math.min(z0, z); z1 = Math.max(z1, z); } }
+    else if (!S.bounds.isEmpty()){ x0 = S.bounds.min.x; x1 = S.bounds.max.x; z0 = S.bounds.min.z; z1 = S.bounds.max.z; }
+    else return;
+    const r = $("civPlan").getBoundingClientRect(), asp = r.width / Math.max(1, r.height);
+    PV.cx = (x0 + x1) / 2; PV.cz = (z0 + z1) / 2;
+    PV.half = Math.max(10, Math.max((z1 - z0) / 2, (x1 - x0) / 2 / Math.max(asp, 0.1)) * 1.15 + CIV.W * 0.5);
+    camaraPlanta(); requestRender();
+  }
+  function renderPlanta(){
+    if (!CIV.on || !planR) return;
+    const bgPlan = scene.background, bajo = ortoDebajo();
+    if (bajo){ scene.background = null; planR.setClearColor(0x000000, 0); }
+    planR.render(scene, planCam);
+    if (bajo) scene.background = bgPlan;
+    const ov = $("civPlanOv"), { cx, w, h } = lienzo(ov), e = ejeCiv(), o = S.sceneOrigin || [0, 0, 0];
+    const aPant = (X, Y) => { const v = new THREE.Vector3(X - o[0], 0, -(Y - o[1])).project(planCam); return [(v.x + 1) / 2 * w, (1 - v.y) / 2 * h]; };
+    ortoPlanta(aPant, w, h);
+    const pxm = h / (PV.half * 2);
+    if (e){
+      // PK rotulados en planta
+      const paso = PK_PASOS.find(p => p * pxm >= 80) || PK_PASOS[PK_PASOS.length - 1];
+      const pk0 = e.pk[0], pk1 = e.pk[e.pk.length - 1];
+      cx.font = "bold 10.5px sans-serif"; cx.lineWidth = 1.5;
+      for (let pk = Math.ceil(pk0 / paso - 1e-9) * paso; pk <= pk1 + 1e-6; pk += paso){
+        const q = puntoEje(e, pk), L = Math.hypot(q.tx, q.ty) || 1, nx = q.ty / L, ny = -q.tx / L;
+        const [x, y] = aPant(q.X, q.Y), [xa, ya] = aPant(q.X + nx * 6 / pxm, q.Y + ny * 6 / pxm), [xb, yb] = aPant(q.X - nx * 6 / pxm, q.Y - ny * 6 / pxm);
+        if (x < -40 || x > w + 40 || y < -40 || y > h + 40) continue;
+        cx.strokeStyle = "#D62F6E"; cx.beginPath(); cx.moveTo(xa, ya); cx.lineTo(xb, yb); cx.stroke();
+        const ang = Math.atan2(yb - ya, xb - xa);
+        cx.save(); cx.translate(xa, ya); cx.rotate(ang + Math.PI); cx.fillStyle = "#D62F6E"; cx.textAlign = "left"; cx.fillText(formatoPK(pk, true), 4, 4); cx.restore();
+      }
+      tramoEnPlanta(cx, e, aPant);
+      // sección actual
+      const q = puntoEje(e, CIV.pk), L = Math.hypot(q.tx, q.ty) || 1, nx = q.ty / L, ny = -q.tx / L;
+      const [x1, y1] = aPant(q.X - nx * CIV.W, q.Y - ny * CIV.W), [x2, y2] = aPant(q.X + nx * CIV.W, q.Y + ny * CIV.W), [xc, yc] = aPant(q.X, q.Y);
+      cx.strokeStyle = CIV_NARANJA; cx.lineWidth = 2.5; cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(x2, y2); cx.stroke();
+      cx.fillStyle = CIV_NARANJA; cx.beginPath(); cx.arc(xc, yc, 4.5, 0, Math.PI * 2); cx.fill();
+      cx.font = "bold 12px sans-serif"; cx.textAlign = "left"; cx.fillText("PK " + formatoPK(CIV.pk), x2 + 6, y2);
+      const [ax, ay] = aPant(e.X[0], e.Y[0]);
+      cx.fillStyle = "#D62F6E"; cx.font = "bold 12px sans-serif"; cx.fillText(e.nombre, ax + 8, ay - 8);
+    }
+    // norte y escala
+    cx.fillStyle = css("--ink"); cx.strokeStyle = css("--ink"); cx.lineWidth = 1.5;
+    cx.beginPath(); cx.moveTo(w - 22, 40); cx.lineTo(w - 28, 56); cx.lineTo(w - 22, 52); cx.lineTo(w - 16, 56); cx.closePath(); cx.fill();
+    cx.font = "bold 11px sans-serif"; cx.textAlign = "center"; cx.fillText("N", w - 22, 36);
+    const esc = pasoBonito(120 / pxm, 1), lpx = esc * pxm;
+    cx.beginPath(); cx.moveTo(14, h - 26); cx.lineTo(14 + lpx, h - 26); cx.moveTo(14, h - 30); cx.lineTo(14, h - 22); cx.moveTo(14 + lpx, h - 30); cx.lineTo(14 + lpx, h - 22); cx.stroke();
+    cx.textAlign = "left"; cx.font = "11px sans-serif"; cx.fillText(fmtM(esc).replace(/,00$/, "") + " m", 18 + lpx, h - 22);
+    if (ORTO.on && ORTO.error){
+      cx.font = "bold 11px sans-serif"; const txt = "Ortofoto: las coordenadas de los modelos no son UTM (ver pestaña Ortofoto)", tw = cx.measureText(txt).width;
+      cx.fillStyle = "rgba(255,240,235,.95)"; cx.strokeStyle = "#C0392B"; cx.lineWidth = 1;
+      cx.fillRect(w - tw - 14, h - 20, tw + 10, 16); cx.strokeRect(w - tw - 14, h - 20, tw + 10, 16);
+      cx.fillStyle = "#A93226"; cx.textAlign = "right"; cx.fillText(txt, w - 9, h - 8);
+    } else if (ORTO.on && ORTO.cita && !ortoImg.hidden){
+      cx.font = "10px sans-serif"; const tw = cx.measureText(ORTO.cita).width;
+      cx.fillStyle = "rgba(255,255,255,.8)"; cx.fillRect(w - tw - 10, h - 16, tw + 8, 14);
+      cx.fillStyle = "#333"; cx.textAlign = "right"; cx.fillText(ORTO.cita, w - 6, h - 5);
+    }
+  }
+
+  // ---- Reproducir el recorrido ----
+  function civPlay(on){
+    CIV.play = on;
+    $("civPlay").textContent = on ? "❚❚" : "▶";
+    cancelAnimationFrame(CIV.raf);
+    if (!on) return;
+    CIV.last = 0;
+    const paso = t => {
+      if (!CIV.play) return;
+      const e = ejeCiv(); if (!e){ civPlay(false); return; }
+      const dt = CIV.last ? Math.min(0.1, (t - CIV.last) / 1000) : 0; CIV.last = t;
+      const pk1 = e.pk[e.pk.length - 1];
+      setPK(CIV.pk + CIV.vel * dt);
+      if (CIV.pk >= pk1 - 1e-6){ civPlay(false); return; }
+      CIV.raf = requestAnimationFrame(paso);
+    };
+    CIV.raf = requestAnimationFrame(paso);
+  }
+
+  // ---- Activar / desactivar ----
+  function setCivil(on){
+    CIV.on = on;
+    document.body.classList.toggle("civil", on);
+    ["civPlan", "civPerfil", "civSec", "civBar", "civPanel"].forEach(id => $(id).hidden = !on);
+    if (!on){ civPlay(false); civMarker.visible = false; requestRender(); return; }
+    initPlanta(); pintarOrto();
+    setTimeout(() => { refreshCivil(); if (!ejeCiv()) encuadrarPlanta(); requestRender(); }, 0);
+  }
+
+  // ---- Eventos ----
+  $("civEje").addEventListener("change", e => { CIV.eje = +e.target.value; CIV.perf = null; CIV.cub = null; refreshCivil(); if ($("mScope").value === "tramo") sincronizarTramoMedicion(false); });
+  $("civTerreno").addEventListener("change", e => { CIV.terreno = e.target.value; CIV.perf = null; CIV.cub = null; setPK(CIV.pk); pintarCubicacion(); });
+  $("civRasante").addEventListener("change", e => { CIV.rasante = e.target.value; CIV.perf = null; CIV.cub = null; setPK(CIV.pk); pintarCubicacion(); });
+  $("civW").addEventListener("change", e => { const v = parseFloat(String(e.target.value).replace(",", ".")); if (v > 0){ CIV.W = Math.min(500, v); setPK(CIV.pk); if (CIV.tramo) sincronizarTramoMedicion(false); } });
+  $("civExag").addEventListener("change", e => { CIV.exag = e.target.value; dibujarPerfil(); });
+  $("civSecExag").addEventListener("change", e => { CIV.secExag = e.target.value; dibujarSeccion(); });
+  $("civSlider").addEventListener("input", e => setPK(+e.target.value));
+  $("civPkTxt").addEventListener("change", e => {
+    const s = String(e.target.value).trim().replace(/\s/g, ""), m = /^(-?\d+)\+(\d+(?:[.,]\d+)?)$/.exec(s);
+    const v = m ? (+m[1]) * 1000 + parseFloat(m[2].replace(",", ".")) : parseFloat(s.replace(/\./g, "").replace(",", "."));
+    if (isFinite(v)) setPK(v);
+    e.target.value = formatoPK(CIV.pk);
+  });
+  const pasoPK = () => { const e = ejeCiv(); if (!e) return 20; const L = e.pk[e.pk.length - 1] - e.pk[0]; return L > 2000 ? 50 : L > 500 ? 20 : 10; };
+  $("civPrev").addEventListener("click", () => setPK(Math.ceil(CIV.pk / pasoPK() - 1e-6) * pasoPK() - pasoPK()));
+  $("civNext").addEventListener("click", () => setPK(Math.floor(CIV.pk / pasoPK() + 1e-6) * pasoPK() + pasoPK()));
+  $("civPlay").addEventListener("click", () => { const e = ejeCiv(); if (e && !CIV.play && CIV.pk >= e.pk[e.pk.length - 1] - 1e-6) setPK(e.pk[0]); civPlay(!CIV.play); });
+  $("civVel").addEventListener("change", e => CIV.vel = +e.target.value);
+  $("civCam").addEventListener("change", e => { CIV.camara = e.target.checked; const ej = ejeCiv(); if (CIV.camara && ej) camaraEnEje(ej); });
+  $("civPlanFit").addEventListener("click", encuadrarPlanta);
+  $("civPanel").querySelectorAll("[data-ct]").forEach(b => b.addEventListener("click", () => {
+    CIV.tab = b.dataset.ct;
+    $("civPanel").querySelectorAll("[data-ct]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    ["geo", "sup", "cub", "orto"].forEach(k => $("civTab_" + k).hidden = k !== CIV.tab);
+  }));
+  // Perfil: clic = PK; arrastrar = desplazar; rueda = zoom; doble clic = todo
+  (() => {
+    const cv = $("civPerfCv"); let arr = null;
+    cv.addEventListener("pointerdown", ev => { arr = { x:ev.clientX, win:CIV.win ? CIV.win.slice() : null, mov:false }; cv.setPointerCapture(ev.pointerId); });
+    cv.addEventListener("pointermove", ev => {
+      if (!arr || !CIV.perfEsc || !arr.win) return;
+      const dx = ev.clientX - arr.x; if (Math.abs(dx) > 3) arr.mov = true;
+      if (!arr.mov) return;
+      const e = ejeCiv(), d = dx / CIV.perfEsc.sx, pk0 = e.pk[0], pk1 = e.pk[e.pk.length - 1], L = arr.win[1] - arr.win[0];
+      let a = arr.win[0] - d; a = Math.max(pk0, Math.min(pk1 - L, a)); CIV.win = [a, a + L]; dibujarPerfil();
+    });
+    cv.addEventListener("pointerup", ev => {
+      const a = arr; arr = null; if (!a || a.mov || !CIV.perfEsc) return;
+      const r = cv.getBoundingClientRect(), E = CIV.perfEsc;
+      setPK(E.a + (ev.clientX - r.left - E.ml) / E.sx);
+    });
+    cv.addEventListener("wheel", ev => {
+      ev.preventDefault(); const e = ejeCiv(); if (!e || !CIV.perfEsc) return;
+      const r = cv.getBoundingClientRect(), E = CIV.perfEsc, pkc = E.a + (ev.clientX - r.left - E.ml) / E.sx;
+      const pk0 = e.pk[0], pk1 = e.pk[e.pk.length - 1], f = ev.deltaY > 0 ? 1.25 : 0.8;
+      let [a, b] = CIV.win; a = pkc - (pkc - a) * f; b = pkc + (b - pkc) * f;
+      if (b - a > pk1 - pk0){ a = pk0; b = pk1; } if (b - a < 10){ const m = (a + b) / 2; a = m - 5; b = m + 5; }
+      if (a < pk0){ b += pk0 - a; a = pk0; } if (b > pk1){ a -= b - pk1; b = pk1; }
+      CIV.win = [Math.max(pk0, a), Math.min(pk1, b)]; dibujarPerfil();
+    }, { passive:false });
+    cv.addEventListener("dblclick", () => { CIV.win = null; dibujarPerfil(); });
+    $("civPerfFit").addEventListener("click", () => { CIV.win = null; dibujarPerfil(); });
+    // Sección: lectura de desplazamiento y cota, elemento bajo el ratón, clic = propiedades, medir
+    const sc = $("civSecOv"); let bajo = null;
+    sc.addEventListener("pointermove", ev => {
+      const E = CIV.secEsc; if (!E || !CIV.slice) return;
+      let q = secMundo(ev), txt;
+      if (CIV.med){
+        const p = CIV.hovPt = snapSec(ev); CIV.hov = null;
+        txt = "Desplazamiento " + fmtM(p.o) + " m  ·  cota " + f3(p.z) + (p.snap === "v" ? "  (vértice)" : p.snap === "e" ? "  (borde)" : "");
+      } else {
+        const g = grupoEn(ev); CIV.hov = g; sc.classList.toggle("sobre", !!g);
+        txt = "Desplazamiento " + fmtM(q.o) + " m  ·  cota " + q.z.toLocaleString("es-ES", { minimumFractionDigits:2, maximumFractionDigits:2 }) + (g ? "  ·  " + nombreEl(g.m, g.e) : "");
+      }
+      $("civSecPos").textContent = txt;
+      dibujarSecOv();
+    });
+    sc.addEventListener("pointerleave", () => { $("civSecPos").textContent = ""; CIV.hov = null; CIV.hovPt = null; dibujarSecOv(); });
+    sc.addEventListener("pointerdown", ev => { if (ev.button === 0) bajo = { x:ev.clientX, y:ev.clientY }; });
+    sc.addEventListener("pointerup", ev => {
+      const b = bajo; bajo = null;
+      if (!b || Math.hypot(ev.clientX - b.x, ev.clientY - b.y) > 4 || !CIV.slice || !CIV.secEsc) return;
+      if (CIV.med){
+        const p = snapSec(ev);
+        if (!CIV.medA) CIV.medA = [p.o, p.z];
+        else { CIV.meds.push({ a:CIV.medA, b:[p.o, p.z] }); CIV.medA = null; $("civSecBorrar").hidden = false; }
+        dibujarSecOv(); return;
+      }
+      const g = grupoEn(ev), ctrl = ev.ctrlKey || ev.metaKey;
+      if (!g){ if (!ctrl) select(null); return; }
+      const q = secMundo(ev), sl = CIV.slice;
+      const hit = { m:g.m, e:g.e, point:new THREE.Vector3(sl.px + sl.nx * q.o, q.z - sl.oz, -(sl.py + sl.ny * q.o)) };
+      if (ctrl) toggleSel(hit); else select(hit);
+    });
+    sc.addEventListener("contextmenu", ev => {
+      if (!CIV.med && !CIV.meds.length) return;
+      ev.preventDefault();
+      if (CIV.medA) CIV.medA = null; else CIV.meds.pop();
+      $("civSecBorrar").hidden = !CIV.meds.length; dibujarSecOv();
+    });
+    $("civSecMed").addEventListener("click", () => setSecMed(!CIV.med));
+    $("civSecFicha").addEventListener("click", () => { const on = $("civSecFicha").getAttribute("aria-pressed") !== "true"; $("civSecFicha").setAttribute("aria-pressed", String(on)); $("civSecInfo").classList.toggle("oculta", !on); });
+    $("civSecRot").addEventListener("click", () => { CIV.rot = !CIV.rot; $("civSecRot").setAttribute("aria-pressed", String(CIV.rot)); dibujarSeccion(); });
+    $("civSecBorrar").addEventListener("click", () => { CIV.meds = []; CIV.medA = null; $("civSecBorrar").hidden = true; dibujarSecOv(); });
+    $("propClose").addEventListener("click", () => select(null));
+    new ResizeObserver(() => { if (CIV.on){ dibujarPerfil(); dibujarSeccion(); } }).observe($("civPerfil"));
+    new ResizeObserver(() => { if (CIV.on) dibujarSeccion(); }).observe($("civSec"));
+  })();
+  window.addEventListener("keydown", ev => {
+    if (!CIV.on || WALK.on || DIM.on || ev.target.matches("input, select, textarea")) return;
+    if (ev.key === "Escape" && CIV.med){ ev.preventDefault(); ev.stopImmediatePropagation(); if (CIV.medA){ CIV.medA = null; dibujarSecOv(); } else setSecMed(false); return; }
+    if (ev.key === "ArrowRight"){ ev.preventDefault(); $("civNext").click(); }
+    else if (ev.key === "ArrowLeft"){ ev.preventDefault(); $("civPrev").click(); }
+  });
+
+  // ---- Cubicación por secciones a lo largo del eje ----
+  function pintarCubicacion(){
+    const box = $("civCubRes"), ok = !!(supCiv(CIV.terreno) && supCiv(CIV.rasante));
+    $("civCubGo").disabled = !ok;
+    $("civCubXls").disabled = !CIV.cub;
+    if (!ok){ box.innerHTML = `<p class="muted">Elige en Superficies el terreno y una superficie de rasante (o de fondo de excavación) para cubicar.</p>`; return; }
+    if (!CIV.cub){ box.innerHTML = ""; return; }
+    const r = CIV.cub;
+    box.innerHTML = `<p><b>Desmonte</b> ${fmtV(r.corte)} m³<br><b>Terraplén</b> ${fmtV(r.relleno)} m³</p>
+      <div class="civ-cubt"><table><thead><tr><th>PK</th><th class="num">Desm.<br>m²</th><th class="num">Terr.<br>m²</th><th class="num">Desm. m³<br>a origen</th><th class="num">Terr. m³<br>a origen</th></tr></thead><tbody>` +
+      r.filas.map(f => `<tr data-pk="${f.pk}"><td>${formatoPK(f.pk)}</td><td class="num">${fmtV(f.ac)}</td><td class="num">${fmtV(f.ar)}</td><td class="num">${fmtV(f.cc)}</td><td class="num">${fmtV(f.cr)}</td></tr>`).join("") +
+      `</tbody></table></div>`;
+    box.querySelectorAll("tr[data-pk]").forEach(tr => tr.onclick = () => setPK(+tr.dataset.pk));
+  }
+  $("civCubGo").addEventListener("click", async () => {
+    const e = ejeCiv(), A = supCiv(CIV.terreno), B = supCiv(CIV.rasante); if (!e || !A || !B) return;
+    const paso = parseFloat(String($("civPaso").value).replace(",", ".")) || 20;
+    $("civCubGo").disabled = true;
+    const r = await volumenSecciones(A, B, e, paso, CIV.W, p => $("civCubRes").innerHTML = `<p class="muted">Calculando… ${Math.round(p * 100)} %</p>`, tramoCiv());
+    const nom = s => { const o = $("civTerreno").querySelector(`option[value="${s}"]`) || $("civRasante").querySelector(`option[value="${s}"]`); return o ? o.textContent : s; };
+    Object.assign(r, { ini:nom(CIV.terreno), fin:nom(CIV.rasante), fe:1, fc:1, metodo:"Secciones por PK (prismoide) en " + e.nombre + (CIV.tramo ? ", PK " + formatoPK(tramoCiv()[0]) + " a " + formatoPK(tramoCiv()[1]) : "") + ", cada " + fmtM(paso) + " m, ancho ±" + fmtM(CIV.W) + " m" });
+    CIV.cub = r;
+    pintarCubicacion(); estadoCiv();
+    $("civCubGo").disabled = false;
+  });
+  $("civCubXls").addEventListener("click", () => { if (CIV.cub) exportarVolumen(CIV.cub); });
+
+  function civRefrescarCorte(){ if (!CIV.on) return; clearTimeout(CIV.tmr); CIV.tmr = setTimeout(() => setPK(CIV.pk), 60); }
+  // ===================== Civil: tramo de PK, medición por tramo, imprimir secciones y ortofoto =====================
+  // ---- Tramo de PK del panel Civil (cubicación, medición e impresión) ----
+  CIV.tramo = null;   // [a, b]; null = todo el eje
+  function leerPK(s){
+    s = String(s == null ? "" : s).trim().replace(/\s/g, "");
+    if (!s) return NaN;
+    const m = /^(-?\d+)\+(\d+(?:[.,]\d+)?)$/.exec(s);
+    return m ? (+m[1]) * 1000 + parseFloat(m[2].replace(",", ".")) : parseFloat(s.replace(/\./g, "").replace(",", "."));
+  }
+  function numCiv(s, def){ const v = parseFloat(String(s).replace(/\./g, "").replace(",", ".")); return isFinite(v) && v > 0 ? v : def; }
+  function tramoCiv(){
+    const e = ejeCiv(); if (!e) return null;
+    const pk0 = e.pk[0], pk1 = e.pk[e.pk.length - 1];
+    if (!CIV.tramo) return [pk0, pk1];
+    const a = Math.max(pk0, Math.min(CIV.tramo[0], CIV.tramo[1])), b = Math.min(pk1, Math.max(CIV.tramo[0], CIV.tramo[1]));
+    return b > a ? [a, b] : [pk0, pk1];
+  }
+  function pintarTramo(){
+    const t = tramoCiv(); if (!t) return;
+    $("civTrA").value = formatoPK(t[0]); $("civTrB").value = formatoPK(t[1]);
+    $("civTrTodo").disabled = !CIV.tramo;
+  }
+  function cambiarTramo(){
+    const e = ejeCiv(); if (!e) return;
+    const a = leerPK($("civTrA").value), b = leerPK($("civTrB").value), pk0 = e.pk[0], pk1 = e.pk[e.pk.length - 1];
+    CIV.tramo = isFinite(a) && isFinite(b) && Math.abs(b - a) > 0.01 ? [Math.max(pk0, Math.min(a, b)), Math.min(pk1, Math.max(a, b))] : null;
+    if (CIV.tramo && CIV.tramo[0] <= pk0 + 1e-6 && CIV.tramo[1] >= pk1 - 1e-6) CIV.tramo = null;
+    CIV.cub = null; pintarCubicacion(); pintarTramo(); dibujarPerfil(); requestRender();
+    sincronizarTramoMedicion(true);
+  }
+  // El tramo del panel Civil manda en la Medición: al poner un tramo se mide solo ese tramo; con "Todo" se vuelve a medir todo
+  function sincronizarTramoMedicion(avisar){
+    const t = tramoCiv(); if (!t) return;
+    TR.eje = CIV.eje; TR.a = t[0]; TR.b = t[1]; TR.dist = Math.max(5, CIV.W);
+    const sc = $("mScope");
+    if (CIV.tramo){
+      if (sc.value !== "tramo"){ CIV.ambitoPrevio = sc.value; sc.value = "tramo"; }
+      if (avisar) toast("La Medición mide ahora solo el tramo PK " + formatoPK(t[0]) + " a " + formatoPK(t[1]) + " (±" + fmtM(TR.dist) + " m del eje).");
+    } else if (sc.value === "tramo"){ sc.value = CIV.ambitoPrevio && CIV.ambitoPrevio !== "tramo" ? CIV.ambitoPrevio : "all"; CIV.ambitoPrevio = null; }
+    pintarTramoMedicion();
+    if (MS.open) refreshMeasure();
+  }
+  $("civTrB").addEventListener("change", cambiarTramo);
+  $("civTrTodo").addEventListener("click", () => { CIV.tramo = null; CIV.cub = null; pintarCubicacion(); pintarTramo(); dibujarPerfil(); requestRender(); sincronizarTramoMedicion(false); });
+  // tramo en el perfil: lo de fuera, sombreado
+  function tramoEnPerfil(cx, X, mt, h, mb, ml, w, mr){
+    if (!CIV.tramo) return;
+    const t = tramoCiv(), xa = Math.max(ml, X(t[0])), xb = Math.min(w - mr, X(t[1]));
+    cx.fillStyle = "rgba(60,70,80,.10)";
+    if (xa > ml) cx.fillRect(ml, mt, xa - ml, h - mt - mb);
+    if (xb < w - mr) cx.fillRect(xb, mt, w - mr - xb, h - mt - mb);
+    cx.strokeStyle = "#1E88E5"; cx.lineWidth = 1.2; cx.setLineDash([5, 3]);
+    for (const x of [X(t[0]), X(t[1])]) if (x >= ml && x <= w - mr){ cx.beginPath(); cx.moveTo(x, mt); cx.lineTo(x, h - mb); cx.stroke(); }
+    cx.setLineDash([]);
+  }
+  // tramo en la planta: el eje resaltado entre los dos PK
+  function tramoEnPlanta(cx, e, aPant){
+    if (!CIV.tramo) return;
+    const t = tramoCiv();
+    cx.strokeStyle = "rgba(30,136,229,.55)"; cx.lineWidth = 9; cx.lineCap = "round"; cx.beginPath();
+    let pr = true;
+    const paso = Math.max(0.5, (t[1] - t[0]) / 400);
+    for (let pk = t[0]; pk <= t[1] + 1e-6; pk += paso){ const q = puntoEje(e, Math.min(pk, t[1])), [x, y] = aPant(q.X, q.Y); if (pr){ cx.moveTo(x, y); pr = false; } else cx.lineTo(x, y); }
+    cx.stroke(); cx.lineCap = "butt";
+  }
+
+  // ---- Medición por tramo de PK: parte proporcional de cada elemento entre los dos PK ----
+  const TR = { eje:-1, a:NaN, b:NaN, dist:50, ckey:"", fkey:"", I:null, vpk:null, fr:null };
+  function indiceEje(e, dist, o){
+    const n = e.pk.length, xs = new Float64Array(n), ys = new Float64Array(n);
+    for (let i = 0; i < n; i++){ xs[i] = e.X[i] - o[0]; ys[i] = e.Y[i] - o[1]; }
+    const cel = Math.max(10, dist), grid = new Map(), K = (gx, gy) => (gx + 50000) * 100000 + (gy + 50000);
+    for (let i = 0; i < n - 1; i++){
+      const x0 = Math.floor((Math.min(xs[i], xs[i + 1]) - dist) / cel), x1 = Math.floor((Math.max(xs[i], xs[i + 1]) + dist) / cel);
+      const y0 = Math.floor((Math.min(ys[i], ys[i + 1]) - dist) / cel), y1 = Math.floor((Math.max(ys[i], ys[i + 1]) + dist) / cel);
+      for (let gx = x0; gx <= x1; gx++) for (let gy = y0; gy <= y1; gy++){ const k = K(gx, gy); let l = grid.get(k); if (!l){ l = []; grid.set(k, l); } l.push(i); }
+    }
+    return { xs, ys, cel, grid, n, K };
+  }
+  // PK del punto (x, y relativos al origen) sobre el eje; NaN si está a más de dist o antes del inicio / después del final
+  function pkSobreEje(I, e, dist, x, y){
+    const L = I.grid.get(I.K(Math.floor(x / I.cel), Math.floor(y / I.cel)));
+    if (!L) return NaN;
+    let bd = dist * dist, pk = NaN;
+    for (let j = 0; j < L.length; j++){
+      const i = L[j], ax = I.xs[i], ay = I.ys[i], dx = I.xs[i + 1] - ax, dy = I.ys[i + 1] - ay, L2 = dx * dx + dy * dy;
+      let t = L2 ? ((x - ax) * dx + (y - ay) * dy) / L2 : 0;
+      if (t < 0){ if (i === 0) continue; t = 0; } else if (t > 1){ if (i === I.n - 2) continue; t = 1; }
+      const px = ax + dx * t - x, py = ay + dy * t - y, d2 = px * px + py * py;
+      if (d2 <= bd){ bd = d2; pk = e.pk[i] + (e.pk[i + 1] - e.pk[i]) * t; }
+    }
+    return pk;
+  }
+  // Fracción del área de un triángulo en la que una función lineal (valores p en los vértices) cae en [lo, hi)
+  function cdfTri(p1, p2, p3, t){
+    if (t <= p1) return 0; if (t >= p3) return 1;
+    const d = p3 - p1;
+    if (t <= p2) return p2 > p1 ? (t - p1) * (t - p1) / (d * (p2 - p1)) : 0;
+    return p3 > p2 ? 1 - (p3 - t) * (p3 - t) / (d * (p3 - p2)) : 1;
+  }
+  function fracLineal(a, b, c, lo, hi){
+    if (a > b){ const t = a; a = b; b = t; } if (b > c){ const t = b; b = c; c = t; } if (a > b){ const t = a; a = b; b = t; }
+    if (c - a < 1e-9) return a >= lo && a < hi ? 1 : 0;
+    return Math.max(0, cdfTri(a, b, c, hi) - cdfTri(a, b, c, lo));
+  }
+  function fraccionesTramo(){
+    const e = EJES.list[TR.eje]; if (!e || !(TR.b > TR.a)) return null;
+    const o = S.sceneOrigin || [0, 0, 0];
+    const ck = TR.eje + "|" + e.nombre + "|" + TR.dist + "|" + S.models.map(m => m.id + ":" + (m.ready ? 1 : 0)).join(",");
+    if (TR.ckey !== ck){ TR.ckey = ck; TR.vpk = new Map(); TR.I = indiceEje(e, TR.dist, o); TR.fkey = ""; }
+    const fk = TR.a + "|" + TR.b;
+    if (TR.fkey === fk && TR.fr) return TR.fr;
+    TR.fkey = fk; TR.fr = new Map();
+    const lo = TR.a, hi = TR.b;
+    S.models.forEach(m => {
+      if (!m.ready) return;
+      let V = TR.vpk.get(m.id);
+      const g = m.group.position;
+      if (!V){
+        V = m.chunks.map(c => { const P = c.pos, n = P.length / 3, A = new Float32Array(n); for (let v = 0; v < n; v++) A[v] = pkSobreEje(TR.I, e, TR.dist, P[3 * v] + g.x, -(P[3 * v + 2] + g.z)); return A; });
+        TR.vpk.set(m.id, V);
+      }
+      const F = new Float32Array(m.n), C = new Uint8Array(m.n);
+      for (let el = 0; el < m.n; el++){
+        const ci = m.elC[el], c = m.chunks[ci]; if (!c) continue;
+        const A = V[ci], P = c.pos, I = c.full, t0 = m.elT[el] * 3, t1 = t0 + m.elTN[el] * 3;
+        let at = 0, ad = 0, av = 0, sp = 0;
+        for (let t = t0; t < t1; t += 3){
+          const i0 = I[t], i1 = I[t + 1], i2 = I[t + 2];
+          const ux = P[3*i1] - P[3*i0], uy = P[3*i1+1] - P[3*i0+1], uz = P[3*i1+2] - P[3*i0+2];
+          const vx = P[3*i2] - P[3*i0], vy = P[3*i2+1] - P[3*i0+1], vz = P[3*i2+2] - P[3*i0+2];
+          const ar = 0.5 * Math.hypot(uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx);
+          if (!(ar > 0)) continue;
+          at += ar;
+          const p0 = A[i0], p1 = A[i1], p2 = A[i2], nn = (p0 !== p0) + (p1 !== p1) + (p2 !== p2);
+          if (nn >= 2) continue;
+          if (nn === 1){ const pm = p0 !== p0 ? (p1 + p2) / 2 : p1 !== p1 ? (p0 + p2) / 2 : (p0 + p1) / 2; av += ar; sp += ar * pm; if (pm >= lo && pm < hi) ad += ar; continue; }
+          av += ar; sp += ar * (p0 + p1 + p2) / 3;
+          ad += ar * fracLineal(p0, p1, p2, lo, hi);
+        }
+        if (!(at > 0)) continue;
+        F[el] = Math.min(1, ad / at);
+        const pc = av > 0 ? sp / av : NaN;
+        C[el] = av > at * 0.5 && pc >= lo && pc < hi ? 1 : 0;
+      }
+      TR.fr.set(m.id, { F, C });
+    });
+    return TR.fr;
+  }
+  function textoTramo(){
+    const e = EJES.list[TR.eje];
+    return e ? "el tramo PK " + formatoPK(TR.a) + " a " + formatoPK(TR.b) + " de " + e.nombre + " (±" + fmtM(TR.dist) + " m)" : "un tramo (sin eje)";
+  }
+  function pintarTramoMedicion(){
+    const bar = $("mTramo"), on = $("mScope").value === "tramo";
+    bar.hidden = !on; if (!on) return;
+    const se = $("mTrEje");
+    if (se.options.length !== EJES.list.length || [...se.options].some((op, i) => op.textContent !== EJES.list[i].nombre)){
+      se.innerHTML = ""; EJES.list.forEach((e, i) => se.append(new Option(e.nombre, i)));
+    }
+    $("mTrVacio").hidden = EJES.list.length > 0;
+    if (!EJES.list.length) return;
+    if (!EJES.list[TR.eje]){ TR.eje = EJES.list[CIV.eje] ? CIV.eje : 0; TR.a = NaN; }
+    const e = EJES.list[TR.eje];
+    if (!isFinite(TR.a) || !isFinite(TR.b)){ TR.a = e.pk[0]; TR.b = e.pk[e.pk.length - 1]; }
+    se.value = TR.eje; $("mTrA").value = formatoPK(TR.a); $("mTrB").value = formatoPK(TR.b); $("mTrD").value = fmtM(TR.dist).replace(/,00$/, "");
+  }
+  function cambiarTramoMedicion(){
+    const nuevoEje = +$("mTrEje").value;
+    if (nuevoEje !== TR.eje){ TR.eje = nuevoEje; TR.a = NaN; TR.b = NaN; }
+    else {
+      const a = leerPK($("mTrA").value), b = leerPK($("mTrB").value);
+      if (isFinite(a) && isFinite(b) && b !== a){ TR.a = Math.min(a, b); TR.b = Math.max(a, b); }
+    }
+    TR.dist = numCiv($("mTrD").value, TR.dist);
+    // y al revés: si es el eje del panel Civil, el tramo también se ve en la planta y el perfil
+    if (TR.eje === CIV.eje && ejeCiv() && EJES.list[TR.eje] === ejeCiv() && isFinite(TR.a)){
+      const e = ejeCiv(), full = TR.a <= e.pk[0] + 1e-6 && TR.b >= e.pk[e.pk.length - 1] - 1e-6;
+      CIV.tramo = full ? null : [TR.a, TR.b]; CIV.cub = null;
+      if (CIV.on){ pintarTramo(); pintarCubicacion(); dibujarPerfil(); requestRender(); }
+    }
+    pintarTramoMedicion(); refreshMeasure();
+  }
+  ["mTrEje", "mTrA", "mTrB", "mTrD"].forEach(id => $(id).addEventListener("change", cambiarTramoMedicion));
+  $("mScope").addEventListener("change", pintarTramoMedicion);
+  $("civMedTramo").addEventListener("click", () => {
+    const t = tramoCiv(); if (!t) return;
+    TR.eje = CIV.eje; TR.a = t[0]; TR.b = t[1]; TR.dist = Math.max(5, CIV.W);
+    if ($("mScope").value !== "tramo") CIV.ambitoPrevio = $("mScope").value;
+    $("mScope").value = "tramo"; pintarTramoMedicion();
+    if (MS.open) refreshMeasure(); else setMeasure(true);
+  });
+
+  // ---- Imprimir secciones (PDF / DXF) ----
+  const JSPDF_URL = "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js";
+  let jspdfProm = null;
+  function cargarJsPDF(){
+    if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+    if (!jspdfProm) jspdfProm = new Promise((ok, ko) => {
+      const s = document.createElement("script"); s.src = JSPDF_URL; s.async = true;
+      s.onload = () => window.jspdf && window.jspdf.jsPDF ? ok(window.jspdf.jsPDF) : ko(new Error("jsPDF no disponible"));
+      s.onerror = () => { jspdfProm = null; ko(new Error("No se pudo cargar la librería de PDF (¿sin conexión?)")); };
+      document.head.append(s);
+    });
+    return jspdfProm;
+  }
+  const PAPEL = { a3h:[420, 297, "a3", "l", "A3 horizontal"], a4h:[297, 210, "a4", "l", "A4 horizontal"], a4v:[210, 297, "a4", "p", "A4 vertical"], a1h:[841, 594, "a1", "l", "A1 horizontal"] };
+  const PASOS_BONITOS = [0.1, 0.2, 0.25, 0.5, 1, 2, 2.5, 5, 10, 20, 25, 50, 100, 200, 500];
+  const pasoMin = (minMm, k) => PASOS_BONITOS.find(p => p * k >= minMm) || 500;
+  const nf = (v, d) => v.toLocaleString("es-ES", { minimumFractionDigits:d, maximumFractionDigits:d, useGrouping:false });
+  const aclarar = (c, f) => c.map(v => Math.round(v + (255 - v) * f));
+  const oscurecer = (c, f) => c.map(v => Math.round(v * f));
+
+  // Recorta un polígono cerrado (Sutherland-Hodgman) o una polilínea (Liang-Barsky por tramos) a un rectángulo
+  function recortarPoli(pts, cerrado, R){
+    if (cerrado){
+      let P = pts;
+      const lados = [[p => p[0] >= R[0], (a, b) => { const t = (R[0] - a[0]) / (b[0] - a[0]); return [R[0], a[1] + (b[1] - a[1]) * t]; }],
+                     [p => p[0] <= R[2], (a, b) => { const t = (R[2] - a[0]) / (b[0] - a[0]); return [R[2], a[1] + (b[1] - a[1]) * t]; }],
+                     [p => p[1] >= R[1], (a, b) => { const t = (R[1] - a[1]) / (b[1] - a[1]); return [a[0] + (b[0] - a[0]) * t, R[1]]; }],
+                     [p => p[1] <= R[3], (a, b) => { const t = (R[3] - a[1]) / (b[1] - a[1]); return [a[0] + (b[0] - a[0]) * t, R[3]]; }]];
+      for (const [dentro, corte] of lados){
+        if (!P.length) break;
+        const Q = [];
+        for (let i = 0; i < P.length; i++){
+          const a = P[(i + P.length - 1) % P.length], b = P[i], da = dentro(a), db = dentro(b);
+          if (db){ if (!da) Q.push(corte(a, b)); Q.push(b); } else if (da) Q.push(corte(a, b));
+        }
+        P = Q;
+      }
+      return P.length >= 3 ? [P] : [];
+    }
+    const out = []; let cur = null;
+    for (let i = 0; i + 1 < pts.length; i++){
+      let [x0, y0] = pts[i], [x1, y1] = pts[i + 1], t0 = 0, t1 = 1;
+      const dx = x1 - x0, dy = y1 - y0, p = [-dx, dx, -dy, dy], q = [x0 - R[0], R[2] - x0, y0 - R[1], R[3] - y0];
+      let ok = true;
+      for (let k = 0; k < 4; k++){
+        if (Math.abs(p[k]) < 1e-12){ if (q[k] < 0){ ok = false; break; } continue; }
+        const r = q[k] / p[k];
+        if (p[k] < 0){ if (r > t1){ ok = false; break; } if (r > t0) t0 = r; } else { if (r < t0){ ok = false; break; } if (r < t1) t1 = r; }
+      }
+      if (!ok){ cur = null; continue; }
+      const a = [x0 + dx * t0, y0 + dy * t0], b = [x0 + dx * t1, y0 + dy * t1];
+      if (cur && t0 === 0) cur.push(b); else { cur = [a, b]; out.push(cur); }
+      if (t1 < 1) cur = null;
+    }
+    return out;
+  }
+
+  // Datos de cada sección: corte, cotas, áreas y guitarra
+  function datosSeccionImp(e, pk, op){
+    const Wprev = CIV.W; CIV.W = op.W;
+    let sl; try { sl = cortarSeccion(e, pk); } finally { CIV.W = Wprev; }
+    const grupos = sl.grupos.filter(g => !g.ghost);
+    let zmin = Infinity, zmax = -Infinity;
+    grupos.forEach(g => g.lazos.forEach(l => { for (let i = 1; i < l.pts.length; i += 2){ const z = l.pts[i] + sl.oz; if (z < zmin) zmin = z; if (z > zmax) zmax = z; } }));
+    const zr = rasanteEn(e, pk), zt = terrenoEn(e, pk);
+    for (const z of [zr, zt]) if (isFinite(z)){ zmin = Math.min(zmin, z); zmax = Math.max(zmax, z); }
+    const A = supCiv(CIV.terreno), B = supCiv(CIV.rasante);
+    const areas = op.areas && A && B ? seccion(A, B, sl.px, sl.py, sl.nx, sl.ny, op.W) : null;
+    const capas = [];
+    if (op.capas) grupos.forEach(g => { const q = medidaGrupo(g, sl.oz); if (q.area > 1e-4) capas.push([nombreEl(g.m, g.e), q.area]); });
+    const gu = [];
+    if (op.guitarra){
+      const k = 1000 / op.escala, paso = Math.max(op.gpaso, pasoMin(9, k));
+      for (let o = -Math.floor(op.W / paso) * paso; o <= op.W + 1e-6; o += paso){
+        const x = sl.px + sl.nx * o, y = sl.py + sl.ny * o;
+        const t = A ? cotaSuperficie(A, x, y) : (Math.abs(o) < 1e-6 ? zt : NaN);
+        const r = B ? cotaSuperficie(B, x, y) : (Math.abs(o) < 1e-6 ? zr : NaN);
+        gu.push([o, t, r]);
+      }
+    }
+    return { pk, sl, grupos, zmin, zmax, zr, zt, areas, capas, gu, conRas:!!B || isFinite(zr) };
+  }
+
+  // Maqueta: tamaño de cada sección en mm de papel y reparto en columnas y hojas
+  function maquetar(lista, op){
+    const P = PAPEL[op.papel], M = 8, CAJ = 16;
+    const util = { x:M + 2, y:M + 2, w:P[0] - 2 * M - 4, h:P[1] - 2 * M - CAJ - 6 };
+    const k = 1000 / op.escala, kv = k * op.exag;
+    const LM = 17, RM = 3, TH = 7, GH = op.guitarra ? (lista.some(s => s.conRas) ? 3 : 2) * 4.2 : 0;
+    const cajas = lista.map(s => {
+      let zmin = isFinite(s.zmin) ? s.zmin : (isFinite(s.zr) ? s.zr - 1 : 0), zmax = isFinite(s.zmax) ? s.zmax : zmin + 2;
+      const zs = pasoMin(6, kv);
+      let zb = Math.floor((zmin - 0.3) / zs) * zs, zt = Math.ceil((zmax + 0.3) / zs) * zs;
+      if (zt - zb < 2 * zs) zt = zb + 2 * zs;
+      const nAreas = (s.areas ? 1 : 0) + (s.capas.length ? Math.ceil(s.capas.length / Math.max(1, Math.floor((2 * op.W * k) / 45))) : 0);
+      const AH = nAreas * 3.6 + (nAreas ? 1 : 0);
+      const hMax = util.h - TH - GH - AH - 2;
+      let recortada = false;
+      if ((zt - zb) * kv > hMax){
+        const span = Math.floor(hMax / kv / zs) * zs, ref = isFinite(s.zr) ? s.zr : isFinite(s.zt) ? s.zt : (zmin + zmax) / 2;
+        zb = Math.floor((ref - span / 2) / zs) * zs; zt = zb + span; recortada = true;
+      }
+      const ph = (zt - zb) * kv;
+      return { s, zb, zt, zs, ph, w:LM + 2 * op.W * k + RM, h:TH + ph + GH + AH + 2, recortada, AH };
+    });
+    const ancho = Math.max(...cajas.map(c => c.w));
+    if (ancho > util.w) throw new Error("La sección no cabe en el papel a esta escala: elige una escala menor (1:" + (op.escala * 2) + "), menos ancho o un papel mayor.");
+    const hojas = []; let hoja = null, col = 0, y = 0;
+    const nuevaHoja = () => { hoja = []; hojas.push(hoja); col = 0; y = 0; };
+    nuevaHoja();
+    const nCols = Math.max(1, Math.floor((util.w + 8) / (ancho + 8)));
+    cajas.forEach(c => {
+      if (y > 0 && y + c.h > util.h){ col++; y = 0; }
+      if (col >= nCols){ nuevaHoja(); }
+      c.x = util.x + col * (ancho + 8) + (ancho - c.w) / 2; c.y = util.y + y;
+      hoja.push(c); y += c.h + 5;
+    });
+    return { hojas, P, M, CAJ, util, k, kv, LM, RM, TH, GH };
+  }
+
+  // Dibuja una hoja con un "lápiz" (PDF o DXF): mismo dibujo para los dos
+  function dibujarHoja(pen, L, hoja, nHoja, op, e){
+    const { P, M, CAJ, k, kv, LM, TH } = L;
+    pen.rect(M, M, P[0] - 2 * M, P[1] - 2 * M, { capa:"MARCO", w:0.5, color:[0, 0, 0] });
+    // cajetín
+    const yc = P[1] - M - CAJ, xc0 = M, wc = P[0] - 2 * M;
+    pen.line(xc0, yc, xc0 + wc, yc, { capa:"MARCO", w:0.35, color:[0, 0, 0] });
+    const celdas = [["Proyecto", op.proyecto || "—", 0.30], ["Plano", "Secciones transversales · " + e.nombre, 0.27], ["Tramo", "PK " + formatoPK(op.a) + " a " + formatoPK(op.b), 0.15],
+                    ["Escala", "1:" + op.escala + (op.exag !== 1 ? "  (V ×" + op.exag + ")" : ""), 0.11], ["Hoja", nHoja + " de " + op.nHojas, 0.07], ["Fecha", new Date().toLocaleDateString("es-ES"), 0.10]];
+    let xx = xc0;
+    celdas.forEach(([t, v, f], i) => {
+      const cw = wc * f;
+      if (i) pen.line(xx, yc, xx, yc + CAJ, { capa:"MARCO", w:0.25, color:[0, 0, 0] });
+      pen.text(t.toUpperCase(), xx + 2, yc + 4, 5, { capa:"MARCO-TEXTO", color:[110, 110, 110] });
+      pen.text(pen.ajustar(v, 8, cw - 4), xx + 2, yc + 10.5, 8, { capa:"MARCO-TEXTO", color:[0, 0, 0], negrita:i === 1 });
+      xx += cw;
+    });
+    pen.text("BECSA · Visor BIM", P[0] - M - 2, yc + CAJ - 1.6, 4.5, { capa:"MARCO-TEXTO", color:[150, 150, 150], align:"right" });
+    hoja.forEach(c => dibujarSeccionImp(pen, L, c, op));
+  }
+  function dibujarSeccionImp(pen, L, c, op){
+    const { k, kv, LM, TH, GH } = L, s = c.s, W = op.W;
+    const px0 = c.x + LM, py0 = c.y + TH, pw = 2 * W * k, ph = c.ph;
+    const X = o => px0 + (o + W) * k, Y = z => py0 + (c.zt - z) * kv;
+    const R = [px0, py0, px0 + pw, py0 + ph];
+    pen.text("PK " + formatoPK(s.pk), px0 + pw / 2, c.y + 4.6, 8.5, { capa:"TEXTO", color:[0, 0, 0], negrita:true, align:"center" });
+    if (c.recortada) pen.text("(alzado recortado)", px0 + pw, c.y + 4.6, 5, { capa:"TEXTO", color:[150, 60, 60], align:"right" });
+    // cuadrícula
+    const gris = { capa:"CUADRICULA", w:0.08, color:[200, 205, 210] };
+    for (let z = c.zb; z <= c.zt + 1e-6; z += c.zs){
+      pen.line(px0, Y(z), px0 + pw, Y(z), gris);
+      if (z === c.zb) pen.text("P.C. " + nf(z, 2), px0 - 1, Y(z) + 1, 5, { capa:"CUADRICULA-TEXTO", color:[0, 0, 0], align:"right", negrita:true });
+      else pen.text(nf(z, c.zs < 1 ? 2 : 1), px0 - 1, Y(z) + 1, 5, { capa:"CUADRICULA-TEXTO", color:[90, 90, 90], align:"right" });
+    }
+    const os = pasoMin(10, k);
+    for (let o = -Math.floor(W / os) * os; o <= W + 1e-6; o += os) pen.line(X(o), py0, X(o), py0 + ph, gris);
+    pen.rect(px0, py0, pw, ph, { capa:"CUADRICULA", w:0.15, color:[120, 125, 130] });
+    // elementos cortados
+    const capaDe = g => "SEC-" + nombreEl(g.m, g.e);
+    for (const pasada of [0, 1]) s.grupos.forEach(g => g.lazos.forEach(l => {
+      if ((pasada === 0) !== l.cerrado) return;
+      const pts = []; for (let i = 0; i < l.pts.length; i += 2) pts.push([X(l.pts[i]), Y(l.pts[i + 1] + s.sl.oz)]);
+      if (l.cerrado && pts.length > 3){ const a = pts[0], b = pts[pts.length - 1]; if (Math.abs(a[0] - b[0]) < 1e-6 && Math.abs(a[1] - b[1]) < 1e-6) pts.pop(); }
+      const rgb = g.rgb.map(v => v);
+      recortarPoli(pts, l.cerrado, R).forEach(q => {
+        if (l.cerrado) pen.poly(q, true, { capa:capaDe(g), w:0.12, color:oscurecer(rgb, 0.55), fill:aclarar(rgb, 0.45) });
+        else pen.poly(q, false, { capa:capaDe(g), w:/superficie|topograf|toposol|terreno/.test(plain(g.cat)) ? 0.3 : 0.22, color:oscurecer(rgb, 0.6) });
+      });
+    }));
+    // eje
+    pen.line(X(0), py0, X(0), py0 + ph, { capa:"EJE", w:0.18, color:[214, 47, 47], dash:true });
+    pen.text("EJE", X(0), py0 - 0.8, 4.5, { capa:"EJE", color:[214, 47, 47], align:"center" });
+    // rótulos de capas
+    if (op.rotulos){
+      const puestos = [], libre = r => r[0] >= R[0] && r[2] <= R[2] && r[1] >= R[1] && r[3] <= R[3] && !puestos.some(q => r[0] < q[2] && q[0] < r[2] && r[1] < q[3] && q[1] < r[3]);
+      const cerr = [];
+      s.grupos.forEach(g => g.lazos.forEach(l => { if (l.cerrado) cerr.push({ g, l, a:Math.abs(areaLazo(l.pts)) }); }));
+      cerr.sort((a, b) => b.a - a.a);
+      const hecho = new Set(), T = 5;
+      cerr.forEach(({ g, l }) => {
+        if (hecho.has(g)) return;
+        const p = l.pts; let xa = Infinity, xb = -Infinity, ya = Infinity, yb = -Infinity, cxo = 0, czo = 0, A = 0;
+        for (let i = 0, n = p.length; i < n; i += 2){
+          const x = X(p[i]), y = Y(p[i + 1] + s.sl.oz); xa = Math.min(xa, x); xb = Math.max(xb, x); ya = Math.min(ya, y); yb = Math.max(yb, y);
+          const j = (i + 2) % n, kk = p[i] * p[j + 1] - p[j] * p[i + 1]; A += kk; cxo += (p[i] + p[j]) * kk; czo += (p[i + 1] + p[j + 1]) * kk;
+        }
+        const txt = nombreEl(g.m, g.e), tw = pen.ancho(txt, T);
+        if (yb - ya < 2 || tw + 1.5 > xb - xa) return;
+        const x = A ? X(cxo / (3 * A)) : (xa + xb) / 2, y = A ? Y(czo / (3 * A) + s.sl.oz) : (ya + yb) / 2, r = [x - tw / 2, y - 1.2, x + tw / 2, y + 1.2];
+        if (!libre(r)) return;
+        puestos.push(r); hecho.add(g);
+        pen.text(txt, x, y + 0.9, T, { capa:"ROTULOS", color:[20, 25, 30], align:"center" });
+      });
+      s.grupos.forEach(g => {
+        if (hecho.has(g) || g.lazos.some(l => l.cerrado)) return;
+        let mejor = null;
+        g.lazos.forEach(l => { const p = l.pts; for (let i = 0; i + 3 < p.length; i += 2){ const xm = (X(p[i]) + X(p[i + 2])) / 2; if (xm < R[2] - 14 && xm > R[0] + 2 && (!mejor || xm > mejor.x)) mejor = { x:xm, y:(Y(p[i + 1] + s.sl.oz) + Y(p[i + 3] + s.sl.oz)) / 2 }; } });
+        if (!mejor) return;
+        const txt = nombreEl(g.m, g.e), tw = pen.ancho(txt, T);
+        for (const dy of [-1.6, 2.8]){ const r = [mejor.x - tw, mejor.y + dy - 2, mejor.x, mejor.y + dy + 0.5]; if (libre(r)){ puestos.push(r); pen.text(txt, mejor.x, mejor.y + dy, T, { capa:"ROTULOS", color:[60, 60, 60], align:"right" }); break; } }
+      });
+    }
+    // rasante y terreno en el eje
+    if (op.cotasEje){
+      const marca = (z, color, txt, dy) => {
+        if (!isFinite(z) || z < c.zb || z > c.zt) return;
+        pen.circulo(X(0), Y(z), 0.55, { capa:"COTAS", color });
+        pen.text(txt + " " + nf(z, 3), X(0) + 1.4, Y(z) + dy, 5.5, { capa:"COTAS", color:[0, 0, 0], negrita:true });
+      };
+      marca(s.zr, [224, 176, 0], "Ras.", -1);
+      marca(s.zt, [139, 90, 43], "Ter.", 2.6);
+    }
+    // guitarra
+    let y = py0 + ph;
+    if (op.guitarra && s.gu.length){
+      const filas = [["Dist. eje", 0], ["Terreno", 1]].concat(L.GH > 9 ? [["Rasante", 2]] : []);
+      filas.forEach(([t, idx], fi) => {
+        const y0 = y + fi * 4.2;
+        pen.line(c.x + 1, y0 + 4.2, px0 + pw, y0 + 4.2, { capa:"GUITARRA", w:0.1, color:[150, 150, 150] });
+        pen.text(t, c.x + 1, y0 + 3, 4.8, { capa:"GUITARRA", color:[80, 80, 80] });
+        s.gu.forEach(gv => {
+          const v = gv[idx]; if (!isFinite(v)) return;
+          pen.text(idx === 0 ? nf(v, 1) : nf(v, 2), X(gv[0]), y0 + 3, 4.8, { capa:"GUITARRA", color:[0, 0, 0], align:"center" });
+        });
+      });
+      s.gu.forEach(gv => pen.line(X(gv[0]), y, X(gv[0]), y + 0.9, { capa:"GUITARRA", w:0.1, color:[120, 120, 120] }));
+      y += L.GH;
+    }
+    // áreas
+    y += 3.4;
+    if (s.areas){ pen.text("Desmonte " + nf(s.areas.corte, 2) + " m²   ·   Terraplén " + nf(s.areas.relleno, 2) + " m²", px0, y, 6, { capa:"AREAS", color:[0, 0, 0], negrita:true }); y += 3.6; }
+    if (s.capas.length){
+      let linea = "";
+      const flush = () => { if (linea){ pen.text(linea, px0, y, 5.2, { capa:"AREAS", color:[50, 50, 50] }); y += 3.6; linea = ""; } };
+      s.capas.forEach(([n, a]) => { const t = n + " " + nf(a, 2) + " m²"; const nueva = linea ? linea + "  ·  " + t : t; if (pen.ancho(nueva, 5.2) > pw && linea){ flush(); linea = t; } else linea = nueva; });
+      flush();
+    }
+  }
+
+  // Lápiz PDF (jsPDF, mm, y hacia abajo)
+  function lapizPDF(doc){
+    const col = (st, f) => { if (st.color) doc.setDrawColor(st.color[0], st.color[1], st.color[2]); if (f) doc.setFillColor(f[0], f[1], f[2]); doc.setLineWidth(st.w || 0.1); doc.setLineDashPattern(st.dash ? [2.4, 0.8, 0.4, 0.8] : [], 0); };
+    const ajustar = (t, size, max) => { doc.setFontSize(size); if (doc.getTextWidth(t) <= max) return t; while (t.length > 3 && doc.getTextWidth(t + "…") > max) t = t.slice(0, -1); return t + "…"; };
+    return {
+      line(x1, y1, x2, y2, st){ col(st); doc.line(x1, y1, x2, y2); },
+      rect(x, y, w, h, st){ col(st); doc.rect(x, y, w, h, "S"); },
+      poly(pts, cerrado, st){
+        if (pts.length < 2) return;
+        col(st, st.fill);
+        doc.moveTo(pts[0][0], pts[0][1]);
+        for (let i = 1; i < pts.length; i++) doc.lineTo(pts[i][0], pts[i][1]);
+        if (cerrado){ doc.close(); if (st.fill) doc.fillStroke(); else doc.stroke(); } else doc.stroke();
+      },
+      circulo(x, y, r, st){ doc.setFillColor(st.color[0], st.color[1], st.color[2]); doc.setDrawColor(30, 30, 30); doc.setLineWidth(0.1); doc.setLineDashPattern([], 0); doc.circle(x, y, r, "FD"); },
+      text(t, x, y, size, st){
+        t = String(t);
+        doc.setFont("helvetica", st.negrita ? "bold" : "normal"); doc.setFontSize(size); doc.setTextColor(st.color[0], st.color[1], st.color[2]);
+        if (!t.includes("²")){ doc.text(t, x, y, { align:st.align || "left" }); return; }
+        // el ² de las fuentes estándar del PDF no sale: se escribe un 2 pequeño elevado
+        const partes = t.split("²"), sub = size * 0.62;
+        const anchoSub = () => { doc.setFontSize(sub); const a = doc.getTextWidth("2"); doc.setFontSize(size); return a; };
+        const as = anchoSub(); let total = 0; partes.forEach((p, i) => { total += doc.getTextWidth(p) + (i < partes.length - 1 ? as : 0); });
+        let xx = st.align === "center" ? x - total / 2 : st.align === "right" ? x - total : x;
+        partes.forEach((p, i) => {
+          doc.setFontSize(size); if (p) doc.text(p, xx, y); xx += doc.getTextWidth(p) + 0.12;
+          if (i < partes.length - 1){ doc.setFontSize(sub); doc.text("2", xx, y - size * 0.3528 * 0.38); xx += as; doc.setFontSize(size); }
+        });
+      },
+      ancho(t, size){ doc.setFont("helvetica", "normal"); doc.setFontSize(size); return doc.getTextWidth(String(t)); },
+      ajustar
+    };
+  }
+
+  // Lápiz DXF (R12 ASCII): en metros reales (1 unidad = 1 m de obra), hojas una al lado de otra
+  function lapizDXF(op){
+    const s = op.escala / 1000, ent = [], capas = new Map();
+    let dx = 0, pageH = 0;
+    const nombreCapa = n => {
+      let c = String(n).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9_\-]+/g, "_").replace(/_+/g, "_").slice(0, 31).toUpperCase();
+      return c || "0";
+    };
+    const ACI = [[1, 255, 0, 0], [2, 255, 255, 0], [3, 0, 255, 0], [4, 0, 255, 255], [5, 0, 0, 255], [6, 255, 0, 255], [7, 0, 0, 0], [8, 128, 128, 128], [9, 192, 192, 192],
+                 [30, 255, 127, 0], [40, 255, 191, 0], [34, 165, 82, 0], [42, 165, 124, 0], [130, 0, 127, 255], [150, 0, 63, 255], [94, 0, 165, 0], [12, 165, 0, 0], [252, 130, 130, 130]];
+    const aci = c => { if (!c) return 7; let b = 7, bd = Infinity; ACI.forEach(([i, r, g, bb]) => { const d = (r - c[0]) ** 2 + (g - c[1]) ** 2 + (bb - c[2]) ** 2; if (d < bd){ bd = d; b = i; } }); return b; };
+    const capa = st => { const n = nombreCapa(st.capa || "0"); if (!capas.has(n)) capas.set(n, { color:aci(st.color), dash:!!st.dash }); return n; };
+    const X = x => ((x + dx) * s).toFixed(4), Y = y => ((pageH - y) * s).toFixed(4);
+    const push = (...a) => { for (let i = 0; i < a.length; i += 2) ent.push(a[i], a[i + 1]); };
+    const fuente = { ancho:(t, size) => String(t).length * size * 0.3528 * 0.52 };
+    return {
+      hoja(i, P){ dx = i * (P[0] + 20); pageH = P[1]; },
+      line(x1, y1, x2, y2, st){ push(0, "LINE", 8, capa(st), 10, X(x1), 20, Y(y1), 30, 0, 11, X(x2), 21, Y(y2), 31, 0); },
+      rect(x, y, w, h, st){ this.poly([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], true, st); },
+      poly(pts, cerrado, st){
+        if (pts.length < 2) return;
+        const c = capa(st);
+        push(0, "POLYLINE", 8, c, 66, 1, 70, cerrado ? 1 : 0, 10, 0, 20, 0, 30, 0);
+        pts.forEach(p => push(0, "VERTEX", 8, c, 10, X(p[0]), 20, Y(p[1]), 30, 0));
+        push(0, "SEQEND", 8, c);
+      },
+      circulo(x, y, r, st){ push(0, "CIRCLE", 8, capa(st), 10, X(x), 20, Y(y), 30, 0, 40, (r * s).toFixed(4)); },
+      text(t, x, y, size, st){
+        const h = (size * 0.3528 * 0.72 * s).toFixed(4), al = st.align === "center" ? 1 : st.align === "right" ? 2 : 0;
+        const txt = String(t).replace(/[\r\n]+/g, " ");
+        push(0, "TEXT", 8, capa(st), 10, X(x), 20, Y(y), 30, 0, 40, h, 1, txt);
+        if (al) push(72, al, 11, X(x), 21, Y(y), 31, 0);
+      },
+      ancho:fuente.ancho,
+      ajustar(t, size, max){ const n = Math.max(4, Math.floor(max / (size * 0.3528 * 0.52))); return t.length > n ? t.slice(0, n - 1) + "…" : t; },
+      generar(){
+        const L = [];
+        const add = (...a) => { for (let i = 0; i < a.length; i += 2) L.push(String(a[i]), String(a[i + 1])); };
+        add(0, "SECTION", 2, "HEADER", 9, "$ACADVER", 1, "AC1009", 9, "$DWGCODEPAGE", 3, "ANSI_1252", 0, "ENDSEC");
+        add(0, "SECTION", 2, "TABLES");
+        add(0, "TABLE", 2, "LTYPE", 70, 2);
+        add(0, "LTYPE", 2, "CONTINUOUS", 70, 0, 3, "Solid line", 72, 65, 73, 0, 40, "0.0");
+        const d = (op.escala / 1000);
+        add(0, "LTYPE", 2, "DASHDOT", 70, 0, 3, "Dash dot __ . __ . __", 72, 65, 73, 4, 40, (4.0 * d).toFixed(4), 49, (2.4 * d).toFixed(4), 49, (-0.8 * d).toFixed(4), 49, "0.0", 49, (-0.8 * d).toFixed(4));
+        add(0, "ENDTAB");
+        add(0, "TABLE", 2, "LAYER", 70, capas.size + 1);
+        add(0, "LAYER", 2, "0", 70, 0, 62, 7, 6, "CONTINUOUS");
+        capas.forEach((v, n) => { if (n !== "0") add(0, "LAYER", 2, n, 70, 0, 62, v.color, 6, v.dash ? "DASHDOT" : "CONTINUOUS"); });
+        add(0, "ENDTAB");
+        add(0, "TABLE", 2, "STYLE", 70, 1, 0, "STYLE", 2, "STANDARD", 70, 0, 40, "0.0", 41, "1.0", 50, "0.0", 71, 0, 42, "0.2", 3, "txt", 4, "", 0, "ENDTAB");
+        add(0, "ENDSEC");
+        add(0, "SECTION", 2, "ENTITIES");
+        for (let i = 0; i < ent.length; i += 2) L.push(String(ent[i]), String(ent[i + 1]));
+        add(0, "ENDSEC", 0, "EOF");
+        const txt = L.join("\r\n") + "\r\n";
+        const bytes = new Uint8Array(txt.length);
+        for (let i = 0; i < txt.length; i++){ const c = txt.charCodeAt(i); bytes[i] = c < 256 ? c : (c === 0x2026 ? 0x85 : c === 0x2014 ? 0x97 : c === 0x2013 ? 0x96 : 63); }
+        return new Blob([bytes], { type:"application/dxf" });
+      }
+    };
+  }
+
+  function abrirImprimir(){
+    const e = ejeCiv();
+    if (!e){ toast("No hay ejes: exporta desde Civil 3D con la hoja «Ejes»."); return; }
+    const t = tramoCiv(), A = supCiv(CIV.terreno), B = supCiv(CIV.rasante);
+    const proy = (typeof PJ !== "undefined" && PJ.nombre) || S.models.map(m => m.name).join(", ");
+    const M = abrirModal("vol imp");
+    M.box.innerHTML = `
+      <div class="md-head"><div><h2>Imprimir secciones</h2><p class="md-sub">Secciones transversales de ${escH(e.nombre)} a escala, con su PK, cotas y áreas. PDF para imprimir o DXF para CAD.</p></div><button class="ibtn md-x" aria-label="Cerrar">✕</button></div>
+      <div class="vol-body">
+        <div class="vol-grid">
+          <label>PK inicial<input type="text" class="i-a" value="${formatoPK(t[0])}"></label>
+          <label>PK final<input type="text" class="i-b" value="${formatoPK(t[1])}"></label>
+          <label>Secciones cada (m)<input type="text" class="i-paso" value="${escH($("civPaso").value || "20")}"></label>
+          <label>Ancho a cada lado (m)<input type="text" class="i-w" value="${fmtM(CIV.W).replace(/,00$/, "")}"></label>
+          <label>Escala<select class="i-esc"><option value="100">1:100</option><option value="200" selected>1:200</option><option value="250">1:250</option><option value="500">1:500</option><option value="1000">1:1000</option></select></label>
+          <label>Exageración vertical<select class="i-ex"><option value="1" selected>×1 (sin exagerar)</option><option value="2">×2</option><option value="5">×5</option><option value="10">×10</option></select></label>
+          <label>Papel<select class="i-pap"><option value="a3h" selected>A3 horizontal</option><option value="a4h">A4 horizontal</option><option value="a4v">A4 vertical</option><option value="a1h">A1 horizontal</option></select></label>
+          <label>Proyecto (cajetín)<input type="text" class="i-proy" value="${escH(proy)}"></label>
+        </div>
+        <div class="lbl">Contenido</div>
+        <label class="check"><input type="checkbox" class="i-geo"> Añadir los PK de inicio y final de cada recta, clotoide y curva</label>
+        <label class="check"><input type="checkbox" class="i-rot" checked> Nombre de cada capa y superficie</label>
+        <label class="check"><input type="checkbox" class="i-ce" checked> Cotas de rasante y terreno en el eje</label>
+        <label class="check"><input type="checkbox" class="i-gu" checked> Guitarra con cotas del terreno${B ? " y la rasante" : ""} cada <input type="text" class="i-gp" value="5" style="width:48px"> m</label>
+        <label class="check"><input type="checkbox" class="i-ar" ${A && B ? "checked" : "disabled"}> Áreas de desmonte y terraplén${A && B ? "" : " (elige terreno y una superficie de rasante en Superficies)"}</label>
+        <label class="check"><input type="checkbox" class="i-ca" checked> Área de cada capa (firmes, rellenos…)</label>
+        <p class="muted i-nota">Sale lo que esté visible: oculta modelos o categorías antes para quitarlos de las secciones.</p>
+      </div>
+      <div class="md-foot"><span class="muted i-prog"></span><span class="spacer"></span><button class="btn i-dxf">DXF</button><button class="btn primary i-pdf">PDF</button></div>`;
+    const q = s => M.box.querySelector(s);
+    q(".md-x").onclick = M.cerrar;
+    const opciones = () => {
+      let a = leerPK(q(".i-a").value), b = leerPK(q(".i-b").value);
+      const pk0 = e.pk[0], pk1 = e.pk[e.pk.length - 1];
+      if (!isFinite(a)) a = pk0; if (!isFinite(b)) b = pk1;
+      if (b < a){ const x = a; a = b; b = x; }
+      a = Math.max(pk0, a); b = Math.min(pk1, b);
+      return { a, b, paso:numCiv(q(".i-paso").value, 20), W:Math.min(500, numCiv(q(".i-w").value, CIV.W)), escala:+q(".i-esc").value, exag:+q(".i-ex").value,
+               papel:q(".i-pap").value, proyecto:q(".i-proy").value.trim(), geo:q(".i-geo").checked, rotulos:q(".i-rot").checked, cotasEje:q(".i-ce").checked,
+               guitarra:q(".i-gu").checked, gpaso:numCiv(q(".i-gp").value, 5), areas:q(".i-ar").checked, capas:q(".i-ca").checked };
+    };
+    const pksDe = op => {
+      const set = new Set([+op.a.toFixed(3), +op.b.toFixed(3)]);
+      for (let p = Math.ceil(op.a / op.paso - 1e-9) * op.paso; p < op.b - 1e-6; p += op.paso) set.add(+p.toFixed(3));
+      if (op.geo) (e.geo || []).forEach(g => { for (const p of [g.pk0, g.pk0 + g.L]) if (p >= op.a - 1e-6 && p <= op.b + 1e-6) set.add(+p.toFixed(3)); });
+      return [...set].sort((x, y) => x - y);
+    };
+    const generar = async tipo => {
+      const op = opciones(), pks = pksDe(op);
+      if (pks.length > 400 && !confirm(pks.length + " secciones. ¿Seguir?")) return;
+      q(".i-pdf").disabled = q(".i-dxf").disabled = true;
+      const prog = txt => q(".i-prog").textContent = txt;
+      try {
+        let jsPDF = null;
+        if (tipo === "pdf"){ prog("Cargando el generador de PDF…"); jsPDF = await cargarJsPDF(); }
+        const lista = [];
+        let t0 = performance.now();
+        for (let i = 0; i < pks.length; i++){
+          lista.push(datosSeccionImp(e, pks[i], op));
+          if (performance.now() - t0 > 60){ prog("Cortando secciones… " + (i + 1) + " / " + pks.length); await new Promise(r => setTimeout(r)); t0 = performance.now(); }
+        }
+        prog("Maquetando…"); await new Promise(r => setTimeout(r));
+        const L = maquetar(lista, op);
+        op.nHojas = L.hojas.length;
+        const nombre = ("Secciones_" + e.nombre + "_PK" + formatoPK(op.a) + "-" + formatoPK(op.b)).replace(/[\\/:*?"<>|,\s]+/g, "_");
+        if (tipo === "pdf"){
+          const P = L.P, doc = new jsPDF({ orientation:P[3], unit:"mm", format:P[2], compress:true });
+          doc.setProperties({ title:"Secciones transversales · " + e.nombre, creator:"BECSA Visor BIM" });
+          const pen = lapizPDF(doc);
+          L.hojas.forEach((h, i) => { if (i) doc.addPage(P[2], P[3]); dibujarHoja(pen, L, h, i + 1, op, e); });
+          download(doc.output("blob"), nombre + ".pdf");
+        } else {
+          const pen = lapizDXF(op);
+          L.hojas.forEach((h, i) => { pen.hoja(i, L.P); dibujarHoja(pen, L, h, i + 1, op, e); });
+          download(pen.generar(), nombre + ".dxf");
+        }
+        prog(pks.length + " secciones en " + L.hojas.length + (L.hojas.length === 1 ? " hoja" : " hojas") + " (" + PAPEL[op.papel][4] + ", 1:" + op.escala + ").");
+        CIV.ultimaImp = { tipo, n:pks.length, hojas:L.hojas.length };
+      } catch (err){
+        prog(""); q(".i-nota").textContent = err.message || String(err); q(".i-nota").classList.add("err");
+      } finally { q(".i-pdf").disabled = q(".i-dxf").disabled = false; }
+    };
+    q(".i-pdf").onclick = () => generar("pdf");
+    q(".i-dxf").onclick = () => generar("dxf");
+  }
+  $("civImprimir").addEventListener("click", abrirImprimir);
+  $("civSecImp").addEventListener("click", abrirImprimir);
+
+  // ---- Ortofoto en la planta (WMS del ICV, IGN, Catastro u otro, o imagen con archivo de coordenadas) ----
+  const ORTO_FUENTES = {
+    icv:{ nombre:"ICV 2023 · Comunitat Valenciana", url:"https://terramapas.icv.gva.es/0202_2023CVAL0025", capa:"2023CVAL0025_RGB", ver:"1.3.0", fmt:"image/jpeg", cita:"© Institut Cartogràfic Valencià" },
+    pnoa:{ nombre:"PNOA máxima actualidad · IGN", url:"https://www.ign.es/wms-inspire/pnoa-ma", capa:"OI.OrthoimageCoverage", ver:"1.3.0", fmt:"image/jpeg", cita:"PNOA cedido por © Instituto Geográfico Nacional" },
+    catastro:{ nombre:"Catastro", url:"https://ovc.catastro.meh.es/Cartografia/WMS/ServidorWMS.aspx", capa:"Catastro", ver:"1.1.1", fmt:"image/png", transp:true, cita:"© Dirección General del Catastro" }
+  };
+  const ORTO = { on:false, fuente:"auto", crs:"EPSG:25830", op:0.85, modo:"encima", url:"", capa:"", bbox:null, key:"", tmr:0, cargando:false, file:null, cita:"", error:"" };
+  try { Object.assign(ORTO, JSON.parse(localStorage.getItem("visor-bim-orto") || "{}"), { bbox:null, file:null, key:"" }); } catch (err) {}
+  if (ORTO.fuente === "file") ORTO.fuente = "auto";
+  const ortoImg = document.createElement("img");
+  ortoImg.id = "civOrto"; ortoImg.alt = ""; ortoImg.hidden = true; ortoImg.decoding = "async";
+  function guardarOrto(){ try { localStorage.setItem("visor-bim-orto", JSON.stringify({ on:ORTO.on, fuente:ORTO.fuente, crs:ORTO.crs, op:ORTO.op, modo:ORTO.modo, url:ORTO.url, capa:ORTO.capa, dx:ORTO.dx || 0, dy:ORTO.dy || 0 })); } catch (err) {} }
+  function fuenteOrto(X, Y){
+    if (ORTO.fuente === "wms") return ORTO.url && ORTO.capa ? { nombre:"WMS", url:ORTO.url, capa:ORTO.capa, ver:"1.3.0", fmt:"image/jpeg", cita:"" } : null;
+    if (ORTO.fuente !== "auto") return ORTO_FUENTES[ORTO.fuente] || null;
+    const enCV = ORTO.crs === "EPSG:25830" ? X > 620000 && X < 830000 && Y > 4180000 && Y < 4530000 : ORTO.crs === "EPSG:25831" ? X > 230000 && X < 330000 && Y > 4370000 && Y < 4530000 : false;
+    return ORTO_FUENTES[enCV ? "icv" : "pnoa"];
+  }
+  function ortoDebajo(){ return ORTO.on && ORTO.modo === "debajo" && !!ORTO.bbox && !ortoImg.hidden; }
+  function estadoOrto(t){ const el = $("orEstado"); if (el) el.textContent = t; }
+  // Coloca la imagen en la planta y pide una nueva si la vista ha cambiado
+  function ortoPlanta(aPant, w, h){
+    if (!ORTO.on){ ortoImg.hidden = true; return; }
+    if (ORTO.bbox){
+      const [X0, Y0, X1, Y1] = ORTO.bbox, [ax, ay] = aPant(X0, Y1), [bx, by] = aPant(X1, Y0);
+      Object.assign(ortoImg.style, { left:ax + "px", top:ay + "px", width:Math.max(1, bx - ax) + "px", height:Math.max(1, by - ay) + "px", opacity:String(ORTO.op) });
+      ortoImg.hidden = false;
+      const padre = $("civPlan");
+      if (ORTO.modo === "debajo"){ if (ortoImg.nextElementSibling !== planR.domElement) padre.insertBefore(ortoImg, planR.domElement); }
+      else if (ortoImg.nextElementSibling !== $("civPlanOv")) padre.insertBefore(ortoImg, $("civPlanOv"));
+    }
+    if (ORTO.fuente === "file") return;
+    const o = S.sceneOrigin || [0, 0, 0], asp = w / Math.max(1, h);
+    const X0 = PV.cx - PV.half * asp + o[0], X1 = PV.cx + PV.half * asp + o[0], Y1 = -(PV.cz - PV.half) + o[1], Y0 = -(PV.cz + PV.half) + o[1];
+    const key = [X0, Y0, X1, Y1].map(v => Math.round(v * 10)).join(",") + "|" + ORTO.fuente + ORTO.crs + ORTO.url + ORTO.capa + "|" + (ORTO.dx || 0) + "," + (ORTO.dy || 0) + "|" + Math.round(w) + "x" + Math.round(h);
+    if (key === ORTO.key) return;
+    ORTO.key = key;
+    clearTimeout(ORTO.tmr);
+    ORTO.tmr = setTimeout(() => pedirOrto(X0, Y0, X1, Y1, w, h), 350);
+  }
+  function pedirOrto(X0, Y0, X1, Y1, w, h){
+    const DX = ORTO.dx || 0, DY = ORTO.dy || 0;   // corrección de coordenadas locales a reales
+    const f = fuenteOrto((X0 + X1) / 2 + DX, (Y0 + Y1) / 2 + DY);
+    if (!f){ estadoOrto("Indica la URL y la capa del servidor WMS."); return; }
+    // Los servidores devuelven una imagen en blanco (sin error) fuera de España: se avisa si las coordenadas no son UTM
+    const Xc = (X0 + X1) / 2 + DX, Yc = (Y0 + Y1) / 2 + DY;
+    if (ORTO.fuente !== "wms" && !(Xc > 100000 && Xc < 1000000 && Yc > 3800000 && Yc < 4900000)){
+      ORTO.bbox = null; ortoImg.hidden = true;
+      ORTO.error = "Las coordenadas de los modelos (X " + fmtCoord(Xc).replace(/,\d+$/, "") + ", Y " + fmtCoord(Yc).replace(/,\d+$/, "") + ") no son UTM en España, así que la ortofoto no se puede colocar. " +
+        "Si el dibujo está en coordenadas locales, pon arriba el desplazamiento hasta las reales (ΔX, ΔY); si no, revisa el sistema de coordenadas del dibujo de Civil 3D o las coordenadas compartidas de Revit.";
+      estadoOrto(ORTO.error); requestRender(); return;
+    }
+    ORTO.error = "";
+    const mx = (X1 - X0) * 0.15, my = (Y1 - Y0) * 0.15;
+    X0 -= mx; X1 += mx; Y0 -= my; Y1 += my;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let W = Math.round(w * 1.3 * dpr), H = Math.round(h * 1.3 * dpr);
+    const red = Math.min(1, 2048 / Math.max(W, H)); W = Math.max(64, Math.round(W * red)); H = Math.max(64, Math.round(H * red));
+    const p = new URLSearchParams({ SERVICE:"WMS", VERSION:f.ver, REQUEST:"GetMap", LAYERS:f.capa, STYLES:"", FORMAT:f.fmt, TRANSPARENT:f.transp ? "TRUE" : "FALSE", WIDTH:W, HEIGHT:H, BBOX:[X0 + DX, Y0 + DY, X1 + DX, Y1 + DY].map(v => v.toFixed(2)).join(",") });
+    p.set(f.ver === "1.3.0" ? "CRS" : "SRS", ORTO.crs);
+    const url = f.url + (f.url.includes("?") ? "&" : "?") + p.toString();
+    const im = new Image();
+    ORTO.cargando = true; estadoOrto("Cargando " + f.nombre + "…");
+    im.onload = () => {
+      ORTO.cargando = false;
+      if (!ORTO.on || ORTO.fuente === "file") return;
+      ortoImg.src = url; ORTO.bbox = [X0, Y0, X1, Y1]; ORTO.cita = f.cita; ORTO.error = "";
+      estadoOrto(f.nombre + " · " + ORTO.crs); requestRender();
+    };
+    im.onerror = () => { ORTO.cargando = false; ORTO.error = "No se pudo cargar la ortofoto de " + f.nombre + ". Comprueba la conexión y el sistema de coordenadas."; estadoOrto(ORTO.error); };
+    im.src = url;
+  }
+  function pintarOrto(){
+    $("orOn").checked = ORTO.on; $("civOrtoBtn").setAttribute("aria-pressed", String(ORTO.on));
+    $("orFuente").value = ORTO.fuente; $("orCrs").value = ORTO.crs; $("orModo").value = ORTO.modo; $("orOp").value = ORTO.op;
+    $("orUrl").value = ORTO.url; $("orCapa").value = ORTO.capa;
+    $("orWms").hidden = ORTO.fuente !== "wms"; $("orFile").hidden = ORTO.fuente !== "file"; $("orCrsL").hidden = ORTO.fuente === "file"; $("orDespL").hidden = ORTO.fuente === "file";
+    $("orDx").value = fmtM(ORTO.dx || 0).replace(/,00$/, ""); $("orDy").value = fmtM(ORTO.dy || 0).replace(/,00$/, "");
+  }
+  function setOrto(on){
+    ORTO.on = on; ORTO.key = "";
+    if (!on){ ortoImg.hidden = true; estadoOrto(""); }
+    else if (ORTO.fuente === "file" && !ORTO.bbox) estadoOrto("Elige la imagen y su archivo de coordenadas (.jgw, .pgw, .wld).");
+    guardarOrto(); pintarOrto(); requestRender();
+  }
+  function cambioOrto(){ ORTO.key = ""; guardarOrto(); pintarOrto(); requestRender(); }
+  $("orOn").addEventListener("change", ev => setOrto(ev.target.checked));
+  $("civOrtoBtn").addEventListener("click", () => { setOrto(!ORTO.on); if (ORTO.on && CIV.tab !== "orto") $("civPanel").querySelector("[data-ct=orto]").click(); });
+  $("orFuente").addEventListener("change", ev => { ORTO.fuente = ev.target.value; ORTO.bbox = null; ortoImg.hidden = true; if (ORTO.fuente === "file") estadoOrto(ORTO.on ? "Elige la imagen y su archivo de coordenadas (.jgw, .pgw, .wld)." : ""); cambioOrto(); });
+  $("orCrs").addEventListener("change", ev => { ORTO.crs = ev.target.value; ORTO.bbox = null; cambioOrto(); });
+  $("orModo").addEventListener("change", ev => { ORTO.modo = ev.target.value; cambioOrto(); if (ORTO.modo === "debajo") toast("Debajo del modelo: oculta las superficies de terreno (Categorías) para que se vea la ortofoto."); });
+  $("orOp").addEventListener("input", ev => { ORTO.op = +ev.target.value; ortoImg.style.opacity = String(ORTO.op); guardarOrto(); });
+  const leerDesp = v => { const x = parseFloat(String(v).replace(/\s/g, "").replace(/\./g, "").replace(",", ".")); return isFinite(x) ? x : 0; };
+  $("orDx").addEventListener("change", ev => { ORTO.dx = leerDesp(ev.target.value); ORTO.bbox = null; ortoImg.hidden = true; cambioOrto(); });
+  $("orDy").addEventListener("change", ev => { ORTO.dy = leerDesp(ev.target.value); ORTO.bbox = null; ortoImg.hidden = true; cambioOrto(); });
+  $("orUrl").addEventListener("change", ev => { ORTO.url = ev.target.value.trim(); cambioOrto(); });
+  $("orCapa").addEventListener("change", ev => { ORTO.capa = ev.target.value.trim(); cambioOrto(); });
+  $("orFileBtn").addEventListener("click", () => $("orFileIn").click());
+  $("orFileIn").addEventListener("change", async ev => {
+    const fs = [...ev.target.files]; ev.target.value = "";
+    const img = fs.find(f => /\.(jpe?g|png|webp)$/i.test(f.name)), wf = fs.find(f => /\.(jgw|pgw|jpgw|pngw|wld|tfw|j2w)$/i.test(f.name));
+    if (!img || !wf){ estadoOrto("Elige a la vez la imagen (JPG o PNG) y su archivo de coordenadas (.jgw, .pgw o .wld) con el mismo nombre."); return; }
+    const v = (await wf.text()).split(/\s+/).filter(Boolean).map(s => parseFloat(s.replace(",", ".")));
+    if (v.length < 6 || v.some(x => !isFinite(x))){ estadoOrto("El archivo de coordenadas no es válido (deben ser 6 números)."); return; }
+    const [A, D, Bb, E, C, F] = v, url = URL.createObjectURL(img), im = new Image();
+    im.onload = () => {
+      const X0 = C - A / 2, Y1 = F - E / 2, X1 = X0 + A * im.naturalWidth, Y0 = Y1 + E * im.naturalHeight;
+      ORTO.bbox = [Math.min(X0, X1), Math.min(Y0, Y1), Math.max(X0, X1), Math.max(Y0, Y1)]; ORTO.file = img.name; ORTO.cita = "";
+      ortoImg.src = url;
+      $("orFileTxt").textContent = img.name + " · " + im.naturalWidth + " × " + im.naturalHeight + " px · " + fmtM(A) + " m/px" + (Math.abs(Bb) + Math.abs(D) > 1e-9 ? " (giro ignorado)" : "");
+      estadoOrto(""); if (!ORTO.on) setOrto(true); else requestRender();
+      encuadrarOrtoSiFuera();
+    };
+    im.onerror = () => estadoOrto("No se pudo abrir la imagen.");
+    im.src = url;
+  });
+  function encuadrarOrtoSiFuera(){
+    if (!ORTO.bbox || S.bounds.isEmpty()) return;
+    const o = S.sceneOrigin || [0, 0, 0], [X0, Y0, X1, Y1] = ORTO.bbox, B = S.bounds, m = 500;
+    const x0 = X0 - o[0], x1 = X1 - o[0], z0 = -(Y1 - o[1]), z1 = -(Y0 - o[1]);
+    if (x1 < B.min.x - m || x0 > B.max.x + m || z1 < B.min.z - m || z0 > B.max.z + m) estadoOrto("La imagen queda lejos de los modelos: revisa que esté en las mismas coordenadas.");
+  }
 
 
   // ---------- Búsqueda y suma ----------
@@ -3324,7 +5155,7 @@ function workerMain(){
     if (!f.Formula) return;
     for (let i = 0; i < f.els.length; i += 2){
       const m = f.els[i], e = f.els[i + 1];
-      try{ f.SumFormula += Evaluar(f.Formula, n => ValorVariable(m, e, n)); f.TieneFormula = true; }
+      try{ f.SumFormula += Evaluar(f.Formula, n => ValorVariable(m, e, n)) * (f.fr && f.fr.length ? f.fr[i >> 1] : 1); f.TieneFormula = true; }
       catch(err){ f.ErroresFormula++; }
     }
   }
@@ -3549,6 +5380,7 @@ function workerMain(){
     const scope = $("mScope").value;
     const byKey = new Map();
     const conFiltro = filtroActivo();
+    const FRT = scope === "tramo" ? fraccionesTramo() : null;
     S.models.forEach(m => {
       if (!m.ready || !m.data) return;
       const d = m.data, mc = d.mc;
@@ -3559,6 +5391,8 @@ function workerMain(){
         if (scope === "visible" && stateOf(m, e) === 0) continue;
         if (scope === "search" && (!S.search || !m.match[e])) continue;
         if (scope === "sel" && !isSel(m, e)) continue;
+        let fr = 1, cnt = 1;   // tramo de PK: parte proporcional y si cuenta como unidad
+        if (scope === "tramo"){ const q = FRT && FRT.get(m.id); if (!q) continue; fr = q.F[e]; if (!(fr > 1e-6)) continue; cnt = q.C[e]; }
         const row = d.rows[ri];
         if (PF && !cumpleFiltro(PF, row)) continue;   // fase / reglas por parámetro (antes de agrupar)
         const cat = d.catCol >= 0 ? String(row[d.catCol] || "") : "";
@@ -3572,12 +5406,12 @@ function workerMain(){
           const iSub = mc.lower.get("subensamblaje");   // Civil 3D: capa de obra lineal
           g = { key, tkey, oldKey: cat + "|" + fam + "|" + tipo + (size ? "|" + size : ""), model:m.name, cat, fam, tipo, size, n:0, els:[],
                 sub: iSub !== undefined ? String(row[iSub] || "") : "",
-                sums:{ ml:0, m2:0, m3:0, kg:0, m2b:0 }, has:{ ml:false, m2:false, m3:false, kg:false, m2b:false },
+                fr:[], sums:{ ml:0, m2:0, m3:0, kg:0, m2b:0 }, has:{ ml:false, m2:false, m3:false, kg:false, m2b:false },
                 mCode:"", mRes:"", mRes2:"", mPrecio:null };
           byKey.set(key, g);
         }
-        g.n++; g.els.push(m, e);
-        const add = (u, v) => { if (v > 0){ g.sums[u] += v; g.has[u] = true; } };
+        g.n += cnt; g.els.push(m, e); g.fr.push(fr);
+        const add = (u, v) => { if (v > 0){ g.sums[u] += v * fr; g.has[u] = true; } };
         const L = mc.m >= 0 ? parseQty(row[mc.m], "m", mc.raw.m) : NaN;
         add("ml", L);
         add("m2", mc.m2 >= 0 ? parseQty(row[mc.m2], "m2", mc.raw.m2) : NaN);
@@ -3613,7 +5447,7 @@ function workerMain(){
                            a.tipo.localeCompare(b.tipo, "es") || cmpSize(a.size, b.size));
     const nm = new Set(MS.rows.map(r => r.model)).size;
     MS.multiModel = nm > 1;
-    MS.desc = (CAT_LABEL[scope] || "") + (conFiltro ? " · " + textoFiltro() : "");
+    MS.desc = (scope === "tramo" ? textoTramo() : (CAT_LABEL[scope] || "")) + (conFiltro ? " · " + textoFiltro() : "");
     const keys = new Set(MS.rows.map(r => r.key));
     MS.sel.forEach(k => { if (!keys.has(k)) MS.sel.delete(k); });
     if (MS.bc3) PrepararBC3(false);
@@ -5198,10 +7032,12 @@ function workerMain(){
   // ---------- Modo sencillo / avanzado (internamente "tecnico") ----------
   const MODO_KEY = "visor-bim-modo";
   function setModo(m){
-    MS.modo = m === "tecnico" ? "tecnico" : "sencillo";
+    const civil = m === "civil";
+    MS.modo = m === "tecnico" || civil ? "tecnico" : "sencillo";   // Civil lleva todo lo de Avanzado
     document.body.dataset.modo = MS.modo;
-    savePref(MODO_KEY, MS.modo);
-    $("modoSeg").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.modo === MS.modo)));
+    savePref(MODO_KEY, civil ? "civil" : MS.modo);
+    $("modoSeg").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.modo === (civil ? "civil" : MS.modo))));
+    if (civil !== CIV.on) setCivil(civil);
     MostrarEstado(MS.modo === "tecnico" ? "Selecciona filas (Ctrl / Mayús para varias) y asigna partida. Doble clic en una fila la muestra en el modelo."
                                         : "Modo sencillo: consulta de la medición. Doble clic en una fila la muestra en el modelo. Para asignar partidas cambia a Avanzado.", 0);
     // En Sencillo no hay rayos X: si estaban activos se quitan
@@ -5591,7 +7427,7 @@ function workerMain(){
 
   applyTheme();
   resize();
-  window.__visor = { EJES, VOL, pkDe, prepararSuperficie, volumenPrismoides, CUT, MS, S, DIM, PJ, WALK, setWalk, walkRay, walkColocar, walkPaso, sincronizar, setModo, snapPick, setDim, handleFiles, pick, select, setView, CUTS, addCut, selectCut, fitAll, renderer, get camera(){ return camera; } };
+  window.__visor = { EJES, CIV, VOL, pkDe, prepararSuperficie, volumenPrismoides, CUT, MS, S, DIM, PJ, WALK, setWalk, walkRay, walkColocar, walkPaso, sincronizar, setModo, snapPick, setDim, handleFiles, pick, select, setView, CUTS, addCut, selectCut, fitAll, renderer, get camera(){ return camera; } };
 })();
 </script>
 </body>

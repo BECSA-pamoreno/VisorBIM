@@ -1,9 +1,9 @@
-BECSATools - Exportador al Visor BIM para Civil 3D 2027 (.NET 10)  v1.4
+BECSATools - Exportador al Visor BIM para Civil 3D 2027 (.NET 10)  v1.5
 =======================================================================
 
 Hace en Civil 3D lo mismo que Exportar Visor en Revit: saca el dibujo a
 <nombre>.dae + <nombre>.xlsx en la carpeta que elijas, para abrirlo en
-VisorBIM > Visor Revit, junto a los modelos de Revit (modelo federado).
+VisorBIM > Visor BIM, junto a los modelos de Revit (modelo federado).
 
 Instalar
   Doble clic en build.bat. La primera vez descarga el SDK de .NET 10 en
@@ -33,6 +33,12 @@ Que exporta (categoria en el visor)
   Ejes                     hoja "Ejes" del Excel: puntos cada pocos metros con su PK
                            (cota del perfil de rasante o de la superficie). En el visor
                            se ven los PK y el PK de cualquier punto.
+  Geometria del eje        hoja "EjesGeometria": rectas, clotoides (A) y curvas (R) con
+                           PK inicial, final y longitud (v1.5)
+  Perfiles                 hoja "Perfiles": vertices (PVI) de cada perfil del eje con cota,
+                           pendientes, longitud de acuerdo y Kv (v1.5)
+                           Con estas dos hojas el modo Civil del visor muestra la tabla de
+                           geometria y los PVI en el perfil longitudinal.
   Tuberias / Estructuras   redes de tuberias por gravedad (en estructuras, la
                            Longitud es la profundidad tapa - fondo, para medir en ml)
   Tuberias a presion, Accesorios a presion, Dispositivos a presion

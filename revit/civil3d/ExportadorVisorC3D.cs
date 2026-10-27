@@ -1,5 +1,5 @@
 // ============================================================================
-// BECSATools - Exportador al Visor BIM para Civil 3D 2027  v1.4  (2026-10-23)
+// BECSATools - Exportador al Visor BIM para Civil 3D 2027  v1.5  (2026-10-26)
 // ----------------------------------------------------------------------------
 // Comando BECSA_EXPORTARVISOR
 //
@@ -8,7 +8,7 @@
 //   <nombre>.dae   geometria triangulada (Collada), un nodo por objeto con name = Id
 //   <nombre>.xlsx  una fila por objeto: Id, categoria, familia, tipo, capa, mediciones,
 //                  propiedades de Civil 3D, datos de pieza y conjuntos de propiedades
-// El visor (VisorBIM > Visor Revit) enlaza los dos archivos por la columna ElementId
+// El visor (VisorBIM > Visor BIM) enlaza los dos archivos por la columna ElementId
 // y los federa con los modelos de Revit por coordenadas.
 //
 // Que exporta (todo lo visible del espacio modelo, o la seleccion):
@@ -62,7 +62,7 @@ namespace BecsaTools
 {
     public class ExportadorVisorC3D
     {
-        public const string VERSION = "v1.4";
+        public const string VERSION = "v1.5";
 
         // Columnas de medicion: las mismas que escribe la macro de Revit (el visor las reconoce)
         private const string COL_LONG = "Longitud (m)";
@@ -245,7 +245,7 @@ namespace BecsaTools
                 "Descripción", "Estilo", COL_LONG, COL_AREA, COL_AREA_PLANTA, COL_VOL, "Referencia externa" };
             List<string> columnas = new List<string>(fijas);
             columnas.AddRange(_columnas.Where(c => !fijas.Contains(c)).OrderBy(c => c, StringComparer.CurrentCultureIgnoreCase));
-            EscribirXlsx(rutaXlsx, columnas, _filas, _filasEjes);
+            EscribirXlsx(rutaXlsx, columnas, _filas, _filasEjes, _filasGeometria, _filasPerfiles);
 
             reloj.Stop();
 
@@ -467,6 +467,8 @@ namespace BecsaTools
             _ejesPendientes.Clear();
             _superficiesTin.Clear();
             _filasEjes.Clear();
+            _filasGeometria.Clear();
+            _filasPerfiles.Clear();
         }
 
         // ====================================================================
@@ -1289,6 +1291,8 @@ namespace BecsaTools
         private readonly List<EjePendiente> _ejesPendientes = new List<EjePendiente>();
         private readonly List<ObjectId> _superficiesTin = new List<ObjectId>();
         private readonly List<string[]> _filasEjes = new List<string[]>();
+        private readonly List<string[]> _filasGeometria = new List<string[]>();   // hoja "EjesGeometria"
+        private readonly List<string[]> _filasPerfiles = new List<string[]>();    // hoja "Perfiles" (vertices)
 
         private void CalcularEjes(Transaction tr)
         {
@@ -1308,6 +1312,8 @@ namespace BecsaTools
                         continue;
                     }
                     List<object> perfiles = PerfilesDe(eje, tr);
+                    GeometriaEje(eje, nombre);
+                    VerticesPerfiles(perfiles, nombre);
                     double paso = Math.Max(1.0 / _k, Math.Min(10.0 / _k, (pk1 - pk0) / 2000.0));
                     List<double> pks = new List<double>();
                     for (double s = pk0; s < pk1 - 1e-6; s += paso)
@@ -1356,6 +1362,135 @@ namespace BecsaTools
                     {
                         _avisos.Add("Eje: " + ex.Message);
                     }
+                }
+            }
+        }
+
+        // Elementos del eje en planta (recta, curva circular, clotoide) con PK, longitud, radio y parametro A
+        private void GeometriaEje(C3D.Alignment eje, string nombre)
+        {
+            try
+            {
+                IEnumerable ents = Prop(eje, "Entities") as IEnumerable;
+                if (ents == null)
+                {
+                    return;
+                }
+                List<double[]> datos = new List<double[]>();
+                List<string> tipos = new List<string>();
+                foreach (object en in ents)
+                {
+                    double nsub = PrimerNumero(en, "SubEntityCount");
+                    PropertyInfo item = null;
+                    try
+                    {
+                        item = en.GetType().GetProperty("Item", new Type[] { typeof(int) });
+                    }
+                    catch
+                    {
+                        item = null;
+                    }
+                    if (!double.IsNaN(nsub) && nsub > 0 && item != null)
+                    {
+                        for (int i = 0; i < (int)nsub; i++)
+                        {
+                            object sub = null;
+                            try
+                            {
+                                sub = item.GetValue(en, new object[] { i });
+                            }
+                            catch
+                            {
+                                sub = null;
+                            }
+                            AnadirTramoEje(sub, datos, tipos);
+                        }
+                    }
+                    else
+                    {
+                        AnadirTramoEje(en, datos, tipos);
+                    }
+                }
+                List<int> orden = Enumerable.Range(0, datos.Count).OrderBy(i => datos[i][0]).ToList();
+                foreach (int i in orden)
+                {
+                    double[] d = datos[i];
+                    _filasGeometria.Add(new string[]
+                    {
+                        nombre, tipos[i], (d[0] * _k).ToString("0.###", INV), ((d[0] + d[1]) * _k).ToString("0.###", INV), (d[1] * _k).ToString("0.###", INV),
+                        double.IsNaN(d[2]) ? "" : (d[2] * _k).ToString("0.###", INV), double.IsNaN(d[3]) ? "" : (d[3] * _k).ToString("0.###", INV)
+                    });
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private static void AnadirTramoEje(object sub, List<double[]> datos, List<string> tipos)
+        {
+            if (sub == null)
+            {
+                return;
+            }
+            double pk = PrimerNumero(sub, "StartStation"), lon = PrimerNumero(sub, "Length");
+            if (double.IsNaN(pk) || double.IsNaN(lon) || lon <= 0)
+            {
+                return;
+            }
+            string cls = sub.GetType().Name;
+            string tipo = cls.IndexOf("Spiral", StringComparison.OrdinalIgnoreCase) >= 0 ? "Clotoide"
+                : cls.IndexOf("Arc", StringComparison.OrdinalIgnoreCase) >= 0 ? "Curva circular"
+                : cls.IndexOf("Line", StringComparison.OrdinalIgnoreCase) >= 0 ? "Recta" : cls;
+            double r = PrimerNumero(sub, "Radius");
+            if (double.IsNaN(r) && tipo == "Clotoide")
+            {
+                double rin = PrimerNumero(sub, "RadiusIn"), rout = PrimerNumero(sub, "RadiusOut");
+                r = double.IsNaN(rin) || double.IsInfinity(rin) || rin <= 0 ? rout : (double.IsNaN(rout) || double.IsInfinity(rout) || rout <= 0 ? rin : Math.Min(rin, rout));
+            }
+            if (double.IsInfinity(r))
+            {
+                r = double.NaN;
+            }
+            double a = tipo == "Clotoide" ? PrimerNumero(sub, "A") : double.NaN;
+            datos.Add(new double[] { pk, lon, r, a });
+            tipos.Add(tipo);
+        }
+
+        // Vertices (PVI) de los perfiles: PK, cota, pendientes y acuerdos verticales
+        private void VerticesPerfiles(List<object> perfiles, string eje)
+        {
+            foreach (object p in perfiles)
+            {
+                try
+                {
+                    string nom = Texto(Prop(p, "Name")) ?? "";
+                    string tipo = Texto(Prop(p, "ProfileType")) ?? "";
+                    IEnumerable pvis = Prop(p, "PVIs") as IEnumerable;
+                    if (pvis == null)
+                    {
+                        continue;
+                    }
+                    foreach (object v in pvis)
+                    {
+                        double pk = PrimerNumero(v, "Station"), z = PrimerNumero(v, "Elevation");
+                        if (double.IsNaN(pk) || double.IsNaN(z))
+                        {
+                            continue;
+                        }
+                        double gi = PrimerNumero(v, "GradeIn"), go = PrimerNumero(v, "GradeOut");
+                        object curva = Prop(v, "VerticalCurve");
+                        double lc = PrimerNumero(curva, "Length"), kv = PrimerNumero(curva, "K");
+                        _filasPerfiles.Add(new string[]
+                        {
+                            eje, nom, tipo, (pk * _k).ToString("0.###", INV), (z * _k).ToString("0.###", INV),
+                            double.IsNaN(gi) ? "" : (gi * 100).ToString("0.###", INV), double.IsNaN(go) ? "" : (go * 100).ToString("0.###", INV),
+                            double.IsNaN(lc) || lc <= 0 ? "" : (lc * _k).ToString("0.###", INV), double.IsNaN(kv) || kv <= 0 ? "" : (kv * _k).ToString("0.###", INV)
+                        });
+                    }
+                }
+                catch
+                {
                 }
             }
         }
@@ -2653,7 +2788,8 @@ namespace BecsaTools
         // XLSX (mismo escritor que la macro de Revit, sin Excel instalado)
         // ====================================================================
 
-        private static void EscribirXlsx(string ruta, List<string> columnas, List<Dictionary<string, string>> filas, List<string[]> ejes)
+        private static void EscribirXlsx(string ruta, List<string> columnas, List<Dictionary<string, string>> filas, List<string[]> ejes,
+            List<string[]> geometria, List<string[]> perfiles)
         {
             if (File.Exists(ruta))
             {
@@ -2670,6 +2806,8 @@ namespace BecsaTools
                     "<Override PartName=\"/xl/workbook.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml\"/>" +
                     "<Override PartName=\"/xl/worksheets/sheet1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>" +
                     "<Override PartName=\"/xl/worksheets/sheet2.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>" +
+                    "<Override PartName=\"/xl/worksheets/sheet3.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>" +
+                    "<Override PartName=\"/xl/worksheets/sheet4.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>" +
                     "</Types>");
                 EntradaZip(zip, "_rels/.rels",
                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
@@ -2679,12 +2817,14 @@ namespace BecsaTools
                 EntradaZip(zip, "xl/workbook.xml",
                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
                     "<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">" +
-                    "<sheets><sheet name=\"Elementos\" sheetId=\"1\" r:id=\"rId1\"/><sheet name=\"Ejes\" sheetId=\"2\" r:id=\"rId2\"/></sheets></workbook>");
+                    "<sheets><sheet name=\"Elementos\" sheetId=\"1\" r:id=\"rId1\"/><sheet name=\"Ejes\" sheetId=\"2\" r:id=\"rId2\"/><sheet name=\"EjesGeometria\" sheetId=\"3\" r:id=\"rId3\"/><sheet name=\"Perfiles\" sheetId=\"4\" r:id=\"rId4\"/></sheets></workbook>");
                 EntradaZip(zip, "xl/_rels/workbook.xml.rels",
                     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
                     "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" +
                     "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet1.xml\"/>" +
                     "<Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet2.xml\"/>" +
+                    "<Relationship Id=\"rId3\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet3.xml\"/>" +
+                    "<Relationship Id=\"rId4\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet4.xml\"/>" +
                     "</Relationships>");
 
                 ZipArchiveEntry hoja = zip.CreateEntry("xl/worksheets/sheet1.xml");
@@ -2728,6 +2868,31 @@ namespace BecsaTools
                     }
                     w.Write("</sheetData></worksheet>");
                 }
+
+                HojaSimple(zip, "xl/worksheets/sheet3.xml", new List<string> { "Eje", "Tipo", "PK inicial", "PK final", "Longitud", "Radio", "A" },
+                    geometria, new HashSet<int> { 2, 3, 4, 5, 6 });
+                HojaSimple(zip, "xl/worksheets/sheet4.xml", new List<string> { "Eje", "Perfil", "Tipo de perfil", "PK", "Cota", "Pendiente entrada (%)",
+                    "Pendiente salida (%)", "Longitud acuerdo", "Kv" }, perfiles, new HashSet<int> { 3, 4, 5, 6, 7, 8 });
+            }
+        }
+
+        private static void HojaSimple(ZipArchive zip, string ruta, List<string> cabecera, List<string[]> filas, HashSet<int> numericas)
+        {
+            ZipArchiveEntry hoja = zip.CreateEntry(ruta);
+            using (StreamWriter w = new StreamWriter(hoja.Open(), new UTF8Encoding(false)))
+            {
+                w.Write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+                w.Write("<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><sheetData>");
+                EscribirFila(w, 1, cabecera, null);
+                int r = 2;
+                if (filas != null)
+                {
+                    foreach (string[] fila in filas)
+                    {
+                        EscribirFila(w, r++, new List<string>(fila), numericas);
+                    }
+                }
+                w.Write("</sheetData></worksheet>");
             }
         }
 

@@ -1,5 +1,5 @@
 // ============================================================================
-// BECSATools - Visor BIM para Civil 3D 2027  v1.4  (2026-10-23)
+// BECSATools - Visor BIM para Civil 3D 2027  v1.5  (2026-10-26)
 // ----------------------------------------------------------------------------
 // - Se carga solo al abrir Civil 3D (bundle en %APPDATA%\Autodesk\ApplicationPlugins)
 // - Anade el panel "Visor BIM" a la pestana "BECSATools" de la cinta (la misma que usa
@@ -158,7 +158,7 @@ namespace BecsaTools
                 "Exporta lo visible del dibujo (o una selección) a DAE + XLSX. Pregunta dónde guardarlos y recuerda la última carpeta (la misma que en Revit). "
                 + "como la macro ExportarVisor de Revit: superficies, sólidos de obras lineales, redes de tuberías "
                 + "y a presión, sólidos, mallas, bloques y referencias externas, con sus propiedades.\n\n"
-                + "Ábrelos en VisorBIM > Visor Revit junto a los modelos de Revit: caen en su sitio si el proyecto "
+                + "Ábrelos en VisorBIM > Visor BIM junto a los modelos de Revit: caen en su sitio si el proyecto "
                 + "de Revit adquirió las coordenadas de este dibujo.",
                 IconoVisor(32), IconoVisor(16)));
         }

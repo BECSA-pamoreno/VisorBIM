@@ -7,7 +7,7 @@ Al entrar en la página principal se elige el visor:
 | Visor | Carpeta | Archivos |
 |---|---|---|
 | **Visor IFC** | `ifc/` | IFC2X3, IFC4, IFC4X3 |
-| **Visor Revit** | `revit/` | DAE + XLSX exportados con la macro `ExportarVisor` |
+| **Visor BIM** | `revit/` | DAE + XLSX exportados desde Revit (macro `ExportarVisor`) y Civil 3D (BECSATools > Exportar visor) |
 
 ## Visor IFC
 
@@ -34,7 +34,7 @@ Al entrar en la página principal se elige el visor:
 
 Librerías desde CDN: xeokit-sdk 2.6.114 y web-ifc 0.0.77.
 
-## Visor Revit
+## Visor BIM (Revit + Civil 3D)
 
 1. En Revit, abre una vista 3D de cada modelo y ejecuta la macro `ExportarVisor` (`revit/macro/ExportadorVisor.cs`).
    Se generan `<modelo>.dae` y `<modelo>.xlsx` en `Escritorio\ExportVisor`.
@@ -87,6 +87,52 @@ Funciones:
   y sólidos en m³, y bordillos, rigolas, cunetas, barreras... en ml (por el nombre de la capa o del subensamblaje).
   Las estructuras llevan como longitud su profundidad, por si se miden por metro de altura. Todo se puede cambiar por fila.
 - **Ejes PK** (modelos de Civil 3D): dibuja los ejes con sus PK rotulados; el intervalo se adapta al zoom.
+- **Modo Civil** (pestaña *Civil*, junto a Sencillo y Avanzado): pantalla de obra lineal en cuatro vistas enlazadas por el PK.
+  - Panel izquierdo: elección del eje, tabla de **geometría en planta** (rectas, clotoides con su A, curvas con su R; clic = ir a
+    su PK inicial), **Superficies** (terreno y rasante: el perfil del eje de Civil 3D o cualquier superficie) y **Cubicación**
+    por secciones cada X metros (desmonte, terraplén, a origen; clic en una fila = ir al PK; Excel).
+  - **Planta**: vista cenital del modelo con el eje, PK rotulados, línea de la sección actual, norte y escala. Rueda = zoom,
+    arrastrar = mover, clic = llevar la sección a ese PK, doble clic o botón = encuadrar.
+  - **Modelo 3D**: el visor de siempre con el plano de la sección en naranja; "Cámara en el eje" lo convierte en un recorrido
+    a la altura de la rasante mirando hacia delante.
+  - **Perfil longitudinal**: terreno, rasante, relleno de desmonte (rojo) y terraplén (verde), vértices (PVI) con su cota y Kv,
+    banda de geometría en planta y PK actual con cotas y diferencia. Clic o arrastrar = cambiar de PK; rueda = zoom en PK;
+    exageración vertical automática o fija.
+  - **Sección** en el PK: corte vertical de todo lo visible (superficies, capas de firme, tuberías, estructuras, Revit...) con sus
+    colores, cotas de rasante y terreno en el eje y ficha con PK, cotas, desmonte/terraplén y áreas si hay dos superficies. Lo que
+    se oculta o filtra por categoría en el modelo desaparece también de la sección.
+    - **Clic en una capa o elemento** de la sección: se selecciona (también en el 3D y la planta) y se abre el panel de
+      propiedades a la derecha (✕ o Esc lo cierra; Ctrl+clic añade). La ficha añade su nombre, subensamblaje y capa, el área en
+      la sección, el ancho, el espesor medio y, en el eje, las cotas de cara superior e inferior y el espesor.
+    - **Rótulos** (Aa): el nombre de cada capa dentro de ella si cabe, y el de cada superficie junto a su línea.
+    - **Medir** en la sección: clic en dos puntos con imán a vértices y bordes (también rasante y terreno en el eje). Da la
+      distancia, la horizontal, la vertical y la pendiente en %. Mayús = horizontal o vertical; clic derecho borra la última;
+      Esc termina. Las cotas se quitan al cambiar de PK.
+  - Barra de PK: deslizador, anterior / siguiente sección, **reproducir** (recorre el eje a la velocidad elegida), PK escrito
+    (0+100 o 100), flechas ← → del teclado.
+  - **Tramo** (debajo del eje): de PK a PK. Se ve en la planta (eje resaltado) y en el perfil (fuera del tramo, sombreado) y lo usan
+    la cubicación, la medición y la impresión de secciones. Al poner un tramo, la Medición pasa a medir solo ese tramo
+    (±ancho de sección del eje); con "Todo" vuelve a medir todo. Cambiar el tramo en la barra de la Medición también lo cambia aquí.
+  - **Imprimir secciones** (pestaña Cubicación o botón *Imprimir* de la sección; solo en el modo Civil): secciones transversales a
+    escala (1:100 a 1:1000, exageración vertical opcional) cada X metros, con los PK de la geometría si se quiere, en A4, A3 o A1.
+    Cada sección lleva su PK, cuadrícula con el plano de comparación, el eje, el nombre de cada capa, las cotas de rasante y terreno
+    en el eje, la guitarra con las cotas de terreno y rasante cada X m, las áreas de desmonte y terraplén y el área de cada capa.
+    Cajetín con proyecto, eje, tramo, escala, hoja y fecha. **PDF** para imprimir o **DXF** (R12) para CAD: en metros reales
+    (1 unidad = 1 m), una capa por cada capa del firme o superficie y capas para eje, cotas, guitarra, rótulos y marco.
+    Sale lo visible: lo oculto en el modelo o por categoría no aparece.
+  - **Ortofoto** en la planta (pestaña Ortofoto o botón *Orto*): ICV 2023 de la Comunitat Valenciana (25 cm), PNOA máxima actualidad
+    del IGN, Catastro (transparente), otro servidor WMS o una imagen propia con su archivo de coordenadas (.jgw, .pgw, .wld).
+    La automática usa el ICV dentro de la Comunitat y el PNOA fuera. Se pide al servidor la zona que se ve, con la resolución de la
+    pantalla, y se vuelve a pedir al mover o hacer zoom. Encima del modelo con transparencia o debajo (ocultando las superficies
+    de terreno). Hay que indicar el sistema de coordenadas de los modelos (ETRS89 UTM 30N por defecto). Funciona también sin ejes
+    (edificios, urbanizaciones sin obra lineal). Si el dibujo está en coordenadas locales se puede poner el desplazamiento
+    (ΔX, ΔY) hasta las reales; si las coordenadas no son UTM de España, avisa en la planta en vez de pedir una imagen en blanco.
+- **Medición por tramo de PK** (ámbito "Tramo de PK" de la Medición, o "Medición del tramo" en el modo Civil): solo lo que hay entre
+  dos PK de un eje y a menos de X m de él. Cada elemento cuenta en la parte proporcional que cae dentro del tramo (longitud, área,
+  volumen, peso y fórmulas), calculada con sus triángulos proyectados sobre el eje: una capa de firme de 0+000 a 0+200 medida de
+  0+040 a 0+120 cuenta el 40 %. Las unidades (ud) cuentan los elementos cuyo centro cae en el tramo. Sirve para certificar por tramos.
+  - Necesita exportar con el add-in de Civil 3D v1.5 para la geometría en planta (hoja *EjesGeometria*) y los vértices del perfil
+    (hoja *Perfiles*); con exportaciones anteriores funciona igual sin esa tabla ni los PVI.
 - Carpeta de proyectos (Chrome / Edge): se elige una vez una carpeta (por ejemplo, la de SharePoint sincronizada con
   OneDrive) con una subcarpeta por proyecto, y el visor la recuerda. "Proyectos" lista las subcarpetas con modelos .dae
   y se abren con un clic (también "Abrir «último proyecto»" en la pantalla de inicio).
@@ -129,7 +175,7 @@ Para planos DWG y DXF está el **BECSA Visor 2D**, en su propio repo (`Visor2D`)
 
 - `index.html`: página de selección de visor (BECSA Visor BIM)
 - `ifc/index.html`: visor IFC
-- `revit/index.html`: visor Revit (three.js desde CDN; SheetJS se carga en segundo plano)
+- `revit/index.html`: Visor BIM (three.js desde CDN; SheetJS se carga en segundo plano)
 - `revit/macro/ExportadorVisor.cs`: macro de Revit que exporta DAE + XLSX
 - `revit/civil3d/`: add-in de Civil 3D 2027 que exporta DAE + XLSX con el mismo formato (`build.bat` compila e instala)
 - `revit/ejemplo/`: tres modelos ficticios (arquitectura, estructura e instalaciones) con orígenes distintos con «Fase de creación» y «Certificación» (meses 13-15) para probar los filtros, y un BC3 de prueba (`Ejemplo_banco.bc3`)
