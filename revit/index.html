@@ -68,6 +68,20 @@ aside.left{grid-column:1} #center{grid-column:2} aside.right{grid-column:3}
 .ftipos-l .ft-c{color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px}
 #fReglas[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#1d2228}
 .bq-n{font-weight:600;color:var(--ink);margin:4px 0}
+.tbtn{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:2px;color:var(--muted);padding:1px 3px;border-radius:4px;margin-left:4px;font-size:11px;font-variant-numeric:tabular-nums}
+.tbtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.4}.tbtn svg path{fill:currentColor;stroke:none}
+.tbtn:hover{background:var(--soft);color:var(--ink)}.tbtn.on{color:#1E88E5}
+.btn.on-trans{border-color:#1E88E5;color:#1E88E5}
+.pop-trans{position:fixed;z-index:50;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:8px 10px;width:230px;font-size:13px}
+.pop-trans .pt-t{font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pop-trans .pt-r{display:flex;align-items:center;gap:8px}.pop-trans .pt-r input{flex:1}.pop-trans .pt-r b{width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.pop-trans .pt-p{display:flex;gap:4px;margin-top:6px}.pop-trans .pt-p button{flex:1;border:1px solid var(--line);background:var(--soft);border-radius:5px;padding:2px 0;font-size:12px;cursor:pointer;color:var(--ink)}
+.nube-h{font-size:13.5px;margin:12px 0 6px;color:var(--ink)}
+.sw.nube-sw{background:repeating-radial-gradient(circle,#6b7580 0 1.5px,transparent 1.5px 4px)!important;border:1px solid var(--line)}
+.nube-ctl{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;margin-top:6px;font-size:12.5px;color:var(--muted)}
+.nube-ctl label{display:flex;flex-direction:column;gap:2px}
+.nube-ctl label:last-child{grid-column:1 / -1}
+.nube-ctl select{font-size:12.5px;padding:3px 6px}
 .seg.mmodo button{padding:3px 10px;font-size:13px}
 #props td.prop-sec{font-weight:700;padding-top:10px;color:var(--ink);border-bottom:1px solid var(--line)}
 .bq-bots .btn{overflow:hidden;text-overflow:ellipsis}
@@ -89,7 +103,7 @@ input[type=text],select{width:100%;padding:6px 9px;border:1px solid var(--line);
 .m-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .m-meta{color:var(--muted);font-size:13px;margin:2px 0 0 28px;font-variant-numeric:tabular-nums}
 .m-warn{color:var(--warn);font-size:13px;margin:2px 0 0 28px}
-.m-actions{display:flex;gap:6px;margin:6px 0 0 28px}
+.m-actions{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0 28px}
 .bar{height:4px;background:var(--soft);border-radius:2px;margin:6px 0 0 28px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--accent);width:0}
 
@@ -223,8 +237,11 @@ input[type=text],select{width:100%;padding:6px 9px;border:1px solid var(--line);
 #selBox{position:absolute;border:1.5px solid var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);pointer-events:none;z-index:4}
 #selBox.cross{border-style:dashed;border-color:#2f9a48;background:color-mix(in srgb,#2f9a48 10%,transparent)}
 #selBox.minus{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,transparent)}
-.ms-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.ms-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px}
 .ms-btns .btn{width:100%;padding-left:4px;padding-right:4px}
+#singleBtns{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+#singleBtns .btn,.ms-btns .btn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#msTrans{grid-column:span 2}
 .ms-total{margin:8px 0 0;font-size:13.5px;font-variant-numeric:tabular-nums}
 .ms-total b{font-weight:700}
 .ms-list{list-style:none;margin:10px 0 0;padding:0;max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:8px}
@@ -480,6 +497,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
 .fx-lista tbody tr{cursor:copy}
 .fx-lista tbody tr:hover{background:var(--soft)}
 .fx-lista tr.tipo td:first-child{color:#2563C9}
+.fx-lista tr.mat td:first-child{color:#1E7D45;font-weight:600}
 .fx-f{width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--soft);font:13px/1.4 ui-monospace,Consolas,monospace;resize:vertical}
 .fx-ayuda{font-size:12px;margin:6px 0}
 .fx-ud{max-width:160px}
@@ -523,7 +541,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
   </div>
   <button class="btn primary" id="projBtn" title="Abrir un proyecto de la carpeta de proyectos">Proyectos</button>
   <button class="btn" id="openBtn">Añadir modelos</button>
-  <input type="file" id="fileInput" accept=".dae,.xlsx,.xls,.csv" multiple hidden>
+  <input type="file" id="fileInput" accept=".dae,.xlsx,.xls,.csv,.las,.laz" multiple hidden>
   <button class="btn pbtn" id="btnRight" aria-pressed="true" title="Mostrar u ocultar el panel de propiedades"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg></button>
 </header>
 
@@ -596,6 +614,15 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
     <section>
       <h2>Modelos</h2>
       <ul class="models" id="models"><li class="muted">Añade el .dae y el .xlsx de cada modelo. Se colocan solos por sus coordenadas.</li></ul>
+      <div id="nubeBox" hidden>
+        <h3 class="nube-h">Nubes de puntos</h3>
+        <ul class="models" id="nubes"></ul>
+        <div class="nube-ctl">
+          <label>Color<select id="nubeModo"><option value="rgb">Color real (RGB)</option><option value="altura">Por altura</option><option value="intensidad">Intensidad</option><option value="clase">Clasificación</option></select></label>
+          <label>Puntos en pantalla<select id="nubePres"><option value="1000000">1 millón</option><option value="2000000">2 millones</option><option value="3000000">3 millones</option><option value="5000000">5 millones</option><option value="8000000">8 millones</option></select></label>
+          <label>Tamaño de punto<input type="range" id="nubeTam" min="1" max="6" step="0.5"></label>
+        </div>
+      </div>
     </section>
     <section>
       <h2>Buscar elementos</h2>
@@ -642,7 +669,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
           <button class="btn primary" id="projOpen">Elegir carpeta...</button>
         </div>
         <div class="or">o bien</div>
-        <p>Arrastra aquí el .dae y el .xlsx de cada modelo, con el mismo nombre. Se leen en tu navegador: no se suben a ningún sitio.</p>
+        <p>Arrastra aquí el .dae y el .xlsx de cada modelo, con el mismo nombre, y las nubes de puntos en .las o .laz. Se leen en tu navegador: no se suben a ningún sitio.</p>
         <div class="row" style="justify-content:center">
           <button class="btn" id="openBtn2">Añadir modelos</button>
           <button class="btn" id="demoBtn">Probar con el ejemplo</button>
@@ -768,6 +795,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
           <button class="btn small" id="msMeasure" title="Abrir la medición solo con los elementos seleccionados">Medir selección</button>
           <button class="btn small" id="msXlsx" title="Resumen por tipo y lista de elementos">Excel</button>
           <button class="btn small" id="msClear">Deseleccionar</button>
+          <button class="btn small" id="msTrans" title="Transparencia de los elementos seleccionados (T)">Transparencia</button>
         </div>
         <ul class="ms-list" id="msList"></ul>
         <p class="muted ms-help">Clic en una fila para quedarte solo con ese tipo. <kbd>Ctrl</kbd>+clic en el modelo para añadir o quitar elementos.</p>
@@ -781,6 +809,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
           <button class="btn small" id="zoomSel">Encuadrar</button>
           <button class="btn small" id="hideSel">Ocultar</button>
           <button class="btn small" id="isoSel">Aislar</button>
+          <button class="btn small" id="transSel" title="Transparencia del elemento (T)">Transparencia</button>
         </div>
         <div class="row"><input type="text" id="propFilter" placeholder="Filtrar parámetros" aria-label="Filtrar parámetros"></div>
         <table><tbody id="props"></tbody></table>
@@ -1155,7 +1184,11 @@ function workerMain(){
   const matGhost = new THREE.MeshLambertMaterial({ color:0x9aa5ab, transparent:true, opacity:0.07, depthWrite:false, side:THREE.DoubleSide });
   const matSel = new THREE.MeshLambertMaterial({ color:0xF2B705, emissive:0x3a2a00, side:THREE.DoubleSide });
   const matEdge = new THREE.LineBasicMaterial({ color:0x3A4A54, transparent:true, opacity:0.5 });
-  const MATS = [matMain, matGhost, matSel, matEdge];
+  // Transparencia por elemento: nivel k = 1..9 -> opacidad k/10 (0 = sin cambio). Una malla por nivel y bloque, solo si hace falta.
+  const MAT_TRANS = [null];
+  for (let k = 1; k <= 9; k++) MAT_TRANS.push(new THREE.MeshLambertMaterial({ vertexColors:true, transparent:true, opacity:k / 10, depthWrite:false, side:THREE.DoubleSide }));
+  const matSelT = new THREE.MeshLambertMaterial({ color:0xF2B705, emissive:0x3a2a00, side:THREE.DoubleSide, transparent:true, opacity:0.45, depthWrite:false });   // seleccionado y transparente
+  const MATS = [matMain, matGhost, matSel, matEdge, matSelT].concat(MAT_TRANS.slice(1));
 
   const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   function applyTheme(){
@@ -1169,7 +1202,7 @@ function workerMain(){
   function requestRender(){
     if (pending) return;
     pending = true;
-    requestAnimationFrame(() => { pending = false; renderer.render(scene, camera); updateDims(); updatePK(); try { renderPlanta(); } catch(err){} });
+    requestAnimationFrame(() => { pending = false; try { lodNubes(); } catch(err){} renderer.render(scene, camera); updateDims(); updatePK(); try { renderPlanta(); } catch(err){} });
   }
   controls.addEventListener("change", requestRender);
 
@@ -1206,10 +1239,11 @@ function workerMain(){
       const ext = f.name.split(".").pop().toLowerCase();
       const k = keyOf(f.name);
       if (!groups.has(k)) groups.set(k, { name:stemOf(f.name) });
+      if (ext === "las" || ext === "laz"){ cargarNube(f); return; }
       if (ext === "dae") groups.get(k).dae = f;
       else if (ext === "xlsx" || ext === "xls" || ext === "csv") groups.get(k).data = f;
     });
-    if (!groups.size){ toast("Añade archivos .dae y .xlsx exportados de Revit o de Civil 3D."); return; }
+    if (!groups.size){ if (!Array.from(list || []).some(f => /\.la[sz]$/i.test(f.name))) toast("Añade archivos .dae y .xlsx exportados de Revit o de Civil 3D, o nubes de puntos .las / .laz."); return; }
     groups.forEach((g, k) => {
       if (g.dae){
         const old = S.models.find(m => m.key === k);
@@ -1322,6 +1356,7 @@ function workerMain(){
     m.hidden = new Uint8Array(m.n);
     m.match = new Uint8Array(m.n);
     m.catIdx = new Int32Array(m.n);
+    m.opac = new Uint8Array(m.n);
     m.tris = 0;
     if (!S.sceneOrigin) S.sceneOrigin = m.origin.slice();
     const d = [m.origin[0] - S.sceneOrigin[0], m.origin[1] - S.sceneOrigin[1], m.origin[2] - S.sceneOrigin[2]];
@@ -1368,13 +1403,13 @@ function workerMain(){
     if (i >= 0) S.models.splice(i, 1);
     if (m.group){
       scene.remove(m.group);
-      m.chunks.forEach(c => [c.main, c.ghost, c.sel, c.edges].forEach(o => o.geometry.dispose()));
+      m.chunks.forEach(c => [c.main, c.ghost, c.sel, c.edges].concat((c.trans || []).filter(Boolean)).forEach(o => o.geometry.dispose()));
     }
     m.chunks = null; m.data = null; m.group = null;
     if (S.sel && S.sel.m === m) S.sel = null;
     S.selSet.delete(m.id);
     if (S.isolate) S.isolate.delete(m.id);
-    if (!S.models.some(mm => mm.ready)) S.sceneOrigin = null;
+    if (!S.models.some(mm => mm.ready) && !NUBE.lista.some(nb => nb.listo)) S.sceneOrigin = null;
     onModelsChanged(false);
     if (!S.models.length){ $("empty").hidden = false; $("toolbar").hidden = true; clearCuts(); setCut(false); cerrarProyecto(); pintarInicio(); }
   }
@@ -1448,12 +1483,14 @@ function workerMain(){
       const mainA = c.main.geometry.index, ghostA = c.ghost.geometry.index, edgeA = c.edges.geometry.index;
       const MI = mainA.array, GI = ghostA.array, EI = edgeA.array, F = c.full, FE = c.fullEdge;
       let nm = 0, ng = 0, ne = 0, selN = 0;
-      const selR = [];
+      const selR = [], trR = [[], [], [], [], [], [], [], [], [], []], trN = new Array(10).fill(0);
       for (let e = c.elFirst; e < c.elEnd; e++){
         const st = stateOf(m, e);
         if (!st) continue;
         const t0 = m.elT[e] * 3, tn = m.elTN[e] * 3;
-        if (st === 1){
+        if (st === 1 && m.opac[e]){ const k = m.opac[e]; trR[k].push(t0, tn); trN[k] += tn; }
+        else if (st === 3 && m.opac[e]){ trR[0].push(t0, tn); trN[0] += tn; }
+        else if (st === 1){
           MI.set(F.subarray(t0, t0 + tn), nm); nm += tn;
           const e0 = m.elE[e] * 2, en = m.elEN[e] * 2;
           if (en){ EI.set(FE.subarray(e0, e0 + en), ne); ne += en; }
@@ -1473,7 +1510,36 @@ function workerMain(){
         for (let k = 0, o = 0; k < selR.length; k += 2){ sa.array.set(F.subarray(selR[k], selR[k] + selR[k + 1]), o); o += selR[k + 1]; }
         setDraw(c.sel, sa, selN);
       } else c.sel.visible = false;
+      // mallas transparentes
+      for (let k = 0; k <= 9; k++){   // 0 = seleccionados transparentes
+        if (!trN[k]){ if (c.trans && c.trans[k]) c.trans[k].visible = false; continue; }
+        const tm = mallaTrans(m, c, k);
+        let ta = tm.geometry.index;
+        if (ta.array.length < trN[k]){ tm.geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(Math.max(trN[k], ta.array.length * 2)), 1)); ta = tm.geometry.index; ta.setUsage(THREE.DynamicDrawUsage); }
+        for (let q = 0, o = 0; q < trR[k].length; q += 2){ ta.array.set(F.subarray(trR[k][q], trR[k][q] + trR[k][q + 1]), o); o += trR[k][q + 1]; }
+        setDraw(tm, ta, trN[k]);
+      }
     });
+  }
+  function mallaTrans(m, c, k){
+    if (!c.trans) c.trans = [];
+    if (c.trans[k]) return c.trans[k];
+    const mg = c.main.geometry, g = new THREE.BufferGeometry();
+    g.setAttribute("position", mg.getAttribute("position")); g.setAttribute("normal", mg.getAttribute("normal")); g.setAttribute("color", mg.getAttribute("color"));
+    g.setIndex(new THREE.BufferAttribute(new Uint32Array(1024), 1)); g.index.setUsage(THREE.DynamicDrawUsage);
+    g.boundingBox = mg.boundingBox; g.boundingSphere = mg.boundingSphere;
+    const t = new THREE.Mesh(g, k ? MAT_TRANS[k] : matSelT); t.renderOrder = 3; t.visible = false;
+    m.group.add(t); c.trans[k] = t;
+    return t;
+  }
+  // nivel (0..9) a partir de un % de transparencia (0 = opaco)
+  const nivelTrans = pct => { const t = Math.round(Math.max(0, Math.min(90, pct)) / 10); return t ? 10 - t : 0; };
+  const pctTrans = k => k ? (10 - k) * 10 : 0;
+  function ponerTransparencia(lista, pct){   // lista = [m, e, m, e, ...]
+    const k = nivelTrans(pct), afect = new Set();
+    for (let i = 0; i < lista.length; i += 2){ const m = lista[i], e = lista[i + 1]; m.opac[e] = k; afect.add(m); }
+    afect.forEach(m => rebuild(m));
+    requestRender(); try { civRefrescarCorte(); } catch (err) {}
   }
   function setDraw(mesh, attr, count){
     attr.updateRange.offset = 0; attr.updateRange.count = count;
@@ -1505,6 +1571,7 @@ function workerMain(){
       if (!m.ready || !m.visible) return;
       m.chunks.forEach(c => { const b = c.main.geometry.boundingBox.clone().translate(m.group.position); S.bounds.union(b); });
     });
+    try { NUBE.lista.forEach(nb => { if (nb.listo && nb.visible) nb.celdas.forEach(c => { S.bounds.expandByPoint(c.centro.clone().addScalar(-c.radio)); S.bounds.expandByPoint(c.centro.clone().addScalar(c.radio)); }); }); } catch (err) {}
   }
 
   // ---------- UI de modelos ----------
@@ -1554,6 +1621,15 @@ function workerMain(){
         z.addEventListener("click", () => { const b = new THREE.Box3(); m.chunks.forEach(c => b.union(c.main.geometry.boundingBox.clone().translate(m.group.position))); fitTo(b); });
         act.append(z);
       }
+      if (m.ready){
+        const tr = document.createElement("button"); tr.className = "btn small" + (m.trans ? " on-trans" : ""); tr.textContent = m.trans ? "Transp. " + m.trans + " %" : "Transp.";
+        tr.title = "Transparencia de todo el modelo (para ver la nube de puntos u otros modelos a través)";
+        tr.addEventListener("click", () => abrirTransparencia(tr, m.trans || 0, "Transparencia · " + m.name, v => {
+          m.trans = v; m.opac.fill(nivelTrans(v)); rebuild(m); requestRender(); try { civRefrescarCorte(); } catch (err) {}
+          tr.textContent = v ? "Transp. " + v + " %" : "Transp."; tr.classList.toggle("on-trans", !!v);
+        }));
+        act.append(tr);
+      }
       const rm = document.createElement("button"); rm.className = "btn small"; rm.textContent = "Quitar";
       rm.title = "Quitar el modelo y liberar memoria";
       rm.addEventListener("click", () => removeModel(m));
@@ -1588,13 +1664,41 @@ function workerMain(){
       const nm = document.createElement("span"); nm.className = "name"; nm.textContent = c.name; nm.title = c.name;
       label.append(cb, sw, nm);
       const ct = document.createElement("span"); ct.className = "count"; ct.textContent = fmtInt(c.count);
-      li.append(label, ct);
+      const tb = document.createElement("button"); tb.className = "tbtn" + (c.trans ? " on" : ""); tb.title = "Transparencia de la categoría";
+      tb.innerHTML = '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 2a6 6 0 0 1 0 12z"/></svg>' + (c.trans ? "<i>" + c.trans + "</i>" : "");
+      tb.addEventListener("click", ev => { ev.preventDefault(); abrirTransparencia(tb, c.trans || 0, "Transparencia · " + c.name, v => {
+        c.trans = v; const L = [];
+        S.models.forEach(m => { if (!m.ready) return; for (let e = 0; e < m.n; e++) if (S.cats[m.catIdx[e]] === c) L.push(m, e); });
+        ponerTransparencia(L, v);
+        tb.classList.toggle("on", !!v); tb.querySelector("i") ? (v ? tb.querySelector("i").textContent = v : tb.querySelector("i").remove()) : (v && tb.insertAdjacentHTML("beforeend", "<i>" + v + "</i>"));
+      }); });
+      li.append(label, ct, tb);
       ul.append(li);
     });
   }
 
 
   function setAllCats(v){ S.cats.forEach(c => c.visible = v); renderCats(); rebuildAll(); }
+  // Ventanita con el deslizador de transparencia junto a un botón
+  let popTrans = null;
+  function abrirTransparencia(boton, valor, titulo, alCambiar){
+    if (popTrans){ popTrans.remove(); const era = popTrans._b; popTrans = null; if (era === boton) return; }
+    const d = document.createElement("div"); d.className = "pop-trans"; d._b = boton;
+    d.innerHTML = `<div class="pt-t"></div><div class="pt-r"><input type="range" min="0" max="90" step="10" aria-label="Transparencia"><b></b></div><div class="pt-p"><button data-v="0">Opaco</button><button data-v="50">50 %</button><button data-v="70">70 %</button><button data-v="90">90 %</button></div>`;
+    d.querySelector(".pt-t").textContent = titulo;
+    const rg = d.querySelector("input"), out = d.querySelector("b");
+    const fijar = v => { rg.value = v; out.textContent = v + " %"; alCambiar(+v); };
+    rg.value = valor; out.textContent = valor + " %";
+    rg.addEventListener("input", () => fijar(rg.value));
+    d.querySelectorAll(".pt-p button").forEach(b => b.addEventListener("click", () => fijar(b.dataset.v)));
+    document.body.append(d);
+    const r = boton.getBoundingClientRect();
+    d.style.left = Math.min(window.innerWidth - d.offsetWidth - 8, Math.max(8, r.left)) + "px";
+    d.style.top = Math.min(window.innerHeight - d.offsetHeight - 8, r.bottom + 4) + "px";
+    popTrans = d;
+    setTimeout(() => document.addEventListener("pointerdown", function fuera(ev){ if (!d.contains(ev.target) && ev.target !== boton){ d.remove(); if (popTrans === d) popTrans = null; document.removeEventListener("pointerdown", fuera); } }), 0);
+  }
+  const textoTrans = pct => pct ? pct + " %" : "";
 
   // ---------- Cámara ----------
   function updateOrthoFrustum(){
@@ -1804,7 +1908,7 @@ function workerMain(){
     if (!down) return;
     const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
     down = null;
-    if (moved > 5 || !S.models.some(m => m.ready)) return;
+    if (moved > 5 || (!S.models.some(m => m.ready) && !NUBE.lista.some(nb => nb.listo))) return;
     if (WALK.on && WALK.placing){ walkPuntoDesdeClic(e.clientX, e.clientY); return; }
     if (DIM.on){ dimClick(e.clientX, e.clientY); return; }
     const hit = pick(e.clientX, e.clientY);
@@ -2117,7 +2221,9 @@ function workerMain(){
   }
   function showAll(){
     S.isolate = null;
-    S.models.forEach(m => { if (m.ready) m.hidden.fill(0); });
+    S.models.forEach(m => { if (m.ready){ m.hidden.fill(0); m.opac.fill(0); m.trans = 0; } });
+    S.cats.forEach(c => c.trans = 0);
+    renderModels();
     S.cats.forEach(c => c.visible = true);
     renderCats();
     rebuildAll();
@@ -2346,13 +2452,25 @@ function workerMain(){
     return [A, B];
   }
   const SNAP_RING = [[5,0],[-5,0],[0,5],[0,-5],[4,4],[-4,4],[4,-4],[-4,-4],[9,0],[-9,0],[0,9],[0,-9],[7,7],[-7,7],[7,-7],[-7,-7]];
+  let snapTrans = false;   // el último elemento tocado por el imán es transparente
   function snapPick(clientX, clientY){
+    const r = renderer.domElement.getBoundingClientRect();
+    const mx = clientX - r.left, my = clientY - r.top;
+    const pn = snapNube(mx, my, r);   // punto de nube de puntos más cercano al cursor
+    const s = snapModelo(clientX, clientY, r, mx, my);
+    if (!pn) return s;
+    if (!s) return { point:pn.point, kind:"vertex" };
+    if (snapTrans) return { point:pn.point, kind:"vertex" };   // lo transparente deja medir la nube que hay detrás
+    if (s.kind !== "face") return s;   // vértices y aristas del modelo mandan
+    const zs = s.point.clone().project(camera).z;
+    return pn.z < zs ? { point:pn.point, kind:"vertex" } : s;
+  }
+  function snapModelo(clientX, clientY, r, mx, my){
     let hit = pick(clientX, clientY);
     // justo en el borde del modelo el rayo puede no tocar nada: se busca alrededor para que el imán llegue a esquinas y contornos
     for (let i = 0; !hit && i < SNAP_RING.length; i++) hit = pick(clientX + SNAP_RING[i][0], clientY + SNAP_RING[i][1]);
+    snapTrans = !!(hit && hit.m.opac[hit.e]);
     if (!hit) return null;
-    const r = renderer.domElement.getBoundingClientRect();
-    const mx = clientX - r.left, my = clientY - r.top;
     const m = hit.m, e = hit.e, c = m.chunks[m.elC[e]], P = c.pos, E = c.fullEdge, off = m.group.position;
     const e0 = m.elE[e] * 2, en = m.elEN[e] * 2;
     const scr = p => { _v.copy(p).project(camera); return [(_v.x + 1) / 2 * r.width, (1 - _v.y) / 2 * r.height]; };
@@ -2411,7 +2529,7 @@ function workerMain(){
 
   // ---------- Ventana Medir: distancias y ángulos ----------
   function setDim(on, modo){
-    if (on && !S.models.some(m => m.ready)){ toast("Carga primero un modelo."); return; }
+    if (on && !S.models.some(m => m.ready) && !NUBE.lista.some(nb => nb.listo)){ toast("Carga primero un modelo."); return; }
     if (on && CUT.picking) cancelCutPick();
     if (on && WALK.on) setWalk(false);
     if (modo) DIM.mode = modo;
@@ -5196,6 +5314,324 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
     return { nombre:"Presupuesto", filas, anchos:[11.1, 6.6, 6.7, 33.1, 71.7, 13.4, 8.4, 8.1, 7.7, 23.8, 8.4, 9.5, 10.5, 4.1, 11.6], fijar:3, vertical:true };
   }
 
+  // ---------- Nubes de puntos (LAS / LAZ georreferenciadas) ----------
+  // Se leen en segundo plano; los puntos se reparten en celdas del espacio y, dentro de cada celda, en orden aleatorio:
+  // así, dibujar los N primeros de una celda es una muestra uniforme y se ajusta el detalle a la distancia (presupuesto de puntos).
+  const LAZPERF_URL = "https://cdn.jsdelivr.net/npm/laz-perf@0.0.6/lib/worker/laz-perf.js";
+  const NUBE = { lista:[], seq:0, presupuesto:3e6, tam:2, modo:"rgb", worker:null };
+  try { Object.assign(NUBE, JSON.parse(localStorage.getItem("visor-bim-nube") || "{}"), { lista:[], seq:0, worker:null }); } catch (err) {}
+  const NUBE_MAX = 25e6;   // puntos que se cargan como máximo (si hay más, se toma uno de cada n)
+
+  function nubeWorkerMain(){
+    "use strict";
+    let lazMod = null;
+    const tdec = new TextDecoder("latin1");
+    const cad = (dv, o, n) => tdec.decode(new Uint8Array(dv.buffer, dv.byteOffset + o, n)).replace(/\0.*$/, "");
+    function cabecera(dv){
+      if (cad(dv, 0, 4) !== "LASF") throw new Error("No es un archivo LAS/LAZ");
+      const h = { vMaj:dv.getUint8(24), vMin:dv.getUint8(25), hdrSize:dv.getUint16(94, true), off:dv.getUint32(96, true), nVlr:dv.getUint32(100, true),
+        fmtRaw:dv.getUint8(104), recLen:dv.getUint16(105, true), n:dv.getUint32(107, true),
+        sx:dv.getFloat64(131, true), sy:dv.getFloat64(139, true), sz:dv.getFloat64(147, true),
+        ox:dv.getFloat64(155, true), oy:dv.getFloat64(163, true), oz:dv.getFloat64(171, true),
+        maxX:dv.getFloat64(179, true), minX:dv.getFloat64(187, true), maxY:dv.getFloat64(195, true), minY:dv.getFloat64(203, true), maxZ:dv.getFloat64(211, true), minZ:dv.getFloat64(219, true) };
+      h.fmt = h.fmtRaw & 0x3F; h.laz = (h.fmtRaw & 0xC0) !== 0;
+      if (h.vMin >= 4 && dv.byteLength >= 255){ const n64 = Number(dv.getBigUint64(247, true)); if (n64 > 0) h.n = n64; }
+      // VLR: sistema de coordenadas (GeoKeys o WKT) y si es LAZ
+      let p = h.hdrSize; h.epsg = 0; h.epsgV = 0; h.wkt = "";
+      for (let i = 0; i < h.nVlr && p + 54 <= dv.byteLength; i++){
+        const user = cad(dv, p + 2, 16), rid = dv.getUint16(p + 18, true), len = dv.getUint16(p + 20, true), d0 = p + 54;
+        if (user === "LASF_Projection" && rid === 34735 && d0 + len <= dv.byteLength){
+          const nk = dv.getUint16(d0 + 6, true);
+          for (let k = 0; k < nk; k++){
+            const b = d0 + 8 + k * 8, id = dv.getUint16(b, true), loc = dv.getUint16(b + 2, true), val = dv.getUint16(b + 6, true);
+            if (loc === 0 && id === 3072) h.epsg = val; else if (loc === 0 && id === 4096) h.epsgV = val;
+          }
+        } else if (user === "LASF_Projection" && rid === 2112 && d0 + len <= dv.byteLength){
+          h.wkt = cad(dv, d0, len);
+          const m = /AUTHORITY\["EPSG","(\d+)"\]\]\s*$/.exec(h.wkt) || /ID\["EPSG",(\d+)\]\]\s*$/.exec(h.wkt);
+          if (m && !h.epsg) h.epsg = +m[1];
+        } else if (user === "laszip encoded") h.laz = true;
+        p = d0 + len;
+      }
+      const rgbOff = { 2:20, 3:28, 5:28, 7:30, 8:30, 10:30 };
+      h.rgb = rgbOff[h.fmt] ?? -1;
+      h.cls = h.fmt >= 6 ? 16 : 15;
+      return h;
+    }
+    self.onmessage = async ev => {
+      const { file, origen, maxPts } = ev.data;
+      try {
+        const h = cabecera(new DataView(await file.slice(0, Math.min(file.size, 1 << 20)).arrayBuffer()));
+        if (h.off > (1 << 20)){ const dv2 = new DataView(await file.slice(0, h.off).arrayBuffer()); Object.assign(h, cabecera(dv2)); }
+        const N = h.n, paso = Math.max(1, Math.ceil(N / maxPts)), nOut = Math.ceil(N / paso);
+        const o = origen || [Math.round((h.minX + h.maxX) / 2), Math.round((h.minY + h.maxY) / 2), Math.round(h.minZ)];
+        const pos = new Float32Array(nOut * 3), col16 = h.rgb >= 0 ? new Uint16Array(nOut * 3) : null, inten = new Uint16Array(nOut), cls = new Uint8Array(nOut);
+        let k = 0, rgbMax = 0;
+        const bx = h.ox - o[0], by = h.oy - o[1], bz = h.oz - o[2];
+        const leer = (dv, b) => {
+          const X = dv.getInt32(b, true) * h.sx + bx, Y = dv.getInt32(b + 4, true) * h.sy + by, Z = dv.getInt32(b + 8, true) * h.sz + bz;
+          pos[3*k] = X; pos[3*k+1] = Z; pos[3*k+2] = -Y;   // misma convención que los modelos: Y arriba
+          inten[k] = dv.getUint16(b + 12, true);
+          cls[k] = h.fmt >= 6 ? dv.getUint8(b + h.cls) : (dv.getUint8(b + h.cls) & 31);
+          if (col16){
+            const r = dv.getUint16(b + h.rgb, true), g = dv.getUint16(b + h.rgb + 2, true), bl = dv.getUint16(b + h.rgb + 4, true);
+            if (r > rgbMax) rgbMax = r; if (g > rgbMax) rgbMax = g; if (bl > rgbMax) rgbMax = bl;
+            col16[3*k] = r; col16[3*k+1] = g; col16[3*k+2] = bl;
+          }
+          k++;
+        };
+        let t0 = performance.now();
+        const avisar = (i) => { const t = performance.now(); if (t - t0 > 150){ t0 = t; self.postMessage({ tipo:"progreso", p:i / N }); } };
+        if (!h.laz){
+          const porTrozo = Math.max(1, Math.floor((8 << 20) / h.recLen));
+          for (let i = 0; i < N; i += porTrozo){
+            const nn = Math.min(porTrozo, N - i), a = h.off + i * h.recLen;
+            const dv = new DataView(await file.slice(a, a + nn * h.recLen).arrayBuffer());
+            for (let j = 0; j < nn; j++){ if ((i + j) % paso === 0 && k < nOut) leer(dv, j * h.recLen); }
+            avisar(i + nn);
+          }
+        } else {
+          if (!lazMod){
+            importScripts(ev.data.lazUrl);
+            lazMod = await createLazPerf({ locateFile:p => ev.data.lazUrl.replace(/[^/]+$/, "") + p });
+          }
+          const buf = new Uint8Array(await file.arrayBuffer());
+          const ptr = lazMod._malloc(buf.length); lazMod.HEAPU8.set(buf, ptr);
+          const lz = new lazMod.LASZip(); lz.open(ptr, buf.length);
+          const rl = lz.getPointLength(), pp = lazMod._malloc(rl);
+          try {
+            for (let i = 0; i < N; i++){
+              lz.getPoint(pp);
+              if (i % paso === 0 && k < nOut) leer(new DataView(lazMod.HEAPU8.buffer, pp, rl), 0);
+              if ((i & 65535) === 0) avisar(i);
+            }
+          } finally { lz.delete(); lazMod._free(pp); lazMod._free(ptr); }
+        }
+        const n = k;
+        // color: el estándar es de 16 bits, pero hay programas que lo guardan en 8
+        let col = null;
+        if (col16){ col = new Uint8Array(n * 3); const sh = rgbMax > 255 ? 8 : 0; for (let i = 0; i < n * 3; i++) col[i] = col16[i] >> sh; }
+        // celdas: tamaño para unos 120.000 puntos por celda; dentro de cada celda, orden aleatorio
+        let mn = [Infinity, Infinity, Infinity], mx = [-Infinity, -Infinity, -Infinity];
+        for (let i = 0; i < n; i++) for (let c = 0; c < 3; c++){ const v = pos[3*i+c]; if (v < mn[c]) mn[c] = v; if (v > mx[c]) mx[c] = v; }
+        const ext = [0, 1, 2].map(c => Math.max(1e-3, mx[c] - mn[c]));
+        const T = Math.max(1, Math.ceil(n / 120000));
+        const lado = Math.max(1, Math.sqrt(ext[0] * ext[2] / T));
+        const nc = [Math.ceil(ext[0] / lado) || 1, Math.ceil(ext[1] / lado) || 1, Math.ceil(ext[2] / lado) || 1];
+        const celda = new Uint32Array(n), cuenta = new Uint32Array(nc[0] * nc[1] * nc[2]);
+        for (let i = 0; i < n; i++){
+          const cx = Math.min(nc[0] - 1, ((pos[3*i] - mn[0]) / lado) | 0), cy = Math.min(nc[1] - 1, ((pos[3*i+1] - mn[1]) / lado) | 0), cz = Math.min(nc[2] - 1, ((pos[3*i+2] - mn[2]) / lado) | 0);
+          const c = cx + nc[0] * (cy + nc[1] * cz); celda[i] = c; cuenta[c]++;
+        }
+        const ini = new Uint32Array(cuenta.length + 1);
+        for (let c = 0; c < cuenta.length; c++) ini[c + 1] = ini[c] + cuenta[c];
+        const lleno = ini.slice(0, cuenta.length);
+        const P2 = new Float32Array(n * 3), C2 = col ? new Uint8Array(n * 3) : null, I2 = new Uint16Array(n), K2 = new Uint8Array(n);
+        let semilla = 0x9E3779B9;
+        const azar = () => { semilla ^= semilla << 13; semilla ^= semilla >>> 17; semilla ^= semilla << 5; return (semilla >>> 0) / 4294967296; };
+        for (let i = 0; i < n; i++){
+          const c = celda[i], a = ini[c], usados = lleno[c] - a;
+          // inserción aleatoria (Fisher-Yates "inside-out"): el nuevo va a un hueco al azar y el que había pasa al final
+          const j = a + Math.floor(azar() * (usados + 1)), dst = a + usados;
+          if (j !== dst){ P2.copyWithin(3*dst, 3*j, 3*j + 3); if (C2) C2.copyWithin(3*dst, 3*j, 3*j + 3); I2[dst] = I2[j]; K2[dst] = K2[j]; }
+          P2[3*j] = pos[3*i]; P2[3*j+1] = pos[3*i+1]; P2[3*j+2] = pos[3*i+2];
+          if (C2){ C2[3*j] = col[3*i]; C2[3*j+1] = col[3*i+1]; C2[3*j+2] = col[3*i+2]; }
+          I2[j] = inten[i]; K2[j] = cls[i];
+          lleno[c]++;
+        }
+        const celdas = [];
+        for (let c = 0; c < cuenta.length; c++){
+          if (!cuenta[c]) continue;
+          let a = [Infinity, Infinity, Infinity], b = [-Infinity, -Infinity, -Infinity];
+          for (let i = ini[c]; i < ini[c + 1]; i++) for (let q = 0; q < 3; q++){ const v = P2[3*i+q]; if (v < a[q]) a[q] = v; if (v > b[q]) b[q] = v; }
+          celdas.push([ini[c], cuenta[c], a[0], a[1], a[2], b[0], b[1], b[2]]);
+        }
+        let imax = 0; for (let i = 0; i < n; i++) if (I2[i] > imax) imax = I2[i];
+        self.postMessage({ tipo:"fin", n, total:N, paso, pos:P2, col:C2, inten:I2, cls:K2, celdas, origen:o, imax,
+          info:{ version:h.vMaj + "." + h.vMin, formato:h.fmt, laz:h.laz, epsg:h.epsg, epsgV:h.epsgV, wkt:h.wkt.slice(0, 400),
+                 min:[h.minX, h.minY, h.minZ], max:[h.maxX, h.maxY, h.maxZ], rgb:!!col } },
+          [P2.buffer, I2.buffer, K2.buffer].concat(C2 ? [C2.buffer] : []));
+      } catch (err){ self.postMessage({ tipo:"error", msg:err && err.message || String(err) }); }
+    };
+  }
+  function trabajadorNube(){
+    return new Worker(URL.createObjectURL(new Blob(["(" + nubeWorkerMain.toString() + ")()"], { type:"text/javascript" })));
+  }
+  const NUBE_CLS = { 0:[180,180,180], 1:[170,170,170], 2:[166,124,82], 3:[120,200,90], 4:[60,170,60], 5:[30,120,40], 6:[230,90,70], 7:[255,0,255], 9:[60,130,230], 10:[200,200,90], 11:[90,90,90], 17:[150,150,220] };
+  function cargarNube(file){
+    const nb = { id:++NUBE.seq, nombre:file.name.replace(/\.(las|laz)$/i, ""), archivo:file.name, size:file.size, listo:false, visible:true, progreso:0, estado:"Leyendo nube" };
+    NUBE.lista.push(nb); $("empty").hidden = true; renderNubes();
+    const w = trabajadorNube();
+    w.onmessage = ev => {
+      const d = ev.data;
+      if (d.tipo === "progreso"){ nb.progreso = d.p; if (nb.barEl) nb.barEl.style.width = Math.round(d.p * 100) + "%"; return; }
+      w.terminate();
+      if (d.tipo === "error"){ nb.estado = "Error: " + d.msg; renderNubes(); toast("No se pudo leer " + file.name + ": " + d.msg); return; }
+      montarNube(nb, d);
+    };
+    w.postMessage({ file, origen:S.sceneOrigin ? S.sceneOrigin.slice() : null, maxPts:NUBE_MAX, lazUrl:new URL(LAZPERF_URL, location.href).href });
+  }
+  function montarNube(nb, d){
+    if (!S.sceneOrigin) S.sceneOrigin = d.origen.slice();
+    const off = [d.origen[0] - S.sceneOrigin[0], d.origen[1] - S.sceneOrigin[1], d.origen[2] - S.sceneOrigin[2]];
+    Object.assign(nb, { n:d.n, total:d.total, paso:d.paso, info:d.info, pos:d.pos, rgb:d.col, inten:d.inten, cls:d.cls, imax:d.imax, listo:true, estado:"" });
+    nb.color = new Uint8Array(d.n * 3);
+    nb.mat = new THREE.PointsMaterial({ size:NUBE.tam, sizeAttenuation:false, vertexColors:true, clippingPlanes:allPlanes.length ? allPlanes : null });
+    MATS.push(nb.mat);
+    nb.grupo = new THREE.Group(); nb.grupo.name = "Nube " + nb.nombre;
+    nb.grupo.position.set(off[0], off[2], -off[1]);
+    const posAttr = new THREE.BufferAttribute(d.pos, 3), colAttr = new THREE.BufferAttribute(nb.color, 3, true);
+    nb.colAttr = colAttr;
+    nb.celdas = d.celdas.map(c => {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute("position", posAttr); g.setAttribute("color", colAttr);
+      const box = new THREE.Box3(new THREE.Vector3(c[2], c[3], c[4]), new THREE.Vector3(c[5], c[6], c[7]));
+      g.boundingBox = box; g.boundingSphere = box.getBoundingSphere(new THREE.Sphere());
+      g.setDrawRange(c[0], Math.min(c[1], 20000));
+      const p = new THREE.Points(g, nb.mat); p.matrixAutoUpdate = false; p.updateMatrix();
+      nb.grupo.add(p);
+      return { obj:p, ini:c[0], n:c[1], centro:box.getCenter(new THREE.Vector3()).add(nb.grupo.position), radio:Math.max(0.5, box.getSize(new THREE.Vector3()).length() / 2) };
+    });
+    // lejos de los modelos (otro sistema o alturas elipsoidales)
+    nb.lejos = Math.hypot(off[0], off[1], off[2]) > 20000;
+    colorearNube(nb);
+    scene.add(nb.grupo);
+    computeBounds();
+    $("toolbar").hidden = false;
+    renderNubes(); updateStats && updateStats();
+    if (!S.models.some(m => m.ready) && NUBE.lista.filter(x => x.listo).length === 1) fitAll(); else requestRender();
+    const avisos = [];
+    if (nb.paso > 1) avisos.push("Tiene " + fmtInt(nb.total) + " puntos: se ha cargado uno de cada " + nb.paso + " (" + fmtInt(nb.n) + "). Para verla entera, mejor en COPC.");
+    if (nb.info.epsg && ![25830, 25829, 25831, 23030, 23029, 23031].includes(nb.info.epsg)) avisos.push("Sistema de coordenadas EPSG:" + nb.info.epsg + ": puede no coincidir con los modelos (ETRS89 UTM).");
+    if (avisos.length) toast(avisos.join(" "));
+  }
+  function colorearNube(nb){
+    const n = nb.n, C = nb.color, modo = NUBE.modo === "rgb" && !nb.rgb ? "altura" : NUBE.modo;
+    if (modo === "rgb") C.set(nb.rgb);
+    else if (modo === "intensidad"){ const k = 255 / Math.max(1, nb.imax * 0.8); for (let i = 0; i < n; i++){ const v = Math.min(255, nb.inten[i] * k); C[3*i] = C[3*i+1] = C[3*i+2] = v; } }
+    else if (modo === "clase"){ for (let i = 0; i < n; i++){ const c = NUBE_CLS[nb.cls[i]] || [200, 200, 200]; C[3*i] = c[0]; C[3*i+1] = c[1]; C[3*i+2] = c[2]; } }
+    else {   // altura: azul (abajo) -> verde -> amarillo -> rojo (arriba), con los percentiles 2-98
+      const P = nb.pos, zs = new Float32Array(Math.min(n, 200000)), st = Math.max(1, Math.floor(n / zs.length));
+      for (let i = 0, j = 0; j < zs.length; i += st, j++) zs[j] = P[3 * Math.min(i, n - 1) + 1];
+      zs.sort(); const z0 = zs[Math.floor(zs.length * 0.02)], z1 = zs[Math.floor(zs.length * 0.98)] || z0 + 1;
+      const rampa = [[44, 123, 182], [0, 166, 202], [0, 204, 188], [144, 235, 157], [255, 255, 140], [249, 208, 87], [242, 158, 46], [231, 104, 24], [215, 25, 28]];
+      for (let i = 0; i < n; i++){
+        let t = (P[3*i+1] - z0) / ((z1 - z0) || 1); t = t < 0 ? 0 : t > 1 ? 1 : t;
+        const f = t * (rampa.length - 1), a = Math.floor(f), b = Math.min(rampa.length - 1, a + 1), u = f - a;
+        for (let c = 0; c < 3; c++) C[3*i+c] = rampa[a][c] + (rampa[b][c] - rampa[a][c]) * u;
+      }
+    }
+    nb.colAttr.needsUpdate = true;
+    requestRender();
+  }
+  // Detalle según la distancia: cada celda dibuja más o menos puntos y el total no pasa del presupuesto
+  const _frus = new THREE.Frustum(), _pm = new THREE.Matrix4(), _v1 = new THREE.Vector3(), _v2 = new THREE.Vector3();
+  function lodNubes(){
+    if (!NUBE.lista.length) return;
+    camera.updateMatrixWorld(); _pm.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); _frus.setFromProjectionMatrix(_pm);
+    const vis = [];
+    let suma = 0;
+    const der = _v2.set(1, 0, 0).applyQuaternion(camera.quaternion);
+    NUBE.lista.forEach(nb => {
+      if (!nb.listo) return;
+      nb.grupo.visible = nb.visible;
+      if (!nb.visible) return;
+      nb.celdas.forEach(c => {
+        if (!_frus.intersectsSphere(new THREE.Sphere(c.centro, c.radio))){ c.obj.visible = false; return; }
+        // tamaño en pantalla de la celda (fracción del alto de la vista)
+        const a = _v1.copy(c.centro).project(camera), b = c.centro.clone().addScaledVector(der, c.radio).project(camera);
+        const s = Math.min(4, Math.hypot(b.x - a.x, b.y - a.y) + (a.z > 1 || a.z < -1 ? 2 : 0));
+        const quiero = c.n * Math.min(1, Math.max(0.01, s * s * 6));
+        c.obj.visible = true; vis.push([c, quiero]); suma += quiero;
+      });
+    });
+    // mientras se gira o se desplaza, un tercio de los puntos (fluido en ordenadores normales); al soltar, todos
+    const pres = NUBE.moviendo ? NUBE.presupuesto / 3 : NUBE.presupuesto;
+    const f = suma > pres ? pres / suma : 1;
+    vis.forEach(([c, q]) => c.obj.geometry.setDrawRange(c.ini, Math.max(1, Math.min(c.n, Math.round(q * f)))));
+    NUBE.enPantalla = Math.round(Math.min(suma, pres));
+  }
+  controls.addEventListener("start", () => { NUBE.moviendo = true; });
+  controls.addEventListener("end", () => { NUBE.moviendo = false; if (NUBE.lista.length) requestRender(); });
+  function quitarNube(nb){
+    if (nb.grupo){ scene.remove(nb.grupo); nb.celdas.forEach(c => c.obj.geometry.dispose()); }
+    if (nb.mat){ nb.mat.dispose(); const i = MATS.indexOf(nb.mat); if (i >= 0) MATS.splice(i, 1); }
+    NUBE.lista.splice(NUBE.lista.indexOf(nb), 1);
+    if (!S.models.some(m => m.ready) && !NUBE.lista.some(x => x.listo)) S.sceneOrigin = null;
+    computeBounds(); renderNubes(); requestRender();
+  }
+  function encuadrarNube(nb){
+    const b = new THREE.Box3(); nb.celdas.forEach(c => b.expandByPoint(c.centro.clone().addScalar(-c.radio)).expandByPoint(c.centro.clone().addScalar(c.radio)));
+    if (!b.isEmpty()) fitTo(b);
+  }
+  function guardarNubePref(){ try { localStorage.setItem("visor-bim-nube", JSON.stringify({ presupuesto:NUBE.presupuesto, tam:NUBE.tam, modo:NUBE.modo })); } catch (err) {} }
+  function renderNubes(){
+    const ul = $("nubes"), box = $("nubeBox");
+    box.hidden = !NUBE.lista.length;
+    ul.innerHTML = "";
+    NUBE.lista.forEach(nb => {
+      const li = document.createElement("li");
+      const head = document.createElement("div"); head.className = "m-head";
+      const label = document.createElement("label");
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = nb.visible; cb.disabled = !nb.listo;
+      cb.addEventListener("change", () => { nb.visible = cb.checked; computeBounds(); requestRender(); });
+      const sw = document.createElement("span"); sw.className = "sw nube-sw";
+      const nm = document.createElement("span"); nm.className = "m-name"; nm.textContent = nb.nombre; nm.title = nb.archivo;
+      label.append(cb, sw, nm); head.append(label); li.append(head);
+      const meta = document.createElement("div"); meta.className = "m-meta";
+      if (nb.listo){
+        meta.textContent = fmtInt(nb.n) + " puntos" + (nb.paso > 1 ? " (de " + fmtInt(nb.total) + ")" : "") + " · LAS " + nb.info.version + (nb.info.laz ? " comprimido" : "") +
+          (nb.info.epsg ? " · EPSG:" + nb.info.epsg : " · sin sistema de coordenadas") + (nb.info.rgb ? " · color" : "");
+      } else meta.textContent = nb.estado + (nb.estado.startsWith("Leyendo") ? " (" + fmtMB(nb.size) + ")" : "");
+      li.append(meta);
+      if (!nb.listo && nb.estado.startsWith("Leyendo")){
+        const bar = document.createElement("div"); bar.className = "bar"; bar.innerHTML = "<i></i>";
+        bar.firstChild.style.width = Math.round(nb.progreso * 100) + "%"; nb.barEl = bar.firstChild; li.append(bar);
+      }
+      if (nb.listo && nb.lejos){ const w = document.createElement("div"); w.className = "m-warn"; w.textContent = "Está a más de 20 km de los modelos: revisa su sistema de coordenadas."; li.append(w); }
+      if (nb.listo){
+        const act = document.createElement("div"); act.className = "m-actions";
+        const b1 = document.createElement("button"); b1.className = "btn small"; b1.textContent = "Encuadrar"; b1.onclick = () => encuadrarNube(nb);
+        const b2 = document.createElement("button"); b2.className = "btn small"; b2.textContent = "Quitar"; b2.onclick = () => quitarNube(nb);
+        act.append(b1, b2); li.append(act);
+      }
+      ul.append(li);
+    });
+    $("nubeModo").value = NUBE.modo; $("nubeTam").value = NUBE.tam; $("nubePres").value = String(NUBE.presupuesto);
+  }
+  $("nubeModo").addEventListener("change", e => { NUBE.modo = e.target.value; guardarNubePref(); NUBE.lista.forEach(nb => { if (nb.listo) colorearNube(nb); }); });
+  $("nubeTam").addEventListener("input", e => { NUBE.tam = +e.target.value; guardarNubePref(); NUBE.lista.forEach(nb => { if (nb.mat) nb.mat.size = NUBE.tam; }); requestRender(); });
+  $("nubePres").addEventListener("change", e => { NUBE.presupuesto = +e.target.value; guardarNubePref(); requestRender(); });
+  // Imán a la nube al medir: el punto dibujado más cercano al cursor (los cortes también cuentan)
+  function snapNube(mx, my, r){
+    if (!NUBE.lista.some(nb => nb.listo && nb.visible)) return null;
+    let best = null, bd = 8, bz = Infinity;
+    const v = new THREE.Vector3();
+    NUBE.lista.forEach(nb => {
+      if (!nb.listo || !nb.visible) return;
+      const P = nb.pos, o = nb.grupo.position;
+      nb.celdas.forEach(c => {
+        if (!c.obj.visible) return;
+        // ¿el cursor cae cerca de la celda en pantalla?
+        v.copy(c.centro).project(camera);
+        const cx = (v.x + 1) / 2 * r.width, cy = (1 - v.y) / 2 * r.height;
+        const w = c.centro.clone().add(_v2.set(c.radio, 0, 0).applyQuaternion(camera.quaternion)).project(camera);
+        const rad = Math.hypot((w.x + 1) / 2 * r.width - cx, (1 - w.y) / 2 * r.height - cy) + 10;
+        if (Math.hypot(mx - cx, my - cy) > rad) return;
+        const dr = c.obj.geometry.drawRange, fin = dr.start + Math.min(dr.count, c.n);
+        for (let i = dr.start; i < fin; i++){
+          v.set(P[3*i] + o.x, P[3*i+1] + o.y, P[3*i+2] + o.z);
+          if (allPlanes.length && allPlanes.some(pl => pl.distanceToPoint(v) < 0)) continue;
+          const wv = v.clone(); v.project(camera);
+          if (v.z < -1 || v.z > 1) continue;
+          const d = Math.hypot((v.x + 1) / 2 * r.width - mx, (1 - v.y) / 2 * r.height - my);
+          if (d < bd - 1 || (d < bd + 1 && v.z < bz)){ bd = Math.min(bd, d); bz = v.z; best = wv; }
+        }
+      });
+    });
+    return best ? { point:best, z:bz } : null;
+  }
+
   // ---------- Paneles laterales: se ocultan y se recuerda (como en el visor IFC) ----------
   const PAN = { izq:true, der:true };
   try { Object.assign(PAN, JSON.parse(localStorage.getItem("visor-bim-paneles") || "{}")); } catch (err) {}
@@ -5666,12 +6102,31 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
     if (!r) throw new Error("[" + nombre + "] no es numérico o está vacío");
     return r.v;
   }
+  // Variables propias de la medición por material: la cantidad de ESE material en el elemento (no la del elemento entero)
+  const VARS_MAT = [["Área material", 0, "m²"], ["Volumen material", 1, "m³"], ["Peso material", 2, "kg"], ["Espesor material", -1, "m"]];
+  function valorMaterial(q, nombre){
+    const k = String(nombre).trim().toLowerCase();
+    for (const [n, i] of VARS_MAT){
+      if (n.toLowerCase() !== k) continue;
+      if (i >= 0) return q[i];
+      if (!(q[0] > 0)) throw new Error("[" + n + "] no se puede calcular: el material no tiene área en este elemento");
+      return q[1] / q[0];
+    }
+    return undefined;
+  }
+  function ParametrosMaterial(q){
+    if (!q) return [];
+    const l = [];
+    VARS_MAT.forEach(([n, i, u]) => { const v = i >= 0 ? q[i] : (q[0] > 0 ? q[1] / q[0] : NaN); if (isFinite(v) && (v > 0 || i === 0 || i === 1)) l.push({ Nombre:n, Valor:v, Ud:u, EsMat:true }); });
+    return l;
+  }
   function EvaluarFormulaFila(f){
     f.SumFormula = 0; f.TieneFormula = false; f.ErroresFormula = 0;
     if (!f.Formula) return;
     for (let i = 0; i < f.els.length; i += 2){
-      const m = f.els[i], e = f.els[i + 1];
-      try{ f.SumFormula += Evaluar(f.Formula, n => ValorVariable(m, e, n)) * (f.fr && f.fr.length ? f.fr[i >> 1] : 1); f.TieneFormula = true; }
+      const m = f.els[i], e = f.els[i + 1], q = f.esMat && f.mq ? f.mq[i >> 1] : null;
+      const vari = q ? (n => { const v = valorMaterial(q, n); return v !== undefined ? v : ValorVariable(m, e, n); }) : (n => ValorVariable(m, e, n));
+      try{ f.SumFormula += Evaluar(f.Formula, vari) * (f.fr && f.fr.length ? f.fr[i >> 1] : 1); f.TieneFormula = true; }
       catch(err){ f.ErroresFormula++; }
     }
   }
@@ -5984,11 +6439,11 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
       let g = byKey.get(key);
       if (!g){
         g = Object.assign({ key, tkey:key, oldKey:key, model:m.name, cat:"", fam:"", tipo:"", size:"", n:0, els:[], sub:"", fr:[], esMat:true, usos:new Set(),
-              sums:{ ml:0, m2:0, m3:0, kg:0, m2b:0 }, has:{ ml:false, m2:false, m3:false, kg:false, m2b:false }, mCode:"", mRes:"", mRes2:"", mPrecio:null }, campos);
+              sums:{ ml:0, m2:0, m3:0, kg:0, m2b:0 }, has:{ ml:false, m2:false, m3:false, kg:false, m2b:false }, mCode:"", mRes:"", mRes2:"", mPrecio:null, mq:[] }, campos);
         byKey.set(key, g);
       }
       g.usos.add(cat || "Sin categoría");
-      g.n += cnt; g.els.push(m, e); g.fr.push(fr);
+      g.n += cnt; g.els.push(m, e); g.fr.push(fr); g.mq.push([0, 0, 0]);   // mq: m², m³ y kg de ese material en el elemento (para las fórmulas)
       return g;
     };
     if (!mats.length){ fila("(Sin material)|" + cat, { cat:sepCat ? cat : "(Sin material)", tipo:"(Sin material)", sinMat:true, mRes:"Elementos sin material en el modelo" }); return; }
@@ -5996,10 +6451,11 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
     mats.forEach(x => {
       const clave = x.n + (x.p ? "|P" : "");
       const g = fila(clave, { cat:sepCat ? cat : (x.c || "Sin clase"), tipo:x.n + (x.p ? " (pintura)" : ""), pintura:x.p, mCode:x.k, mRes:x.d, mPrecio:x.cost > 0 ? x.cost : null });
-      if (vistos.has(clave)){ g.n -= cnt; g.els.length -= 2; g.fr.length -= 1; }   // mismo material dos veces en un elemento: un solo elemento
+      if (vistos.has(clave)){ g.n -= cnt; g.els.length -= 2; g.fr.length -= 1; g.mq.length -= 1; }   // mismo material dos veces en un elemento: un solo elemento
       vistos.add(clave);
       const add = (u, v) => { if (v > 0){ g.sums[u] += v * fr; g.has[u] = true; } };
       add("m2", x.a); add("m3", x.v); add("kg", x.kg);
+      const q = g.mq[g.mq.length - 1]; q[0] += +x.a || 0; q[1] += +x.v || 0; q[2] += +x.kg || 0;
     });
   }
   // Unidad por defecto de un material (como en BoQ): pinturas y capas finas en m², metales en kg, el resto en m³
@@ -6030,7 +6486,7 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
     f.Precio = f.TienePrecio ? p : 0;
     f.Ref = (MS.bc3 && f.Codigo) ? MS.bc3.buscarPartida(f.Codigo) : null;
     f.UdSel = MS.medidas[f.key + "|" + f.Codigo] || "";
-    const fx = f.esMat ? null : MS.formulas[f.tkey];   // las fórmulas son por tipo
+    const fx = MS.formulas[f.tkey];   // las fórmulas son por tipo (o por material en la medición por material)
     f.Formula = fx ? fx[0] : ""; f.UdFormula = fx ? fx[1] : "";
     EvaluarFormulaFila(f);
   }
@@ -6702,7 +7158,7 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
   // Editor de fórmula de medición
   function AbrirFormula(f){
     if (!f.els.length){ MostrarEstado("Esta fila no tiene elementos.", 2); return; }
-    const params = ParametrosNumericos(f.els[0], f.els[1]);
+    const params = (f.esMat ? ParametrosMaterial(f.mq && f.mq[0]) : []).concat(ParametrosNumericos(f.els[0], f.els[1]));
     if (!params.length){ MostrarEstado("No se encontraron parámetros numéricos en " + f.tipo + ".", 2); return; }
     const valores = new Map(params.map(p => [p.Nombre.toLowerCase(), p.Valor]));
     const M = abrirModal("fx");
@@ -6729,9 +7185,10 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
       </div>
       <div class="md-foot"><button class="btn small fx-quitar">Quitar fórmula</button><span class="spacer"></span><button class="btn small fx-cancel">Cancelar</button><button class="btn small primary fx-ok">Aplicar fórmula</button></div>`;
     const q = s => M.box.querySelector(s);
-    q(".md-sub").textContent = f.cat + "  ·  " + f.fam + "  ·  " + f.tipo + "  (" + fmtInt(f.n) + " elementos)";
+    q(".md-sub").textContent = f.esMat ? "Material «" + f.tipo + "»  ·  " + f.fam + "  (" + fmtInt(f.n) + " elementos)" : f.cat + "  ·  " + f.fam + "  ·  " + f.tipo + "  (" + fmtInt(f.n) + " elementos)";
+    if (f.esMat) q(".fx-ayuda").insertAdjacentHTML("afterbegin", "<b>Por material:</b> [Área material], [Volumen material], [Peso material] y [Espesor material] son la cantidad de este material en cada elemento; el resto de parámetros son del elemento entero.  Ej.: [Volumen material] * 2400<br>");
     const txt = q(".fx-f"), ud = q(".fx-ud"), prev = q(".fx-prev"), ok = q(".fx-ok"), chk = q(".fx-cat"), tb = q(".fx-lista tbody"), filtro = q(".fx-filtro");
-    q(".fx-cat + span").textContent = "Aplicar a todos los tipos de «" + f.cat + "»";
+    q(".fx-cat + span").textContent = f.esMat ? "Aplicar a todos los materiales de «" + f.cat + "»" : "Aplicar a todos los tipos de «" + f.cat + "»";
     txt.value = f.Formula; ud.value = f.UdFormula || "ud";
     q(".fx-quitar").hidden = !f.Formula;
     const rellenar = () => {
@@ -6739,7 +7196,7 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
       tb.innerHTML = "";
       params.forEach(p => {
         if (qq && !plain(p.Nombre).includes(qq)) return;
-        const tr = el("tr"); if (p.EsTipo) tr.className = "tipo"; tr._p = p;
+        const tr = el("tr"); if (p.EsTipo) tr.className = "tipo"; if (p.EsMat) tr.className = "mat"; tr._p = p;
         tr.append(el("td", "", p.Nombre), el("td", "num", p.Valor.toLocaleString("es-ES", { maximumFractionDigits:3 })), el("td", "", p.Ud));
         tb.append(tr);
       });
@@ -7174,7 +7631,7 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
     let med = null;
     try{
       await recorrer(p.dir, p.esRaiz ? 0 : 2, async (n, h, ruta) => {
-        if (esExt(n, ["dae", "xlsx", "xls", "csv"])) files.push(await h.getFile());
+        if (esExt(n, ["dae", "xlsx", "xls", "csv", "las", "laz"])) files.push(await h.getFile());
         else if (esExt(n, ["bc3"])) bc3s.push({ n, f: await h.getFile(), raiz:false });
         else if (n === MED_FILE && !ruta) med = h;
       });
@@ -7183,6 +7640,7 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
     const daes = files.filter(f => /\.dae$/i.test(f.name));
     if (!daes.length){ toast("No hay modelos .dae en " + p.nombre + "."); return; }
     S.models.slice().forEach(removeModel);            // cierra el proyecto anterior
+    NUBE.lista.slice().forEach(nb => { if (nb.listo) quitarNube(nb); });
     Object.assign(PJ, { dir:p.dir, nombre:p.nombre, esRaiz:p.esRaiz, modelos:daes.map(f => stemOf(f.name)), base:{ ov:{}, medidas:{}, formulas:{} },
                         mtime:0, bc3:"", bc3Base:"", sucio:false, pendiente:false, error:"", guardado:null });
     // Medición compartida del proyecto
@@ -7997,6 +8455,14 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
   $("zoomSel").addEventListener("click", fitSelection);
   $("hideSel").addEventListener("click", hideSelected);
   $("isoSel").addEventListener("click", isolateSelected);
+  function transSeleccion(boton){
+    const L = []; eachSel((m, e) => L.push(m, e));
+    if (!L.length){ toast("Selecciona antes los elementos."); return; }
+    const actual = pctTrans(L[0].opac ? L[0].opac[L[1]] : 0);
+    abrirTransparencia(boton, actual, "Transparencia · " + (L.length / 2 === 1 ? "elemento seleccionado" : fmtInt(L.length / 2) + " elementos"), v => ponerTransparencia(L, v));
+  }
+  $("transSel").addEventListener("click", e => transSeleccion(e.currentTarget));
+  $("msTrans").addEventListener("click", e => transSeleccion(e.currentTarget));
   window.addEventListener("keydown", e => {
     if (e.target.matches("input, select, textarea")) return;
     const k = e.key.toLowerCase();
@@ -8007,12 +8473,16 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
     else if (k === "h") hideSelected();
     else if (k === "i") isolateSelected();
     else if (k === "f") fitSelection();
+    else if (k === "t"){   // T: la selección al 70 % de transparencia, o vuelve a opaca
+      const L = []; eachSel((m, e) => L.push(m, e));
+      if (L.length) ponerTransparencia(L, L[0].opac[L[1]] ? 0 : 70);
+    }
   });
 
 
   applyTheme();
   resize();
-  window.__visor = { EJES, CIV, VOL, pkDe, prepararSuperficie, volumenPrismoides, CUT, MS, S, DIM, PJ, WALK, setWalk, walkRay, walkColocar, walkPaso, sincronizar, setModo, snapPick, setDim, handleFiles, pick, select, setView, CUTS, addCut, selectCut, fitAll, renderer, get camera(){ return camera; } };
+  window.__visor = { ponerTransparencia, EJES, CIV, NUBE, VOL, pkDe, prepararSuperficie, volumenPrismoides, CUT, MS, S, DIM, PJ, WALK, setWalk, walkRay, walkColocar, walkPaso, sincronizar, setModo, snapPick, setDim, handleFiles, pick, select, setView, CUTS, addCut, selectCut, fitAll, renderer, get camera(){ return camera; } };
 })();
 </script>
 </body>

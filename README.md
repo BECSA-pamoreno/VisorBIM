@@ -52,10 +52,26 @@ Funciones:
 
 - Varios modelos federados por coordenadas compartidas; se pueden ocultar y quitar para liberar memoria.
 - Propiedades por elemento y coordenadas del punto pulsado.
+- **Nubes de puntos LAS / LAZ** (Añadir modelos o arrastrar; también dentro de las carpetas de proyecto): se colocan con el mismo
+  origen que los modelos, así que una nube georreferenciada en las mismas coordenadas (ETRS89 UTM, alturas ortométricas, metros)
+  cae encima de los modelos de Revit y Civil 3D. Se lee en segundo plano (LAZ con laz-perf desde CDN) y se reparte en celdas
+  con los puntos en orden aleatorio: el visor dibuja más puntos cerca y menos lejos, sin pasar de los «Puntos en pantalla»
+  (1 a 8 millones; mientras se gira, un tercio). Hasta 25 millones de puntos cargados; si hay más, uno de cada n.
+  Color real, por altura, intensidad o clasificación; tamaño de punto. Los planos de corte también cortan la nube y **Medir**
+  se engancha a sus puntos. Lee el sistema de coordenadas de la cabecera (EPSG) y avisa si no es ETRS89/ED50 UTM o si la nube
+  queda a más de 20 km de los modelos.
+- **Transparencia por elementos** (Sencillo y Avanzado), en pasos de 10 % hasta el 90 %, para ver la nube de puntos u otros
+  elementos a través: botón ◐ junto a cada categoría, botón *Transp.* en cada modelo y botón *Transparencia* con la selección
+  (uno o varios elementos). Tecla **T**: la selección al 70 % o de vuelta a opaca. *Mostrar todo* quita todas las
+  transparencias. Los elementos transparentes siguen pudiendo seleccionarse, y al **Medir** sobre ellos el imán se engancha a
+  la nube que hay detrás.
 - **Medición por material** (botón *Por tipo / Por material* de la Medición, como en BoQ de BECSATools): cada elemento se
   reparte entre sus materiales (capas de muros, suelos y cubiertas, sólidos de familias y pinturas aparte) con m², m³ y kg si es
   metálico. Unidad automática: pinturas y capas finas en m², metales en kg, el resto en m³ (se cambia por fila). Desplegable para
   ver todos los materiales juntos, separados por categoría (el mismo hormigón en muros, suelos, pilares…) o solo una categoría.
+  La **fórmula personalizada** (ƒx, en Avanzado) también funciona por material: además de los parámetros del elemento tiene
+  [Área material], [Volumen material], [Peso material] y [Espesor material], que son la parte de ese material en cada elemento
+  (p. ej. `[Volumen material] * 2400` en kg).
   La partida se toma de la Nota clave, la Descripción y el Coste del material (las notas clave de la biblioteca de Revit tipo
   «09 91 00.A1» no se toman como partida). Los elementos sin material salen en «(Sin material)». Las propiedades de cada elemento
   muestran también sus materiales. Necesita exportar con la macro actualizada (columna «_Materiales (visor)»; para el Exportar
