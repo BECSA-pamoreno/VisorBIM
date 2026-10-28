@@ -52,7 +52,31 @@ Funciones:
 
 - Varios modelos federados por coordenadas compartidas; se pueden ocultar y quitar para liberar memoria.
 - Propiedades por elemento y coordenadas del punto pulsado.
-- Búsqueda en parámetros, suma de parámetros numéricos, aislar resultados.
+- **Medición por material** (botón *Por tipo / Por material* de la Medición, como en BoQ de BECSATools): cada elemento se
+  reparte entre sus materiales (capas de muros, suelos y cubiertas, sólidos de familias y pinturas aparte) con m², m³ y kg si es
+  metálico. Unidad automática: pinturas y capas finas en m², metales en kg, el resto en m³ (se cambia por fila). Desplegable para
+  ver todos los materiales juntos, separados por categoría (el mismo hormigón en muros, suelos, pilares…) o solo una categoría.
+  La partida se toma de la Nota clave, la Descripción y el Coste del material (las notas clave de la biblioteca de Revit tipo
+  «09 91 00.A1» no se toman como partida). Los elementos sin material salen en «(Sin material)». Las propiedades de cada elemento
+  muestran también sus materiales. Necesita exportar con la macro actualizada (columna «_Materiales (visor)»; para el Exportar
+  Visor de BECSATools, ver `revit/macro/BECSATools_materiales.txt`).
+  Con modelos exportados sin esa columna, se mide por el parámetro «Material estructural» / «Material» del elemento o de su
+  tipo (todo su volumen, área y peso en ese material, sin capas ni pinturas) y el visor avisa de qué modelos conviene volver a exportar.
+- **Filtro de fase en Sencillo**: en la Medición y en Buscar elementos (Fase de creación). Las reglas por parámetro de la
+  Medición siguen siendo de Avanzado.
+- **Paneles laterales ocultables** (botones a los lados de la cabecera, como en el visor IFC), en Sencillo, Avanzado y Civil; se recuerda.
+- **Buscar elementos con filtros** (como en la Medición, en Sencillo y Avanzado): categoría, familia y lista de **tipos con casillas**
+  (clic en el nombre = solo ese tipo; Todos / Ninguno; buscador en la lista), texto en cualquier parámetro o en uno, y
+  **filtro por parámetro** con reglas (igual, contiene, mayor que…). Se aplica al momento; resultados para aislar, seleccionar,
+  sumar un parámetro o exportar a Excel.
+  Lo que no cumple los filtros se puede **atenuar** (gris transparente) u **ocultar** del todo.
+- **Excel con el formato del visor de BC3** (Aptos Narrow 8, capítulos en verde por nivel, partidas con el código resaltado,
+  totales con fórmula en magenta, separadores):
+  - Medición → hoja **Presupuesto** igual que la extracción de mediciones de Presto (Código, Nat, Ud, Resumen, Comentario, N,
+    Longitud, Anchura, Altura, Cantidad, CanPres, Pres, ImpPres): capítulos del BC3 (o uno por categoría si no hay BC3), cada tipo
+    de Revit como línea de medición de su partida, total de partida, de capítulo y general con fórmulas; los tipos sin partida al
+    final por categoría. Además las hojas *Por tipo* y *Criterios*.
+  - Búsqueda y selección → hojas *Resumen* (por categoría, familia y tipo, con totales) y *Elementos* (con todos sus parámetros).
 - Colorear por categoría, por modelo o por cualquier parámetro.
 - **Planos de corte** (como en el visor IFC): clic en una cara para crear un corte alineado con ella, o "+ Horizontal" a media altura.
   Se pueden crear varios a la vez; cada uno se mueve arrastrando la flecha amarilla en el modelo,

@@ -49,6 +49,30 @@ main>aside,#center{grid-row:1}
 aside{background:var(--panel);overflow:auto;min-height:0}
 aside.left{border-right:1px solid var(--line)}
 aside.right{border-left:1px solid var(--line)}
+main{grid-template-columns:var(--cl,290px) minmax(0,1fr) var(--cr,340px)}
+aside.left{grid-column:1} #center{grid-column:2} aside.right{grid-column:3}
+.pbtn{display:inline-flex;align-items:center;justify-content:center;padding:6px 8px}
+.pbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.pbtn[aria-pressed="false"]{opacity:.55}
+.ftipos{border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin:0 0 8px}
+.ftipos-h{display:flex;align-items:center;gap:6px;font-size:13px;margin-bottom:5px}
+.ftipos-h .btn{padding:2px 8px}
+.ftipos input[type=text]{width:100%;font-size:13px;padding:4px 8px;margin-bottom:4px}
+.ftipos-l{list-style:none;margin:0;padding:0;max-height:220px;overflow:auto}
+.ftipos-l li{display:flex;align-items:center;gap:6px;padding:2px 0;font-size:13px}
+.ftipos-l li.muted{padding:4px 0}
+.ftipos-l input{flex:none;margin:0}
+.ftipos-l .ft-n{all:unset;flex:1;min-width:0;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ftipos-l .ft-n:hover span{text-decoration:underline}
+.ftipos-l .ft-n small{color:var(--muted);margin-left:5px}
+.ftipos-l .ft-c{color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px}
+#fReglas[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#1d2228}
+.bq-n{font-weight:600;color:var(--ink);margin:4px 0}
+.seg.mmodo button{padding:3px 10px;font-size:13px}
+#props td.prop-sec{font-weight:700;padding-top:10px;color:var(--ink);border-bottom:1px solid var(--line)}
+.bq-bots .btn{overflow:hidden;text-overflow:ellipsis}
+.bq-vis{margin:2px 0 6px}.bq-vis .check{margin:0;font-size:13.5px;gap:6px;white-space:nowrap}
+.bq-acc{display:flex;gap:6px;flex-wrap:wrap}
 section{padding:14px 16px;border-bottom:1px solid var(--line)}
 h2{font-size:15px;font-weight:600;margin:0 0 10px}
 .muted{color:var(--muted);font-size:14px}
@@ -223,9 +247,11 @@ kbd{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:4px;p
 
 #center{display:flex;flex-direction:column;min-height:0;min-width:0}
 /* Modo Civil */
-body.civil main{grid-template-columns:330px minmax(0,1fr) 0}
+body.civil{--cl:330px;--cr:0px}
 body.civil:not(.civsel) aside.right{display:none}
-body.civil.civsel main{grid-template-columns:330px minmax(0,1fr) 300px}
+body.civil.civsel{--cr:300px}
+body.hide-left,body.civil.hide-left{--cl:0px} body.hide-left aside.left{display:none!important}
+body.hide-right,body.civil.hide-right,body.civil.civsel.hide-right{--cr:0px} body.hide-right aside.right{display:none!important}
 .civ-only{display:none} body.civil .civ-only{display:inline-block;float:right}
 .civ-tit .civ-tg{display:inline-flex;align-items:center;gap:3px;text-transform:none;letter-spacing:0;font-weight:600}
 .civ-tit .civ-tg[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
@@ -468,6 +494,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
   #center #view{flex:none;height:60vh}
   #measure{grid-row:auto;height:auto;max-height:70vh}
   main>aside,#center{grid-row:auto}
+  aside.left,#center,aside.right{grid-column:1}
   aside.left,aside.right{border:0;border-top:1px solid var(--line)}
 }
 #walkHud{position:absolute;left:12px;bottom:12px;z-index:6;max-width:min(560px,calc(100% - 24px));background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:8px 12px;box-shadow:0 6px 18px rgba(0,0,0,.18);font-size:13px}
@@ -484,6 +511,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
 <body>
 <header>
   <a class="btn small back" href="../index.html" title="Elegir otro visor">← Visores</a>
+  <button class="btn pbtn" id="btnLeft" aria-pressed="true" title="Mostrar u ocultar el panel izquierdo (modelos, búsqueda, categorías)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
   <h1>Visor BIM</h1>
   <span id="stats"></span>
   <span class="spacer"></span>
@@ -496,6 +524,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
   <button class="btn primary" id="projBtn" title="Abrir un proyecto de la carpeta de proyectos">Proyectos</button>
   <button class="btn" id="openBtn">Añadir modelos</button>
   <input type="file" id="fileInput" accept=".dae,.xlsx,.xls,.csv" multiple hidden>
+  <button class="btn pbtn" id="btnRight" aria-pressed="true" title="Mostrar u ocultar el panel de propiedades"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg></button>
 </header>
 
 <main>
@@ -570,12 +599,20 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
     </section>
     <section>
       <h2>Buscar elementos</h2>
-      <div class="row"><select id="searchCol" aria-label="Parámetro donde buscar"><option value="">Cualquier parámetro</option></select></div>
-      <div class="row"><input type="text" id="searchText" placeholder="Ej. Fachada, EI 120, Planta 1" aria-label="Texto a buscar"></div>
-      <label class="check"><input type="checkbox" id="ghost" checked> Atenuar el resto</label>
-      <div class="row">
-        <button class="btn" id="searchBtn">Buscar</button>
-        <button class="btn" id="clearBtn">Limpiar</button>
+      <div class="row"><select id="fCat" aria-label="Categoría"><option value="">Todas las categorías</option></select></div>
+      <div class="row"><select id="fFam" aria-label="Familia"><option value="">Todas las familias</option></select></div>
+      <div class="row"><select id="fFase" aria-label="Fase de creación" hidden title="Solo los elementos creados en esta fase (Fase de creación)"></select></div>
+      <div class="ftipos" id="fTiposBox" hidden>
+        <div class="ftipos-h"><b id="fTiposN">Tipos</b><span class="spacer"></span><button class="btn small" id="fTodos" title="Marcar todos (los que se ven en la lista)">Todos</button><button class="btn small" id="fNinguno" title="Desmarcar todos (los que se ven en la lista)">Ninguno</button></div>
+        <input type="text" id="fTipoTxt" placeholder="Buscar en la lista de tipos" aria-label="Buscar en la lista de tipos">
+        <ul class="ftipos-l" id="fTipos"></ul>
+      </div>
+      <div class="row"><input type="text" id="searchText" placeholder="Texto: Fachada, EI 120, Planta 1…" aria-label="Texto a buscar"></div>
+      <div class="row"><select id="searchCol" aria-label="Parámetro donde buscar el texto"><option value="">en cualquier parámetro</option></select></div>
+      <div class="row bq-bots"><button class="btn small" id="fReglas" aria-pressed="false">Por parámetro…</button><button class="btn small" id="clearBtn" title="Quitar todos los filtros de búsqueda">Limpiar</button></div>
+      <div class="row bq-vis">
+        <label class="check" title="Lo que no cumple los filtros se ve en gris transparente"><input type="checkbox" id="ghost" checked> Atenuar el resto</label>
+        <label class="check" title="Lo que no cumple los filtros desaparece del modelo (también de las secciones y las mediciones de pantalla)"><input type="checkbox" id="hideOthers"> Ocultar el resto</label>
       </div>
       <div id="searchInfo" class="muted"></div>
       <div id="sumBox" hidden>
@@ -760,6 +797,10 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
         <option value="sel">Selección (0)</option>
         <option value="tramo">Tramo de PK (Civil)</option>
       </select>
+      <div class="seg mmodo" id="mModoMed" role="group" aria-label="Medir por">
+        <button type="button" data-mm="tipo" aria-pressed="true" title="Una fila por tipo de Revit (y tamaño en instalaciones)">Por tipo</button>
+        <button type="button" data-mm="mat" aria-pressed="false" title="Cada elemento repartido entre sus materiales: capas de muros, suelos y cubiertas, sólidos de familias y pinturas">Por material</button>
+      </div>
       <span class="ktotal" id="kPresu"></span>
       <span class="kpi" id="kAsig"></span>
       <span class="kpi" id="kElem"></span>
@@ -773,10 +814,11 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
     </div>
     <div class="mh mtools">
       <span id="mTramo" class="m-tramo" hidden><select id="mTrEje" aria-label="Eje"></select><span>PK</span><input type="text" id="mTrA" aria-label="PK inicial"><span>a</span><input type="text" id="mTrB" aria-label="PK final"><span>±</span><input type="text" id="mTrD" aria-label="Distancia máxima al eje" title="Solo cuenta lo que está a menos de esta distancia del eje"><span>m</span><span class="muted" id="mTrVacio" hidden>No hay ejes de Civil 3D cargados.</span></span>
+      <select id="mMatModo" aria-label="Materiales por categoría" hidden title="Por material: todos juntos, separados por la categoría de los elementos o solo una categoría"></select>
       <select id="mCat" aria-label="Categoría"><option value="">Todas las categorías</option></select>
       <input type="text" id="mFilter" placeholder="Filtrar familia, tipo, código..." aria-label="Filtrar filas">
       <label class="check"><input type="checkbox" id="mSinPartida"> Solo sin partida</label>
-      <select id="mFase" class="solo-tecnico" aria-label="Fase de creación" hidden><option value="">Fase: todas</option></select>
+      <select id="mFase" aria-label="Fase de creación" hidden><option value="">Fase: todas</option></select>
       <button class="btn small solo-tecnico" id="mFiltroParam" aria-pressed="false">Filtro por parámetro</button>
       <span class="spacer"></span>
       <button class="btn small solo-tecnico" id="mSync" title="Traer resumen, precio y unidad del BC3 a las filas seleccionadas">Actualizar desde BC3</button>
@@ -1148,7 +1190,7 @@ function workerMain(){
     sel: null,                            // {m, e, point}: último elemento seleccionado (el que muestra propiedades)
     selSet: new Map(),                    // Map(modelId -> Set(e)): toda la selección
     isolate: null,                        // Map(modelId -> Set(e))
-    search: false, ghostOn: true,
+    search: false, ghostOn: true, hideOthers: false,
     edges: true, xray: false,
     section: false, sectionBox: new THREE.Box3(), bounds: new THREE.Box3(),
     pendingData: new Map()                // stem -> File (xlsx sin su dae)
@@ -1217,6 +1259,37 @@ function workerMain(){
       .catch(err => { m.dataStatus = "No se pudieron leer los datos: " + err.message; renderModels(); });
   }
 
+  // Columna con los materiales de cada elemento (macro ExportarVisor): [["Material","Clase",m²,m³,kg,pintura,"Nota clave","Descripción",coste], ...]
+  const COL_MAT = "_Materiales (visor)";
+  const colOculta = h => String(h).startsWith("_");
+  // Sin esa columna (modelos exportados antes): el material sale del parámetro «Material estructural» / «Material»
+  // del elemento o de su tipo, con todo su volumen, área y peso (sin capas ni pinturas)
+  const PARAM_MAT = ["material estructural", "tipo: material estructural", "material", "tipo: material", "structural material", "tipo: structural material", "material de la estructura"];
+  function matsParametro(m, ri){
+    const d = m.data, mc = d.mc, row = d.rows[ri];
+    if (!d.cMatParam) d.cMatParam = PARAM_MAT.map(n => mc.lower.get(n)).filter(c => c !== undefined);
+    let nombre = "";
+    for (const c of d.cMatParam){ const v = String(row[c] ?? "").trim(); if (v && !/^<?\s*(por categor|by category|ninguno|none)/i.test(v)){ nombre = v; break; } }
+    if (!nombre) return [];
+    const q = (u, col) => col >= 0 ? parseQty(row[col], u, mc.raw[u === "m2" ? "m2" : u === "m3" ? "m3" : u]) : NaN;
+    const a = q("m2", mc.m2), v = q("m3", mc.m3);
+    let kg = mc.kg >= 0 ? parseQty(row[mc.kg], "kg", true) : NaN;
+    return [{ n:nombre, c:"Según parámetro", a:a > 0 ? a : 0, v:v > 0 ? v : 0, kg:kg > 0 ? kg : 0, p:false, k:"", d:"", cost:0, param:true }];
+  }
+  function matsDe(m, e){
+    const d = m.data; if (!d) return null;
+    const ri = d.rowOf[e]; if (ri < 0) return null;
+    let r = d.mats.get(ri);
+    if (r) return r;
+    if (d.matCol < 0){ r = matsParametro(m, ri); d.mats.set(ri, r); return r; }
+    r = [];
+    try {
+      const a = JSON.parse(String(d.rows[ri][d.matCol] || "[]"));
+      if (Array.isArray(a)) a.forEach(x => { if (Array.isArray(x) && x[0]) r.push({ n:String(x[0]), c:String(x[1] || ""), a:+x[2] || 0, v:+x[3] || 0, kg:+x[4] || 0, p:!!+x[5], k:String(x[6] || ""), d:String(x[7] || ""), cost:+x[8] || 0 }); });
+    } catch (err) {}
+    d.mats.set(ri, r);
+    return r;
+  }
   function attachData(m, res){
     const norm = s => String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f\s_]/g, "");
     const H = res.header;
@@ -1232,6 +1305,7 @@ function workerMain(){
       header:H, rows:res.rows, rowOf, idCol,
       col: new Map(H.map((h, i) => [h, i])),
       catCol: H.findIndex(h => norm(h) === "categoria" || norm(h) === "category"),
+      matCol: H.indexOf(COL_MAT), mats:new Map(),
       linked
     };
     m.data.mc = measureColumns(H);
@@ -1362,6 +1436,7 @@ function workerMain(){
     if (cat && !cat.visible) return 0;
     if (S.isolate){ const set = S.isolate.get(m.id); if (!set || !set.has(e)) return 0; }
     if (isSel(m, e)) return 3;
+    if (S.search && S.hideOthers && !m.match[e]) return 0;
     if (S.search && S.ghostOn && !m.match[e]) return 2;
     return 1;
   }
@@ -1936,13 +2011,25 @@ function workerMain(){
     const frag = document.createDocumentFragment();
     d.header.forEach((h, i) => {
       const v = row[i];
-      if (v === "" || v == null) return;
+      if (v === "" || v == null || colOculta(h)) return;
       if (f && !h.toLowerCase().includes(f) && !String(v).toLowerCase().includes(f)) return;
       const tr = document.createElement("tr");
       const a = document.createElement("td"); a.textContent = h;
       const b = document.createElement("td"); b.textContent = v;
       tr.append(a, b); frag.append(tr);
     });
+    // materiales del elemento (si el modelo se exportó con ellos)
+    const mats = matsDe(m, S.sel.e);
+    if (mats && mats.length){
+      const tr0 = document.createElement("tr"); const th = document.createElement("td"); th.colSpan = 2; th.className = "prop-sec"; th.textContent = "Materiales"; tr0.append(th); frag.append(tr0);
+      mats.forEach(x => {
+        const tr = document.createElement("tr");
+        const a = document.createElement("td"); a.textContent = x.n + (x.p ? " (pintura)" : "");
+        const b = document.createElement("td");
+        b.textContent = [x.a > 0 ? fmtSelQ(x.a) + " m²" : "", x.v > 0 ? fmtSelQ(x.v) + " m³" : "", x.kg > 0 ? fmtSelQ(x.kg) + " kg" : ""].filter(Boolean).join(" · ");
+        tr.append(a, b); frag.append(tr);
+      });
+    }
     tb.append(frag);
   }
 
@@ -2001,21 +2088,7 @@ function workerMain(){
   }
   function exportSelXlsx(){
     if (!selCount()) return;
-    loadXlsxLib().then(X => {
-      const { list, tot, cols } = selGroups();
-      const head = ["Categoría", "Familia", "Tipo", "Nº elementos"].concat(cols.map(c => c[1]));
-      const body = list.map(g => [g.cat, g.fam, g.tipo, g.n].concat(cols.map(([u]) => round(g[u], 3))));
-      body.push(["TOTAL", "", "", tot.n].concat(cols.map(([u]) => round(tot[u], 3))));
-      const wb = X.utils.book_new();
-      const ws1 = X.utils.aoa_to_sheet([head].concat(body)); ws1["!cols"] = head.map((h, i) => ({ wch: i < 3 ? 28 : 13 }));
-      X.utils.book_append_sheet(wb, ws1, "Resumen");
-      const eh = ["Modelo", "ElementId", "Categoría", "Familia", "Tipo", "Nivel"].concat(cols.map(c => c[1]));
-      const rows = [eh];
-      eachSel((m, e) => { const q = elQty(m, e); rows.push([m.name, m.ids[e], catName(m, e), cellOf(m, e, "Familia"), cellOf(m, e, "Tipo"), cellOf(m, e, "Nivel")].concat(cols.map(([u]) => q[u] > 0 ? round(q[u], 3) : ""))); });
-      const ws2 = X.utils.aoa_to_sheet(rows); ws2["!autofilter"] = { ref: ws2["!ref"] };
-      X.utils.book_append_sheet(wb, ws2, "Elementos");
-      X.writeFile(wb, "Seleccion_" + stamp() + ".xlsx");
-    }).catch(err => toast(err.message));
+    exportarElementosXlsx("Selección de elementos", fmtInt(selCount()) + " elementos seleccionados", eachSel, "Seleccion_" + stamp() + ".xlsx");
   }
   $("msFit").addEventListener("click", fitSelection);
   $("msHide").addEventListener("click", hideSelected);
@@ -4823,20 +4896,334 @@ function workerMain(){
   }
 
 
+  // ---------- Excel con el formato del visor de BC3 (Presto): Aptos Narrow 8, capítulos en verde, partidas, totales con fórmula en magenta ----------
+  // Escrito a mano (OpenXML en un ZIP sin comprimir): sin librerías y con estilos, fórmulas, anchos, filtros y paneles fijos.
+  const XL_FUENTES = [   // [negrita, tamaño, color]
+    [0, 8, ""], [1, 14, ""], [1, 10, ""], [1, 8, ""], [0, 8, "FF40FF"], [1, 8, "FF40FF"], [0, 8, "6B7580"], [1, 10, "", 1]
+  ];
+  const XL_RELLENOS = ["", "", "BED2B7", "CADAC4", "D6E2D2", "E2EADF", "EEF2EC", "FFEDDB", "C0C0C0"];   // 0 y 1 reservados
+  const XL_FMT = { gen:0, txt:49, n:164, n3:165, n2:166, int:3 };
+  // nombre: [fuente, relleno, formato, ajustar texto]
+  const XL_ESTILOS = {
+    def:[0, 0, "gen"], txt:[0, 0, "txt"], txtW:[0, 0, "txt", 1], n:[0, 0, "n"], n3:[0, 0, "n3"], n2:[0, 0, "n2"], int:[0, 0, "int"],
+    m3:[4, 0, "n3"], m2:[4, 0, "n2"], mint:[4, 0, "int"],
+    tit:[1, 0, "gen"], proy:[2, 0, "gen"], cab:[7, 0, "gen"], sub:[6, 0, "gen"],
+    pcod:[0, 7, "txt"],
+    tTxt:[3, 0, "txt"], tm3:[5, 0, "n3"], tm2:[5, 0, "n2"], tmint:[5, 0, "int"], tn2:[0, 0, "n2"], tint:[0, 0, "int"], tn3:[0, 0, "n3"],
+    sep:[0, 8, "gen"]
+  };
+  for (let nv = 1; nv <= 5; nv++){   // capítulos por nivel: texto y números en magenta, con su verde
+    XL_ESTILOS["c" + nv] = [3, nv + 1, "txt"];
+    XL_ESTILOS["c" + nv + "m3"] = [5, nv + 1, "n3"]; XL_ESTILOS["c" + nv + "m2"] = [5, nv + 1, "n2"]; XL_ESTILOS["c" + nv + "mint"] = [5, nv + 1, "int"];
+    XL_ESTILOS["c" + nv + "n"] = [3, nv + 1, "gen"];
+  }
+  const XL_NOMBRES = Object.keys(XL_ESTILOS), XL_IDX = Object.fromEntries(XL_NOMBRES.map((n, i) => [n, i]));
+  function xlEsc(s){ return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ""); }
+  function xlCol(i){ let s = ""; i++; while (i > 0){ const r = (i - 1) % 26; s = String.fromCharCode(65 + r) + s; i = Math.floor((i - 1) / 26); } return s; }
+  function xlEstilos(){
+    const fuente = ([b, sz, col, it]) => `<font>${b ? "<b/>" : ""}${it ? "<i/>" : ""}<sz val="${sz}"/>${col ? `<color rgb="FF${col}"/>` : `<color theme="1"/>`}<name val="Aptos Narrow"/><family val="2"/><scheme val="minor"/></font>`;
+    const relleno = (c, i) => i === 0 ? `<fill><patternFill patternType="none"/></fill>` : i === 1 ? `<fill><patternFill patternType="gray125"/></fill>` : `<fill><patternFill patternType="solid"><fgColor rgb="FF${c}"/><bgColor indexed="64"/></patternFill></fill>`;
+    const xf = ([f, r, fmt, w]) => `<xf numFmtId="${XL_FMT[fmt]}" fontId="${f}" fillId="${r}" borderId="0" xfId="0"${XL_FMT[fmt] ? ' applyNumberFormat="1"' : ""} applyFont="1"${r ? ' applyFill="1"' : ""} applyAlignment="1"><alignment vertical="top"${w ? ' wrapText="1"' : ""}/></xf>`;
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<numFmts count="3"><numFmt numFmtId="164" formatCode="#,##0.0?????????"/><numFmt numFmtId="165" formatCode="#,##0.000"/><numFmt numFmtId="166" formatCode="#,##0.00"/></numFmts>
+<fonts count="${XL_FUENTES.length}">${XL_FUENTES.map(fuente).join("")}</fonts>
+<fills count="${XL_RELLENOS.length}">${XL_RELLENOS.map(relleno).join("")}</fills>
+<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="${XL_NOMBRES.length}">${XL_NOMBRES.map(n => xf(XL_ESTILOS[n])).join("")}</cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
+  }
+  // Hoja de bajo nivel. filas = [{ c:[celda...], alto, s (estilo por defecto), relleno:n (pinta n columnas aunque estén vacías) }]
+  // celda = valor | { v, s } | { f:"FÓRMULA", s }
+  function xlHojaXml(h){
+    const filas = h.filas.map((F, ri) => {
+      const r = ri + 1, def = F.s || "def", n = Math.max(F.c.length, F.relleno || 0);
+      let xs = "";
+      for (let i = 0; i < n; i++){
+        let c = F.c[i], s = Array.isArray(def) ? (def[i] || "def") : def, v = c, f = null;
+        if (c && typeof c === "object"){ s = c.s || s; v = c.v; f = c.f || null; }
+        const si = XL_IDX[s] ?? 0, ref = xlCol(i) + r;
+        if (f) xs += `<c r="${ref}" s="${si}"><f>${xlEsc(f)}</f></c>`;
+        else if (v === "" || v == null || (typeof v === "number" && !isFinite(v))){ if (si) xs += `<c r="${ref}" s="${si}"/>`; }
+        else if (typeof v === "number") xs += `<c r="${ref}" s="${si}"><v>${v}</v></c>`;
+        else xs += `<c r="${ref}" s="${si}" t="inlineStr"><is><t xml:space="preserve">${xlEsc(v)}</t></is></c>`;
+      }
+      return `<row r="${r}"${F.alto ? ` ht="${F.alto}" customHeight="1"` : ""}>${xs}</row>`;
+    }).join("");
+    const cols = (h.anchos || []).length ? `<cols>${h.anchos.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join("")}</cols>` : "";
+    const fr = h.fijar || 0;
+    const vista = fr ? `<sheetViews><sheetView workbookViewId="0"><pane ySplit="${fr}" topLeftCell="A${fr + 1}" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A${fr + 1}" sqref="A${fr + 1}"/></sheetView></sheetViews>` : `<sheetViews><sheetView workbookViewId="0"/></sheetViews>`;
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</sheetData>${h.filtro ? `<autoFilter ref="${h.filtro}"/>` : ""}<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.6" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="${h.vertical ? "portrait" : "landscape"}"/></worksheet>`;
+  }
+  const XL_CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++){ let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function xlCrc(b){ let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = XL_CRC[(c ^ b[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+  function xlZip(archivos){
+    const enc = new TextEncoder(), partes = [], central = [];
+    let off = 0;
+    const d = new Date(), hora = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1), dia = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+    archivos.forEach(([nombre, texto]) => {
+      const nb = enc.encode(nombre), db = enc.encode(texto), crc = xlCrc(db);
+      const lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true);
+      lh.setUint16(10, hora, true); lh.setUint16(12, dia, true); lh.setUint32(14, crc, true); lh.setUint32(18, db.length, true); lh.setUint32(22, db.length, true);
+      lh.setUint16(26, nb.length, true);
+      partes.push(new Uint8Array(lh.buffer), nb, db);
+      const ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true);
+      ch.setUint16(12, hora, true); ch.setUint16(14, dia, true); ch.setUint32(16, crc, true); ch.setUint32(20, db.length, true); ch.setUint32(24, db.length, true);
+      ch.setUint16(28, nb.length, true); ch.setUint32(42, off, true);
+      central.push(new Uint8Array(ch.buffer), nb);
+      off += 30 + nb.length + db.length;
+    });
+    const tamC = central.reduce((a, b) => a + b.length, 0);
+    const fin = new DataView(new ArrayBuffer(22));
+    fin.setUint32(0, 0x06054b50, true); fin.setUint16(8, archivos.length, true); fin.setUint16(10, archivos.length, true); fin.setUint32(12, tamC, true); fin.setUint32(16, off, true);
+    return new Blob([...partes, ...central, new Uint8Array(fin.buffer)], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  }
+  function xlsxConFormato(hojas){
+    const usados = new Set();
+    const nombres = hojas.map(h => {
+      let n = String(h.nombre || "Hoja").replace(/[\\\/\?\*\[\]:]/g, " ").slice(0, 31).trim() || "Hoja", k = 2;
+      while (usados.has(n.toLowerCase())) n = n.slice(0, 28) + " " + k++;
+      usados.add(n.toLowerCase()); return n;
+    });
+    const defs = hojas.map((h, i) => h.filtro ? `<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">'${xlEsc(nombres[i].replace(/'/g, "''"))}'!${h.filtro.replace(/([A-Z]+)(\d+)/g, "$$$1$$$2")}</definedName>` : "").join("");
+    const arch = [
+      ["[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${hojas.map((h, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")}<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>`],
+      ["_rels/.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`],
+      ["docProps/core.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:creator>BECSA Visor BIM</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${new Date().toISOString().replace(/\.\d+Z$/, "Z")}</dcterms:created></cp:coreProperties>`],
+      ["xl/workbook.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets>${nombres.map((n, i) => `<sheet name="${xlEsc(n)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("")}</sheets>${defs ? `<definedNames>${defs}</definedNames>` : ""}<calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`],
+      ["xl/_rels/workbook.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${hojas.map((h, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("")}<Relationship Id="rId${hojas.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
+      ["xl/styles.xml", xlEstilos()]
+    ];
+    hojas.forEach((h, i) => arch.push(["xl/worksheets/sheet" + (i + 1) + ".xml", xlHojaXml(h)]));
+    return xlZip(arch);
+  }
+  // Cabecera común: nombre del proyecto (negrita 10), título (negrita 14) y líneas de ámbito/fecha
+  function xlCabecera(filas, proyecto, titulo, sub){
+    filas.push({ c:[proyecto || "Visor BIM"], s:"proy" });
+    filas.push({ c:[titulo], s:"tit", alto:18 });
+    (sub || []).forEach(t => filas.push({ c:[t], s:"sub" }));
+  }
+  const xlNombreProyecto = () => (typeof PJ !== "undefined" && PJ.nombre) || Array.from(new Set(S.models.filter(m => m.ready).map(m => m.name))).join(", ") || "Visor BIM";
+  // Suma de celdas sueltas en una fórmula (si es muy larga, se pone el valor)
+  function xlSuma(refs, valor){
+    if (!refs.length) return { v:0 };
+    const f = refs.length === 1 ? refs[0] : refs.join("+");
+    return f.length < 7500 ? { f } : { v:round(valor, 2) };
+  }
+  const XL_SEP = n => ({ c:[], s:"sep", alto:1.05, relleno:n });
+  // Hoja tipo tabla con el mismo aspecto: grupos (capítulo verde), filas, total por grupo y total general con fórmulas
+  // cols = [{ t:"Título", w:ancho, s:"txt"|"int"|"n3"|"n2", sum:true }]; grupos = [{ titulo, filas:[[...]] }]
+  function xlHojaTabla({ nombre, titulo, sub, cols, grupos, fijas }){
+    const filas = [], n = cols.length;
+    xlCabecera(filas, xlNombreProyecto(), titulo, sub);
+    filas.push({ c:cols.map(c => c.t), s:"cab" });
+    const rCab = filas.length;
+    const sumCols = cols.map((c, i) => c.sum ? i : -1).filter(i => i >= 0);
+    const totGrupo = [];
+    const estNum = s => s === "int" ? "mint" : s === "n2" ? "m2" : "m3";
+    grupos.forEach(g => {
+      const conGrupo = grupos.length > 1 || g.titulo;
+      let rG = 0;
+      if (conGrupo){ filas.push({ c:[g.titulo], s:"c1", relleno:n }); rG = filas.length; }
+      const r0 = filas.length + 1;
+      g.filas.forEach(f => filas.push({ c:f, s:cols.map(c => c.s || "txt") }));
+      const r1 = filas.length;
+      if (conGrupo){
+        const t = new Array(n).fill("");
+        t[0] = { v:"Total " + g.titulo, s:"tTxt" };
+        sumCols.forEach(i => { const L = xlCol(i); t[i] = { f:r1 >= r0 ? `SUBTOTAL(9,${L}${r0}:${L}${r1})` : "0", s:"t" + estNum(cols[i].s) }; });
+        filas.push({ c:t });
+        const rT = filas.length;
+        // en la fila del capítulo, otro SUBTOTAL para que el total general no lo cuente dos veces
+        sumCols.forEach(i => { const L = xlCol(i); filas[rG - 1].c[i] = { f:r1 >= r0 ? `SUBTOTAL(9,${L}${r0}:${L}${r1})` : "0", s:"c1" + estNum(cols[i].s) }; });
+        totGrupo.push(rT);
+        filas.push(XL_SEP(n));
+      } else totGrupo.push(null);
+    });
+    const rFin = filas.length;
+    const t = new Array(n).fill("");
+    t[0] = { v:"TOTAL", s:"tTxt" };
+    const datos0 = rCab + 1;
+    sumCols.forEach(i => { const L = xlCol(i); t[i] = { f:`SUBTOTAL(9,${L}${datos0}:${L}${rFin})`, s:"t" + estNum(cols[i].s) }; });
+    filas.push({ c:t });
+    return { nombre, filas, anchos:cols.map(c => c.w || 12), fijar:rCab, filtro:fijas !== false ? `A${rCab}:${xlCol(n - 1)}${rFin}` : "" };
+  }
+  // Exporta una lista de elementos: Resumen (por categoría con totales) y Elementos (con sus parámetros)
+  function exportarElementosXlsx(titulo, ambito, recorrer, archivo){
+    const grupos = new Map(), has = { m:false, m2:false, m3:false, kg:false }, els = [];
+    recorrer((m, e) => {
+      const cat = catName(m, e), fam = String(cellOf(m, e, "Familia") || ""), tipo = String(cellOf(m, e, "Tipo") || "");
+      const k = cat + "\u0001" + fam + "\u0001" + tipo;
+      let g = grupos.get(k); if (!g){ g = { cat, fam, tipo, n:0, m:0, m2:0, m3:0, kg:0 }; grupos.set(k, g); }
+      const q = elQty(m, e);
+      g.n++;
+      QCOLS.forEach(([u]) => { if (q[u] > 0){ g[u] += q[u]; has[u] = true; } });
+      els.push([m, e, q]);
+    });
+    if (!els.length){ toast("No hay elementos que exportar."); return; }
+    const qc = QCOLS.filter(([u]) => has[u]);
+    const lista = [...grupos.values()].sort((a, b) => a.cat.localeCompare(b.cat, "es") || a.fam.localeCompare(b.fam, "es") || a.tipo.localeCompare(b.tipo, "es", { numeric:true }));
+    const modelos = [...new Set(els.map(x => x[0].name))].join(", ");
+    const sub = [ambito, "Modelos: " + modelos + "   ·   " + new Date().toLocaleString("es-ES")];
+    const porCat = new Map(); lista.forEach(g => { if (!porCat.has(g.cat)) porCat.set(g.cat, []); porCat.get(g.cat).push(g); });
+    const colsR = [{ t:"Familia", w:30 }, { t:"Tipo", w:40 }, { t:"Nº elementos", w:13, s:"int", sum:true }].concat(qc.map(([u, t]) => ({ t, w:13, s:u === "kg" ? "n2" : "n3", sum:true })));
+    const hojaR = xlHojaTabla({ nombre:"Resumen", titulo, sub, cols:colsR,
+      grupos:[...porCat].map(([cat, gs]) => ({ titulo:cat, filas:gs.map(g => [g.fam, g.tipo || "(sin tipo)", g.n].concat(qc.map(([u]) => g[u] > 0 ? round(g[u], 3) : ""))) })) });
+    // Elementos con todos sus parámetros
+    const yaFijas = new Set(["elementid", "uniqueid", "categoría", "categoria", "category", "familia", "tipo", "nivel"]);
+    const extra = [], vistos = new Set();
+    els.forEach(([m]) => { if (vistos.has(m.id) || !m.data) return; vistos.add(m.id); m.data.header.forEach(hd => { const k = String(hd).trim().toLowerCase(); if (k && !yaFijas.has(k) && !colOculta(hd) && !extra.some(x => x.toLowerCase() === k)) extra.push(String(hd).trim()); }); });
+    const extraC = extra.slice(0, 200), maxFilas = 60000;
+    const colsE = [{ t:"Modelo", w:16 }, { t:"ElementId", w:11 }, { t:"Familia", w:26 }, { t:"Tipo", w:32 }, { t:"Nivel", w:14 }]
+      .concat(qc.map(([u, t]) => ({ t, w:12, s:u === "kg" ? "n2" : "n3", sum:true })))
+      .concat(extraC.map(c => ({ t:c, w:Math.min(36, Math.max(10, c.length + 2)) })));
+    const elsCat = new Map();
+    els.slice(0, maxFilas).forEach(x => { const c = catName(x[0], x[1]); if (!elsCat.has(c)) elsCat.set(c, []); elsCat.get(c).push(x); });
+    const hojaE = xlHojaTabla({ nombre:"Elementos", titulo:titulo + " · elementos",
+      sub:[fmtInt(els.length) + " elementos" + (els.length > maxFilas ? " (se exportan los " + fmtInt(maxFilas) + " primeros)" : "") + "   ·   " + ambito], cols:colsE,
+      grupos:[...elsCat].sort((a, b) => a[0].localeCompare(b[0], "es")).map(([cat, xs]) => ({ titulo:cat, filas:xs.map(([m, e, q]) => {
+        const fila = [m.name, String(m.ids[e]), cellOf(m, e, "Familia"), cellOf(m, e, "Tipo"), cellOf(m, e, "Nivel")].concat(qc.map(([u]) => q[u] > 0 ? round(q[u], 3) : ""));
+        extraC.forEach(c => { const v = cellOf(m, e, c); fila.push(v == null ? "" : v); });
+        return fila;
+      }) })) });
+    download(xlsxConFormato([hojaR, hojaE]), archivo);
+  }
+  // Hoja "Presupuesto" con el formato del visor de BC3 (Presto): capítulos del BC3 (o por categoría), partidas con sus líneas
+  // de medición (una por tipo de Revit), total de cada partida, CanPres · Pres · ImpPres con fórmulas, totales por capítulo y total general
+  function hojaPresupuesto(filasMed, proyecto){
+    const N = 15;   // A..O como en el visor de BC3
+    const raiz = { cod:"", res:proyecto, hijos:[], mapa:new Map(), partidas:[], nivel:0 };
+    const nodo = (padre, cod, res) => {
+      const k = cod.toUpperCase() + "\u0001" + res;
+      let n = padre.mapa.get(k);
+      if (!n){ n = { cod, res, hijos:[], mapa:new Map(), partidas:[], nivel:padre.nivel + 1, pmap:new Map() }; padre.mapa.set(k, n); padre.hijos.push(n); }
+      return n;
+    };
+    const rutaBC3 = ref => {
+      const cad = []; let a = ref && ref.Padre, g = 0;
+      while (a && MS.bc3 && a !== MS.bc3.raiz && g < 40){ cad.unshift(a); a = a.Padre; g++; }
+      return cad.slice(0, 5);
+    };
+    const capCat = new Map();
+    filasMed.forEach(f => {
+      let med = Medicion(f); if (!isFinite(med)) med = 0;
+      const u = UdEfectiva(f);
+      let ud = u === "fx" ? (f.UdFormula || "ud") : TextoUd(u);
+      if (f.Ref && !f.UdSel && f.Ref.Ud) ud = f.Ref.Ud;
+      let cap;
+      if (f.Codigo){
+        const ruta = MS.bc3 && f.Ref ? rutaBC3(f.Ref) : [];
+        if (ruta.length){ cap = raiz; ruta.forEach(c => { cap = nodo(cap, String(c.Codigo).replace(/#+$/, ""), c.Resumen || c.Codigo); }); }
+        else if (MS.bc3) cap = nodo(raiz, "PROPIAS", "Partidas propias (sin capítulo en el BC3)");
+        else {
+          if (!capCat.has(f.cat)) capCat.set(f.cat, "C" + String(capCat.size + 1).padStart(2, "0"));
+          cap = nodo(raiz, capCat.get(f.cat), f.cat);
+        }
+      } else {
+        const sp = nodo(raiz, "SP", "Sin partida asignada");
+        if (!capCat.has("SP|" + f.cat)) capCat.set("SP|" + f.cat, "SP" + String(capCat.size + 1).padStart(2, "0"));
+        cap = nodo(sp, capCat.get("SP|" + f.cat), f.cat);
+      }
+      const kp = f.Codigo ? f.Codigo.toUpperCase() : "\u0001" + f.fam + "\u0001" + TipoVisible(f) + "\u0001" + ud;
+      let p = cap.pmap.get(kp);
+      if (!p){
+        p = { cod:f.Codigo || "", ud, res:f.Codigo ? (f.Resumen || "") : (f.fam ? f.fam + " · " : "") + TipoVisible(f), precio:f.TienePrecio ? f.Precio : 0, lineas:[] };
+        cap.pmap.set(kp, p); cap.partidas.push(p);
+      }
+      const com = (f.Codigo ? f.cat + ": " + f.fam + " - " + TipoVisible(f) : f.n + " elementos") + (MS.multiModel ? " [" + f.model + "]" : "");
+      p.lineas.push({ com, ud:u, med, n:f.n });
+    });
+    const ordenar = n => {
+      n.hijos.sort((a, b) => { const sa = a.cod.startsWith("SP") || a.cod === "PROPIAS", sb = b.cod.startsWith("SP") || b.cod === "PROPIAS"; return sa !== sb ? (sa ? 1 : -1) : a.cod.localeCompare(b.cod, "es", { numeric:true }); });
+      n.partidas.sort((a, b) => a.cod.localeCompare(b.cod, "es", { numeric:true }) || a.res.localeCompare(b.res, "es"));
+      n.hijos.forEach(ordenar);
+    };
+    ordenar(raiz);
+    const filas = [];
+    filas.push({ c:[proyecto], s:"proy" });
+    filas.push({ c:["Presupuesto"], s:"tit", alto:18 });
+    filas.push({ c:["Código", "Nat", "Ud", "Resumen", "Comentario", "N", "Longitud", "Anchura", "Altura", "Cantidad", "CanPres", "Pres", "ImpPres", "", "BECSA"], s:"cab" });
+    const altoTexto = t => { const l = Math.min(3, Math.ceil(String(t || "").length / 62)); return l > 1 ? 10.8 * l : undefined; };
+    let total = 0;
+    const partida = p => {
+      filas.push({ c:[{ v:p.cod, s:"pcod" }, "Partida", p.ud, { v:p.res, s:"txtW" }], s:"txt", alto:altoTexto(p.res) });
+      const rP = filas.length, r0 = rP + 1;
+      let cant = 0;
+      p.lineas.forEach(l => {
+        const r = filas.length + 1, esUd = l.ud === "ud";
+        const F = esUd ? round(l.med, 3) : (Math.abs(l.med) > 1e-9 ? 1 : 0), G = esUd ? 0 : round(l.med, 3);   // con todo a 0 la fórmula de Presto da 0
+        cant += esUd ? F : G;
+        filas.push({ c:["", "", "", "", l.com, { v:F, s:"n" }, { v:G, s:"n3" }, { v:0, s:"n3" }, { v:0, s:"n3" },
+          { f:`OR(F${r}<>0,G${r}<>0,H${r}<>0,I${r}<>0)*(F${r} + (F${r} = 0))*(G${r} + (G${r} = 0))*(H${r} + (H${r} = 0))*(I${r} + (I${r} = 0))`, s:"m3" }], s:"txt" });
+      });
+      const r1 = filas.length, rT = r1 + 1;
+      filas.push({ c:["", "", "", "", "", "", "", "", "", { v:"Total " + (p.cod || "(sin código)"), s:"tTxt" },
+        { f:r1 > r0 ? `SUM(J${r0}:J${r1})` : `J${r0}`, s:"tm3" }, { v:round(p.precio, 4), s:"tn2" }, { f:`ROUND(K${rT}*L${rT},2)`, s:"tm2" }] });
+      filas[rP - 1].c[10] = { f:"K" + rT, s:"m3" }; filas[rP - 1].c[11] = { f:"L" + rT, s:"m2" }; filas[rP - 1].c[12] = { f:"M" + rT, s:"m2" };
+      filas.push(XL_SEP(13));
+      const imp = Math.round(round(cant, 3) * p.precio * 100) / 100;
+      return { ref:"M" + rP, imp };
+    };
+    const capitulo = n => {
+      const nv = Math.min(5, n.nivel), est = "c" + nv;
+      filas.push({ c:[n.cod, "Capítulo", "", n.res], s:est, relleno:13 });
+      const rC = filas.length, refs = [];
+      let imp = 0;
+      n.hijos.forEach(h => { const x = capitulo(h); refs.push(x.ref); imp += x.imp; });
+      n.partidas.forEach(p => { const x = partida(p); refs.push(x.ref); imp += x.imp; });
+      const rT = filas.length + 1;
+      filas.push({ c:["", "", "", "", "", "", "", "", "", { v:"Total " + n.cod, s:"tTxt" }, { v:1, s:nv === 1 ? "tint" : "tn3" }, Object.assign(xlSuma(refs, imp), { s:"tm2" }), { f:`ROUND(K${rT}*L${rT},2)`, s:"tm2" }] });
+      filas[rC - 1].c[10] = { f:"K" + rT, s:est + (nv === 1 ? "mint" : "m3") }; filas[rC - 1].c[11] = { f:"L" + rT, s:est + "m2" }; filas[rC - 1].c[12] = { f:"M" + rT, s:est + "m2" };
+      filas.push(XL_SEP(13));
+      return { ref:"M" + rC, imp };
+    };
+    const refs = [];
+    raiz.hijos.forEach(h => { const x = capitulo(h); refs.push(x.ref); total += x.imp; });
+    const rT = filas.length + 1;
+    filas.push({ c:["", "", "", "", "", "", "", "", "", { v:"Total " + proyecto, s:"tTxt" }, { v:1, s:"tint" }, Object.assign(xlSuma(refs, total), { s:"tm2" }), { f:`ROUND(K${rT}*L${rT},2)`, s:"tm2" }] });
+    filas.push(XL_SEP(13));
+    return { nombre:"Presupuesto", filas, anchos:[11.1, 6.6, 6.7, 33.1, 71.7, 13.4, 8.4, 8.1, 7.7, 23.8, 8.4, 9.5, 10.5, 4.1, 11.6], fijar:3, vertical:true };
+  }
+
+  // ---------- Paneles laterales: se ocultan y se recuerda (como en el visor IFC) ----------
+  const PAN = { izq:true, der:true };
+  try { Object.assign(PAN, JSON.parse(localStorage.getItem("visor-bim-paneles") || "{}")); } catch (err) {}
+  function pintarPaneles(){
+    document.body.classList.toggle("hide-left", !PAN.izq); document.body.classList.toggle("hide-right", !PAN.der);
+    $("btnLeft").setAttribute("aria-pressed", String(PAN.izq)); $("btnRight").setAttribute("aria-pressed", String(PAN.der));
+    try { localStorage.setItem("visor-bim-paneles", JSON.stringify(PAN)); } catch (err) {}
+  }
+  $("btnLeft").addEventListener("click", e => { PAN.izq = !PAN.izq; pintarPaneles(); e.currentTarget.blur(); });
+  $("btnRight").addEventListener("click", e => { PAN.der = !PAN.der; pintarPaneles(); e.currentTarget.blur(); });
+  pintarPaneles();
+
   // ---------- Búsqueda y suma ----------
   function allColumns(){
     const set = new Set();
-    S.models.forEach(m => { if (m.data) m.data.header.forEach(h => set.add(h)); });
+    S.models.forEach(m => { if (m.data) m.data.header.forEach(h => { if (!colOculta(h)) set.add(h); }); });
     return Array.from(set);
   }
   function fillColumnSelects(){
     const cols = allColumns();
     const sc = $("searchCol"), prevS = sc.value;
-    sc.innerHTML = '<option value="">Cualquier parámetro</option>';
+    sc.innerHTML = '<option value=""></option>';
+    sc.options[0].textContent = "en cualquier parámetro";
     cols.forEach(c => {
-      const o = document.createElement("option"); o.value = c; o.textContent = c; sc.append(o);
+      const o = document.createElement("option"); o.value = c; o.textContent = "en " + c; sc.append(o);
     });
     if (cols.includes(prevS)) sc.value = prevS;
+    pintarFiltrosBusqueda();
   }
 
   function parseNum(v){
@@ -4853,48 +5240,177 @@ function workerMain(){
   }
   const unitOf = v => { const m = String(v).match(/^\s*-?[\d.,]+\s*(.*)$/); return m ? m[1].trim() : ""; };
 
+  // ---------- Búsqueda con filtros (como en la Medición): categoría, familia, tipos, texto y reglas por parámetro ----------
+  const BQ = { cat:"", fam:"", fase:"", fuera:new Set(), filtro:{ fase:"", reglas:[], todas:true }, tm:0 };
+  const claveTipo = (fam, tipo) => fam + "\u0001" + tipo;
+  function catFila(d, row){ return d.catCol >= 0 ? String(row[d.catCol] || "Sin categoría") : "Sin datos"; }
+  function catalogoBusqueda(){
+    const cats = new Map(), fams = new Map(), tipos = new Map();
+    S.models.forEach(m => {
+      if (!m.ready || !m.data) return;
+      const d = m.data, mc = d.mc;
+      for (let e = 0; e < m.n; e++){
+        const ri = d.rowOf[e]; if (ri < 0) continue;
+        const row = d.rows[ri], cat = catFila(d, row);
+        cats.set(cat, (cats.get(cat) || 0) + 1);
+        if (BQ.cat && cat !== BQ.cat) continue;
+        const fam = mc.fam >= 0 ? String(row[mc.fam] || "") : "";
+        fams.set(fam, (fams.get(fam) || 0) + 1);
+        if (BQ.fam && fam !== BQ.fam) continue;
+        const tipo = mc.tipo >= 0 ? String(row[mc.tipo] || "") : "";
+        const k = claveTipo(fam, tipo), t = tipos.get(k);
+        if (t) t.n++; else tipos.set(k, { k, fam, tipo, n:1 });
+      }
+    });
+    return { cats, fams, tipos };
+  }
+  const ordenEs = (a, b) => a.localeCompare(b, "es", { numeric:true });
+  function opcionesSelect(sel, mapa, todos, actual){
+    sel.innerHTML = "";
+    sel.append(new Option(todos, ""));
+    [...mapa.keys()].sort(ordenEs).forEach(k => sel.append(new Option((k || "(sin nombre)") + "  (" + fmtInt(mapa.get(k)) + ")", k)));
+    sel.value = mapa.has(actual) ? actual : "";
+    return sel.value;
+  }
+  function pintarFiltrosBusqueda(){
+    let C = catalogoBusqueda();
+    const cat = opcionesSelect($("fCat"), C.cats, "Todas las categorías", BQ.cat);
+    if (cat !== BQ.cat){ BQ.cat = cat; BQ.fam = ""; BQ.fuera.clear(); C = catalogoBusqueda(); }
+    const fam = opcionesSelect($("fFam"), C.fams, "Todas las familias", BQ.fam);
+    if (fam !== BQ.fam){ BQ.fam = fam; BQ.fuera.clear(); C = catalogoBusqueda(); }
+    $("fFam").disabled = !C.fams.size;
+    // fases que traen los modelos
+    const fases = new Set();
+    S.models.forEach(m => { if (!m.ready || !m.data) return; const c = colFase(m.data.mc); if (c === undefined) return; m.data.rows.forEach(r => { const v = String(r[c] ?? "").trim(); if (v) fases.add(v); }); });
+    const sf = $("fFase"); sf.innerHTML = ""; sf.append(new Option("Todas las fases", ""));
+    [...fases].sort(ordenEs).forEach(v => sf.append(new Option("Fase: " + v, v)));
+    if (BQ.fase && !fases.has(BQ.fase)) BQ.fase = "";
+    sf.value = BQ.fase; sf.hidden = !fases.size;
+    BQ.tiposVis = [...C.tipos.values()].sort((a, b) => ordenEs(a.tipo, b.tipo) || ordenEs(a.fam, b.fam));
+    $("fTiposBox").hidden = !(BQ.cat || BQ.fam) || !BQ.tiposVis.length;
+    pintarListaTipos();
+    pintarBotonReglasBusq();
+  }
+  function pintarListaTipos(){
+    const ul = $("fTipos"), q = plain($("fTipoTxt").value), lista = BQ.tiposVis || [];
+    ul.innerHTML = "";
+    const frag = document.createDocumentFragment();
+    let vis = 0;
+    lista.forEach(t => {
+      if (q && !plain(t.tipo + " " + t.fam).includes(q)) return;
+      vis++;
+      const li = document.createElement("li");
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !BQ.fuera.has(t.k); cb.dataset.k = t.k;
+      cb.setAttribute("aria-label", "Incluir " + (t.tipo || "(sin tipo)"));
+      const nm = document.createElement("button"); nm.type = "button"; nm.className = "ft-n"; nm.title = "Clic: solo este tipo";
+      const a = document.createElement("span"); a.textContent = t.tipo || "(sin tipo)";
+      nm.append(a);
+      if (!BQ.fam && t.fam){ const f = document.createElement("small"); f.textContent = t.fam; nm.append(f); }
+      const n = document.createElement("span"); n.className = "ft-c"; n.textContent = fmtInt(t.n);
+      cb.addEventListener("change", () => { if (cb.checked) BQ.fuera.delete(t.k); else BQ.fuera.add(t.k); contarTipos(); programarBusqueda(60); });
+      nm.addEventListener("click", () => { BQ.fuera = new Set(lista.map(x => x.k).filter(k => k !== t.k)); pintarListaTipos(); programarBusqueda(0); });
+      li.append(cb, nm, n); frag.append(li);
+    });
+    ul.append(frag);
+    if (!vis){ const li = document.createElement("li"); li.className = "muted"; li.textContent = "Ningún tipo con ese texto."; ul.append(li); }
+    contarTipos();
+  }
+  function contarTipos(){
+    const lista = BQ.tiposVis || [], marcados = lista.filter(t => !BQ.fuera.has(t.k)).length;
+    $("fTiposN").textContent = "Tipos: " + marcados + " de " + lista.length;
+  }
+  function pintarBotonReglasBusq(){
+    const b = $("fReglas"), n = BQ.filtro.reglas.length;
+    b.textContent = n ? "Parámetro: " + n + (n === 1 ? " regla" : " reglas") : "Por parámetro…";
+    b.setAttribute("aria-pressed", String(n > 0));
+    b.title = n ? "Filtro activo: " + textoReglas(BQ.filtro) + "\nClic para cambiarlo o quitarlo" : "Buscar solo los elementos que cumplan unas reglas (p. ej. «Nivel» = Planta 1, «Volumen» > 2)";
+  }
+  const busquedaActiva = () => !!(BQ.cat || BQ.fam || BQ.fase || BQ.fuera.size || $("searchText").value.trim() || BQ.filtro.reglas.length);
+  function programarBusqueda(ms){ clearTimeout(BQ.tm); BQ.tm = setTimeout(() => runSearch(false), ms); }
+  function textoBusqueda(){
+    const p = [];
+    if (BQ.cat) p.push(BQ.cat);
+    if (BQ.fam) p.push("familia «" + BQ.fam + "»");
+    if (BQ.fase) p.push("fase «" + BQ.fase + "»");
+    if (BQ.fuera.size && BQ.tiposVis){ const n = BQ.tiposVis.filter(t => !BQ.fuera.has(t.k)).length; p.push(n + " de " + BQ.tiposVis.length + " tipos"); }
+    const t = $("searchText").value.trim(); if (t) p.push("«" + t + "»" + ($("searchCol").value ? " en " + $("searchCol").value : ""));
+    if (BQ.filtro.reglas.length) p.push(textoReglas(BQ.filtro));
+    return p.join(" · ") || "todo";
+  }
   function runSearch(silent){
-    const col = $("searchCol").value;
-    const q = $("searchText").value.trim().toLowerCase();
-    if (!q){ if (!silent) clearSearch(); return; }
+    clearTimeout(BQ.tm);
+    if (!busquedaActiva()){
+      S.search = false;
+      S.models.forEach(m => { if (m.ready) m.match.fill(0); });
+      $("searchInfo").textContent = ""; $("results").innerHTML = ""; $("sumBox").hidden = true;
+      if (!silent) rebuildAll();
+      return;
+    }
+    const col = $("searchCol").value, q = plain($("searchText").value);
     let total = 0;
     S.models.forEach(m => {
       if (!m.ready) return;
       m.match.fill(0);
       const d = m.data; if (!d) return;
-      const ci = col ? d.col.get(col) : undefined;
-      if (col && ci === undefined) return;
+      const mc = d.mc, ci = col ? d.col.get(col) : undefined;
+      if (q && col && ci === undefined) return;
+      const PF = BQ.filtro.reglas.length ? prepararFiltro(BQ.filtro, m) : null;
+      const cFase = BQ.fase ? colFase(mc) : undefined;
+      if (BQ.fase && cFase === undefined) return;
       for (let e = 0; e < m.n; e++){
         const r = d.rowOf[e]; if (r < 0) continue;
         const row = d.rows[r];
-        let hit = false;
-        if (col) hit = String(row[ci]).toLowerCase().includes(q);
-        else for (let i = 0; i < row.length && !hit; i++) hit = String(row[i]).toLowerCase().includes(q);
-        if (hit){ m.match[e] = 1; total++; }
+        if (BQ.cat && catFila(d, row) !== BQ.cat) continue;
+        const fam = mc.fam >= 0 ? String(row[mc.fam] || "") : "";
+        if (BQ.fam && fam !== BQ.fam) continue;
+        if (BQ.fase && plain(row[cFase] ?? "") !== plain(BQ.fase)) continue;
+        if (BQ.fuera.size && BQ.fuera.has(claveTipo(fam, mc.tipo >= 0 ? String(row[mc.tipo] || "") : ""))) continue;
+        if (q){
+          let hit = false;
+          if (col) hit = plain(row[ci] ?? "").includes(q);
+          else for (let i = 0; i < row.length && !hit; i++) if (i !== d.matCol) hit = plain(row[i] ?? "").includes(q);
+          if (!hit) continue;
+        }
+        if (PF && !cumpleFiltro(PF, row)) continue;
+        m.match[e] = 1; total++;
       }
     });
     S.search = true;
-    $("searchInfo").innerHTML = "";
-    const info = document.createElement("span"); info.textContent = total === 1 ? "1 elemento encontrado. " : fmtInt(total) + " elementos encontrados. ";
-    $("searchInfo").append(info);
+    const box = $("searchInfo"); box.innerHTML = "";
+    const info = document.createElement("div"); info.className = "bq-n";
+    info.textContent = total === 1 ? "1 elemento" : fmtInt(total) + " elementos";
+    box.append(info);
     if (total){
-      const iso = document.createElement("button"); iso.className = "btn small"; iso.textContent = "Aislar resultados";
-      iso.addEventListener("click", isolateMatches);
-      $("searchInfo").append(iso);
+      const fila = document.createElement("div"); fila.className = "bq-acc";
+      const boton = (txt, tit, fn) => { const b = document.createElement("button"); b.className = "btn small"; b.textContent = txt; b.title = tit; b.addEventListener("click", fn); fila.append(b); };
+      boton("Aislar", "Ver solo estos elementos (Mostrar todo para volver)", isolateMatches);
+      boton("Seleccionar", "Seleccionarlos: resumen por tipo, propiedades y medir la selección", () => { const L = []; eachMatch((m, e) => L.push(m, e)); S.selSet = new Map(); changeSelection(L, false); });
+      boton("Excel", "Exportar a Excel el resumen por tipo y la lista de elementos con sus parámetros", () => exportarElementosXlsx("Búsqueda de elementos", textoBusqueda(), eachMatch, "Busqueda_" + stamp() + ".xlsx"));
+      box.append(fila);
     }
     renderResults();
     fillSumSelect();
     if (!silent) rebuildAll();
   }
   function clearSearch(){
+    BQ.cat = ""; BQ.fam = ""; BQ.fase = ""; BQ.fuera.clear(); BQ.filtro.reglas = [];
+    $("searchText").value = ""; $("fTipoTxt").value = ""; $("searchCol").value = "";
+    pintarFiltrosBusqueda();
     S.search = false;
     S.models.forEach(m => { if (m.ready) m.match.fill(0); });
-    $("searchText").value = "";
     $("searchInfo").textContent = "";
     $("results").innerHTML = "";
     $("sumBox").hidden = true;
     rebuildAll();
   }
+  $("fCat").addEventListener("change", e => { BQ.cat = e.target.value; BQ.fam = ""; BQ.fuera.clear(); $("fTipoTxt").value = ""; pintarFiltrosBusqueda(); programarBusqueda(0); });
+  $("fFam").addEventListener("change", e => { BQ.fam = e.target.value; BQ.fuera.clear(); $("fTipoTxt").value = ""; pintarFiltrosBusqueda(); programarBusqueda(0); });
+  $("fTipoTxt").addEventListener("input", pintarListaTipos);
+  $("fFase").addEventListener("change", e => { BQ.fase = e.target.value; programarBusqueda(0); });
+  $("fTodos").addEventListener("click", () => { const q = plain($("fTipoTxt").value); (BQ.tiposVis || []).forEach(t => { if (!q || plain(t.tipo + " " + t.fam).includes(q)) BQ.fuera.delete(t.k); }); pintarListaTipos(); programarBusqueda(0); });
+  $("fNinguno").addEventListener("click", () => { const q = plain($("fTipoTxt").value); (BQ.tiposVis || []).forEach(t => { if (!q || plain(t.tipo + " " + t.fam).includes(q)) BQ.fuera.add(t.k); }); pintarListaTipos(); programarBusqueda(0); });
+  $("fReglas").addEventListener("click", () => AbrirFiltroParametro(BQ.filtro, () => { pintarBotonReglasBusq(); runSearch(false); },
+    { titulo:"Buscar por parámetro", sub:"Busca solo los elementos que cumplan las reglas (se suman a la categoría, familia, tipos y texto elegidos).", vacio:"Sin reglas: no se filtra por parámetro." }));
   function eachMatch(fn){ S.models.forEach(m => { if (!m.ready) return; for (let e = 0; e < m.n; e++) if (m.match[e]) fn(m, e); }); }
   function renderResults(){
     const ul = $("results");
@@ -5162,7 +5678,7 @@ function workerMain(){
   function ParametrosNumericos(m, e){
     const d = m.data, row = d.rows[d.rowOf[e]], l = [], seen = new Set();
     d.header.forEach((h, i) => {
-      if (/^(elementid|uniqueid)$/i.test(h)) return;
+      if (/^(elementid|uniqueid)$/i.test(h) || colOculta(h)) return;
       const r = numVal(row[i], h);
       if (!r) return;
       const name = String(h), k = name.toLowerCase();
@@ -5381,10 +5897,13 @@ function workerMain(){
     const byKey = new Map();
     const conFiltro = filtroActivo();
     const FRT = scope === "tramo" ? fraccionesTramo() : null;
+    const porMat = MS.porMaterial, sepCat = MS.matModo === "sep", soloCat = MS.matModo && MS.matModo !== "sep" ? MS.matModo : "";
+    MS.sinMateriales = [];
     S.models.forEach(m => {
       if (!m.ready || !m.data) return;
       const d = m.data, mc = d.mc;
-      const PF = conFiltro ? prepararFiltro(MS.filtro, m) : null;
+      if (porMat && d.matCol < 0) MS.sinMateriales.push(m.name);   // se mide por el parámetro Material
+      const PF = conFiltro ? prepararFiltro(filtroMedicion(), m) : null;
       for (let e = 0; e < m.n; e++){
         const ri = d.rowOf[e];
         if (ri < 0) continue;
@@ -5395,6 +5914,7 @@ function workerMain(){
         if (scope === "tramo"){ const q = FRT && FRT.get(m.id); if (!q) continue; fr = q.F[e]; if (!(fr > 1e-6)) continue; cnt = q.C[e]; }
         const row = d.rows[ri];
         if (PF && !cumpleFiltro(PF, row)) continue;   // fase / reglas por parámetro (antes de agrupar)
+        if (porMat){ agruparMateriales(byKey, m, e, row, fr, cnt, sepCat, soloCat); continue; }
         const cat = d.catCol >= 0 ? String(row[d.catCol] || "") : "";
         const fam = mc.fam >= 0 ? String(row[mc.fam] || "") : "";
         const tipo = mc.tipo >= 0 ? String(row[mc.tipo] || "") : "";
@@ -5429,7 +5949,8 @@ function workerMain(){
     MS.rows = Array.from(byKey.values());
     let migradas = 0;
     MS.rows.forEach(g => {
-      g.udDef = udDefecto(g);
+      if (g.esMat) g.fam = [...g.usos].sort((a, b) => a.localeCompare(b, "es")).join(", ");
+      g.udDef = g.esMat ? udMaterial(g) : udDefecto(g);
       // Datos de la medición anterior del visor (antes de esta versión)
       const o = MS.oldOv[g.oldKey];
       if (o && !MS.ov[g.key]){
@@ -5447,11 +5968,52 @@ function workerMain(){
                            a.tipo.localeCompare(b.tipo, "es") || cmpSize(a.size, b.size));
     const nm = new Set(MS.rows.map(r => r.model)).size;
     MS.multiModel = nm > 1;
-    MS.desc = (scope === "tramo" ? textoTramo() : (CAT_LABEL[scope] || "")) + (conFiltro ? " · " + textoFiltro() : "");
+    MS.desc = (porMat ? "por material" + (sepCat ? ", separado por categoría" : soloCat ? " de " + soloCat : "") + " · " : "") + (scope === "tramo" ? textoTramo() : (CAT_LABEL[scope] || "")) + (conFiltro ? " · " + textoFiltro() : "");
     const keys = new Set(MS.rows.map(r => r.key));
     MS.sel.forEach(k => { if (!keys.has(k)) MS.sel.delete(k); });
     if (MS.bc3) PrepararBC3(false);
   }
+
+  // Por material: cada elemento suma en una fila por material (las pinturas aparte); los que no tienen material, en "(Sin material)"
+  function agruparMateriales(byKey, m, e, row, fr, cnt, sepCat, soloCat){
+    const d = m.data, cat = d.catCol >= 0 ? String(row[d.catCol] || "") : "";
+    if (soloCat && cat !== soloCat) return;
+    const mats = matsDe(m, e) || [];
+    const fila = (clave, campos) => {
+      const key = m.name + "|MAT|" + clave + (sepCat ? "|" + cat : "");
+      let g = byKey.get(key);
+      if (!g){
+        g = Object.assign({ key, tkey:key, oldKey:key, model:m.name, cat:"", fam:"", tipo:"", size:"", n:0, els:[], sub:"", fr:[], esMat:true, usos:new Set(),
+              sums:{ ml:0, m2:0, m3:0, kg:0, m2b:0 }, has:{ ml:false, m2:false, m3:false, kg:false, m2b:false }, mCode:"", mRes:"", mRes2:"", mPrecio:null }, campos);
+        byKey.set(key, g);
+      }
+      g.usos.add(cat || "Sin categoría");
+      g.n += cnt; g.els.push(m, e); g.fr.push(fr);
+      return g;
+    };
+    if (!mats.length){ fila("(Sin material)|" + cat, { cat:sepCat ? cat : "(Sin material)", tipo:"(Sin material)", sinMat:true, mRes:"Elementos sin material en el modelo" }); return; }
+    const vistos = new Set();
+    mats.forEach(x => {
+      const clave = x.n + (x.p ? "|P" : "");
+      const g = fila(clave, { cat:sepCat ? cat : (x.c || "Sin clase"), tipo:x.n + (x.p ? " (pintura)" : ""), pintura:x.p, mCode:x.k, mRes:x.d, mPrecio:x.cost > 0 ? x.cost : null });
+      if (vistos.has(clave)){ g.n -= cnt; g.els.length -= 2; g.fr.length -= 1; }   // mismo material dos veces en un elemento: un solo elemento
+      vistos.add(clave);
+      const add = (u, v) => { if (v > 0){ g.sums[u] += v * fr; g.has[u] = true; } };
+      add("m2", x.a); add("m3", x.v); add("kg", x.kg);
+    });
+  }
+  // Unidad por defecto de un material (como en BoQ): pinturas y capas finas en m², metales en kg, el resto en m³
+  function udMaterial(g){
+    if (g.sinMat) return "ud";
+    if (g.pintura && g.has.m2) return "m2";
+    if (g.has.kg) return "kg";
+    const esp = g.has.m2 && g.sums.m2 > 0 ? g.sums.m3 / g.sums.m2 : NaN;
+    if (g.has.m3 && (!g.has.m2 || isNaN(esp) || esp >= 0.05)) return "m3";
+    if (g.has.m2) return "m2";
+    return "ud";
+  }
+  // Notas clave de la biblioteca de Revit ("09 91 00.A1"): no son partidas del BC3
+  const PareceNotaClave = c => /^\d{2}(\s\d{2}){1,3}(\.[A-Za-z0-9]+)*$/.test(String(c || "").trim());
 
   // Valores efectivos de la fila: lo que se ha puesto en el visor manda sobre lo que trae el modelo
   function aplicarEstado(f){
@@ -5460,7 +6022,7 @@ function workerMain(){
     if ("code" in o) f.Codigo = o.code;
     else {
       f.Codigo = f.mCode;
-      if (f.Codigo && PareceUniformat(f.Codigo) && !(MS.bc3 && MS.bc3.buscarPartida(f.Codigo))){ f.CodigoIgnorado = f.Codigo; f.Codigo = ""; }
+      if (f.Codigo && (PareceUniformat(f.Codigo) || PareceNotaClave(f.Codigo)) && !(MS.bc3 && MS.bc3.buscarPartida(f.Codigo))){ f.CodigoIgnorado = f.Codigo; f.Codigo = ""; }
     }
     f.Resumen = "res" in o ? o.res : (f.mRes || (f.CodigoIgnorado ? "" : f.mRes2));
     const p = "price" in o ? o.price : f.mPrecio;
@@ -5468,7 +6030,7 @@ function workerMain(){
     f.Precio = f.TienePrecio ? p : 0;
     f.Ref = (MS.bc3 && f.Codigo) ? MS.bc3.buscarPartida(f.Codigo) : null;
     f.UdSel = MS.medidas[f.key + "|" + f.Codigo] || "";
-    const fx = MS.formulas[f.tkey];
+    const fx = f.esMat ? null : MS.formulas[f.tkey];   // las fórmulas son por tipo
     f.Formula = fx ? fx[0] : ""; f.UdFormula = fx ? fx[1] : "";
     EvaluarFormulaFila(f);
   }
@@ -5639,6 +6201,7 @@ function workerMain(){
       if (!colVisible(c)) return;
       MS.visCols.push(c);
       const col = document.createElement("col"); col.dataset.c = c; col.style.width = anchoCol(c) + "px"; cg.append(col);
+      if (MS.porMaterial) label = { cat:"Clase de material", fam:"Usado en", tipo:"Material" }[c] || label;
       const th = document.createElement("th"); th.textContent = label; th.className = "c-" + c + (cls ? " " + cls : ""); th.dataset.c = c;
       if (c !== "btn"){
         th.dataset.sort = c; th.title = (label || "Estado") + " · clic para ordenar · arrastra el borde para cambiar el ancho (doble clic: ajustar)";
@@ -5753,7 +6316,10 @@ function workerMain(){
     $("kPresu").append(lbl);
     kpi($("kPresu"), fmtEur(total), conImp + " filas con importe");
     kpi($("kAsig"), fmtInt(asig) + " / " + fmtInt(MS.filtered.length), Math.round(frac * 100) + " % con partida" + (avisos ? " · " + avisos + " incompletas" : ""));
-    kpi($("kElem"), fmtInt(elem), "elementos · " + fmtInt(MS.filtered.length) + " tipos en " + cats.size + " categorías");
+    if (MS.porMaterial){   // un elemento sale en varios materiales: se cuentan una vez
+      const unicos = new Set(); MS.filtered.forEach(f => { for (let i = 0; i < f.els.length; i += 2) unicos.add(f.els[i].id + ":" + f.els[i + 1]); });
+      kpi($("kElem"), fmtInt(unicos.size), "elementos · " + fmtInt(MS.filtered.length) + " materiales en " + cats.size + (cats.size === 1 ? " clase" : " clases"));
+    } else kpi($("kElem"), fmtInt(elem), "elementos · " + fmtInt(MS.filtered.length) + " tipos en " + cats.size + " categorías");
     $("kAsig").style.setProperty("--p", (frac * 100).toFixed(1) + "%");
   }
   function ActualizarBotones(){
@@ -6403,48 +6969,34 @@ function workerMain(){
   }
   function exportXlsx(){
     if (!MS.filtered.length){ MostrarEstado("No hay nada medido.", 2); return; }
-    loadXlsxLib().then(X => {
-      const wb = X.utils.book_new();
-      const { head, body } = filasTabla();
-      const total = MS.filtered.reduce((a, f) => a + (isNaN(Importe(f)) ? 0 : Importe(f)), 0);
-      const tr = head.map(() => ""); tr[0] = "TOTAL"; tr[14] = round(total, 2);
-      const ws = X.utils.aoa_to_sheet([head].concat(body, [tr]));
-      ws["!cols"] = head.map(h => ({ wch: /Resumen|Tipo$|Familia|Estado/.test(h) ? 32 : Math.max(9, h.length + 2) }));
-      ws["!autofilter"] = { ref: X.utils.encode_range({ s:{ r:0, c:0 }, e:{ r:body.length, c:head.length - 1 } }) };
-      X.utils.book_append_sheet(wb, ws, "Por tipo");
-      // Por partida
-      const g = new Map();
-      MS.filtered.forEach(f => {
-        if (!f.Codigo) return;
-        const k = f.Codigo.toUpperCase();
-        if (!g.has(k)) g.set(k, { code:f.Codigo, res:f.Resumen, uds:new Set(), tipos:0, n:0, qty:0, precio:f.TienePrecio ? f.Precio : null, imp:0 });
-        const it = g.get(k), u = UdEfectiva(f);
-        it.uds.add(u === "fx" ? (f.UdFormula || "ud") : TextoUd(u)); it.tipos++; it.n += f.n;
-        const m = Medicion(f); if (!isNaN(m)) it.qty += m;
-        const im = Importe(f); if (!isNaN(im)) it.imp += im;
-      });
-      const h2 = ["Código", "Resumen", "Ud", "Nº tipos", "Nº elementos", "Cantidad", "Precio (€)", "Importe (€)"];
-      const b2 = Array.from(g.values()).sort((a, b) => a.code.localeCompare(b.code, "es", { numeric:true }))
-        .map(it => [it.code, it.res, it.uds.size === 1 ? Array.from(it.uds)[0] : "varias", it.tipos, it.n, it.uds.size === 1 ? round(it.qty, 3) : "", it.precio === null ? "" : round(it.precio, 4), round(it.imp, 2)]);
-      const ws2 = X.utils.aoa_to_sheet([h2].concat(b2, [["TOTAL", "", "", "", "", "", "", round(total, 2)]]));
-      ws2["!cols"] = h2.map(h => ({ wch: h === "Resumen" ? 48 : 13 }));
-      X.utils.book_append_sheet(wb, ws2, "Por partida");
-      const crit = [
-        ["Criterios de medición"],
-        ["Fecha", new Date().toLocaleString("es-ES")],
-        ["Modelos", Array.from(new Set(MS.rows.map(r => r.model))).join(", ")],
-        ["Ámbito", MS.desc],
-        ["BC3", MS.bc3 ? MS.bc3.nombre : "(ninguno)"],
-        ["Medida por defecto", "Según la unidad de la partida del BC3; si no hay, según la categoría (como la macro BoQ)"],
-        ["Muros y suelos", "m² = área neta de Revit; m² bruta = sin descontar huecos"],
-        ["Instalaciones", "Una línea por tipo y tamaño; aislamientos por espesor"],
-        ["kg", "Peso calculado por la macro de exportación o W (kg/m) x longitud"]
-      ];
-      const wsC = X.utils.aoa_to_sheet(crit); wsC["!cols"] = [{ wch:20 }, { wch:80 }];
-      X.utils.book_append_sheet(wb, wsC, "Criterios");
-      X.writeFile(wb, "BoQ_" + stamp() + ".xlsx");
-      MostrarEstado("Excel exportado.", 1);
-    }).catch(err => MostrarEstado(err.message, 3));
+    const proyecto = xlNombreProyecto();
+    const modelos = Array.from(new Set(MS.rows.map(r => r.model))).join(", ");
+    const sub = ["Ámbito: " + MS.desc + "   ·   BC3: " + (MS.bc3 ? MS.bc3.nombre : "(ninguno)"), "Modelos: " + modelos + "   ·   " + new Date().toLocaleString("es-ES")];
+    const hojaP = hojaPresupuesto(MS.filtered, proyecto);
+    // Por tipo: la tabla de la Medición, por categoría
+    const porCat = new Map();
+    MS.filtered.forEach(f => { if (!porCat.has(f.cat)) porCat.set(f.cat, []); porCat.get(f.cat).push(f); });
+    const cols = [{ t:"Modelo", w:16 }, { t:"Familia", w:26 }, { t:"Tipo", w:32 }, { t:"Cantidad", w:9, s:"int", sum:true }, { t:"ml", w:11, s:"n3", sum:true }, { t:"m²", w:11, s:"n3", sum:true },
+      { t:"m³", w:11, s:"n3", sum:true }, { t:"Acero kg", w:11, s:"n2", sum:true }, { t:"Código", w:12, s:"pcod" }, { t:"Resumen", w:44 }, { t:"Ud", w:6 }, { t:"Medición", w:12, s:"n3" },
+      { t:"Precio", w:10, s:"n2" }, { t:"Importe", w:12, s:"n2", sum:true }, { t:"Estado", w:16 }];
+    const hojaT = xlHojaTabla({ nombre:"Por tipo", titulo:"Medición por tipo", sub, cols,
+      grupos:[...porCat].sort((a, b) => a[0].localeCompare(b[0], "es")).map(([cat, fs]) => ({ titulo:cat, filas:fs.map(f => {
+        const u = UdEfectiva(f), med = Medicion(f), imp = Importe(f);
+        return [f.model, f.fam, TipoVisible(f), f.n, f.has.ml ? round(f.sums.ml, 3) : "", f.has.m2 ? round(f.sums.m2, 3) : "", f.has.m3 ? round(f.sums.m3, 3) : "", f.has.kg ? round(f.sums.kg, 2) : "",
+          f.Codigo, f.Resumen, u === "fx" ? (f.UdFormula || "ud") : TextoUd(u), isFinite(med) ? round(med, 3) : "", f.TienePrecio ? round(f.Precio, 4) : "", isFinite(imp) ? round(imp, 2) : "", TextoEstado(f)];
+      }) })) });
+    const crit = [["Fecha", new Date().toLocaleString("es-ES")], ["Modelos", modelos], ["Ámbito", MS.desc], ["BC3", MS.bc3 ? MS.bc3.nombre : "(ninguno)"],
+      ["Medida por defecto", "Según la unidad de la partida del BC3; si no hay, según la categoría (como la macro BoQ)"],
+      ["Muros y suelos", "m² = área neta de Revit; m² bruta = sin descontar huecos"],
+      ["Instalaciones", "Una línea por tipo y tamaño; aislamientos por espesor"],
+      ["kg", "Peso calculado por la macro de exportación o W (kg/m) x longitud"],
+      ["Presupuesto", "Capítulos del BC3 (o uno por categoría si no hay BC3). Cada tipo de Revit es una línea de medición de su partida; los tipos sin partida van al final, por categoría."]];
+    const fc = []; xlCabecera(fc, proyecto, "Criterios de medición", []);
+    fc.push({ c:["Concepto", "Criterio"], s:"cab" });
+    crit.forEach(r => fc.push({ c:r, s:["tTxt", "txtW"] }));
+    const hojaC = { nombre:"Criterios", filas:fc, anchos:[22, 100] };
+    download(xlsxConFormato([hojaP, hojaT, hojaC]), "Presupuesto_" + nombreProyecto() + "_" + stamp() + ".xlsx");
+    MostrarEstado("Excel exportado.", 1);
   }
 
   // ---- Compartir: exportar / importar lo guardado en este navegador ----
@@ -6473,7 +7025,12 @@ function workerMain(){
     });
   }
 
-  function refreshMeasure(){ if (!MS.open) return; RellenarFases(); computeRows(); RellenarCategorias(); renderMeasure(); }
+  function refreshMeasure(){
+    if (!MS.open) return;
+    RellenarFases(); pintarModoMed(); computeRows(); RellenarCategorias(); renderMeasure();
+    if (MS.porMaterial && MS.sinMateriales && MS.sinMateriales.length)
+      MostrarEstado(MS.sinMateriales.join(", ") + ": exportado sin la lista de materiales, se mide por el parámetro «Material estructural» / «Material» de cada elemento (sin capas ni pinturas). Para las capas de muros, suelos y cubiertas, vuelve a exportarlo con el Exportar Visor actualizado.", 2);
+  }
   function setMeasure(on){
     MS.open = on;
     $("measure").hidden = !on;
@@ -6823,7 +7380,9 @@ function workerMain(){
     const v = parseFloat(t);
     return isNaN(v) ? NaN : v;
   }
-  const filtroActivo = () => MS.modo === "tecnico" && (!!MS.filtro.fase || MS.filtro.reglas.length > 0);
+  // La fase filtra en Sencillo y en Avanzado; las reglas por parámetro, solo en Avanzado
+  const filtroActivo = () => !!MS.filtro.fase || (MS.modo === "tecnico" && MS.filtro.reglas.length > 0);
+  const filtroMedicion = () => MS.modo === "tecnico" ? MS.filtro : { fase:MS.filtro.fase, reglas:[], todas:true };
   function textoReglas(f){
     return f.reglas.map(r => "«" + r.param + "» " + OP_TXT[r.op] + (opNecesitaValor(r.op) ? " " + r.valor : "")).join(f.todas ? " y " : " o ");
   }
@@ -6831,7 +7390,7 @@ function workerMain(){
     if (!filtroActivo()) return "";
     const p = [];
     if (MS.filtro.fase) p.push("fase «" + MS.filtro.fase + "»");
-    if (MS.filtro.reglas.length) p.push(textoReglas(MS.filtro));
+    if (MS.filtro.reglas.length && MS.modo === "tecnico") p.push(textoReglas(MS.filtro));
     return p.join(" · ");
   }
   const colFase = mc => { const L = mc.lower; return L.get("fase de creación") ?? L.get("fase de creacion") ?? L.get("phase created"); };
@@ -6930,7 +7489,7 @@ function workerMain(){
     S.models.forEach(m => {
       if (!m.ready || !m.data) return;
       m.data.header.forEach(h => {
-        const s = String(h).trim(); if (!s || /^(elementid|uniqueid)$/i.test(s)) return;
+        const s = String(h).trim(); if (!s || /^(elementid|uniqueid)$/i.test(s) || colOculta(s)) return;
         if (/^tipo:/i.test(s)) tipo.set(s.toLowerCase(), s); else ej.set(s.toLowerCase(), s);
       });
     });
@@ -6951,12 +7510,15 @@ function workerMain(){
     return Array.from(vals.keys()).sort((a, b) => { const x = numTexto(a), y = numTexto(b); return (!isNaN(x) && !isNaN(y)) ? x - y : a.localeCompare(b, "es", { numeric:true }); }).slice(0, max);
   }
 
-  function AbrirFiltroParametro(){
-    if (!S.models.some(m => m.ready && m.data)){ MostrarEstado("Carga primero los modelos con su .xlsx.", 2); return; }
+  function AbrirFiltroParametro(F, alAplicar, T){
+    if (!F || F instanceof Event) F = MS.filtro;
+    alAplicar = alAplicar || (() => aplicarFiltroElementos());
+    T = T || { titulo:"Filtro por parámetro", sub:"Mide solo los elementos que cumplan las reglas. Se aplica a cada elemento antes de agrupar por tipo.", vacio:"Sin reglas: se mide todo." };
+    if (!S.models.some(m => m.ready && m.data)){ toast("Carga primero los modelos con su .xlsx."); return; }
     const params = catalogoParametros();
     const M = abrirModal("filt");
     M.box.innerHTML = `
-      <div class="md-head"><div><h2>Filtro por parámetro</h2><p class="md-sub">Mide solo los elementos que cumplan las reglas. Se aplica a cada elemento antes de agrupar por tipo.</p></div><button class="ibtn md-x" aria-label="Cerrar">✕</button></div>
+      <div class="md-head"><div><h2>${T.titulo}</h2><p class="md-sub">${T.sub}</p></div><button class="ibtn md-x" aria-label="Cerrar">✕</button></div>
       <div class="filt-body">
         <div class="filt-modo">Que se cumplan
           <label class="check"><input type="radio" name="filtmodo" value="y"> todas las reglas (Y)</label>
@@ -6972,11 +7534,11 @@ function workerMain(){
     const q = s => M.box.querySelector(s);
     const dl = q("#filtParams");
     params.forEach(p => { const o = document.createElement("option"); o.value = p; dl.append(o); });
-    M.box.querySelector('input[value="' + (MS.filtro.todas ? "y" : "o") + '"]').checked = true;
+    M.box.querySelector('input[value="' + (F.todas ? "y" : "o") + '"]').checked = true;
     const tb = q(".filt-t tbody"), prev = q(".filt-prev");
     const filas = [];
     for (let i = 0; i < 4; i++){
-      const r = MS.filtro.reglas[i] || { param:"", op:"eq", valor:"" };
+      const r = F.reglas[i] || { param:"", op:"eq", valor:"" };
       const tr = el("tr");
       const ip = el("input"); ip.type = "text"; ip.setAttribute("list", "filtParams"); ip.placeholder = i === 0 ? "p. ej. Certificación" : "Parámetro"; ip.value = r.param; ip.setAttribute("aria-label", "Parámetro de la regla " + (i + 1));
       const so = el("select"); so.setAttribute("aria-label", "Condición de la regla " + (i + 1));
@@ -6999,7 +7561,7 @@ function workerMain(){
       filas.push(fila);
     }
     const leer = () => ({
-      fase: MS.filtro.fase,
+      fase: F.fase || "",
       todas: M.box.querySelector('input[name="filtmodo"]:checked').value === "y",
       reglas: filas.filter(f => f.ip.value.trim() && (!opNecesitaValor(f.so.value) || f.iv.value.trim() !== ""))
                    .map(f => ({ param:f.ip.value.trim(), op:f.so.value, valor:opNecesitaValor(f.so.value) ? f.iv.value.trim() : "" }))
@@ -7011,17 +7573,17 @@ function workerMain(){
         const f = leer();
         const sinCol = f.reglas.filter(r => !catalogoTiene(params, r.param)).map(r => "«" + r.param + "»");
         const incompletas = filas.filter(x => x.ip.value.trim() && opNecesitaValor(x.so.value) && x.iv.value.trim() === "").length;
-        if (!f.reglas.length){ prev.textContent = "Sin reglas: se mide todo." + (incompletas ? "  (Hay reglas sin valor que no se aplicarán.)" : ""); prev.className = "filt-prev muted"; return; }
+        if (!f.reglas.length){ prev.textContent = T.vacio + (incompletas ? "  (Hay reglas sin valor que no se aplicarán.)" : ""); prev.className = "filt-prev muted"; return; }
         const r = contarFiltro(f);
-        prev.textContent = "Cumplen " + fmtInt(r.ok) + " de " + fmtInt(r.tot) + " elementos" + (MS.filtro.fase ? " (con la fase «" + MS.filtro.fase + "»)" : "") + "." +
+        prev.textContent = "Cumplen " + fmtInt(r.ok) + " de " + fmtInt(r.tot) + " elementos" + (F.fase ? " (con la fase «" + F.fase + "»)" : "") + "." +
           (sinCol.length ? "  No existe en los datos: " + sinCol.join(", ") + "." : "") + (incompletas ? "  Hay reglas sin valor que no se aplicarán." : "");
         prev.className = "filt-prev " + (r.ok ? "ok" : "err");
       }, 150);
     }
     M.box.querySelectorAll('input[name="filtmodo"]').forEach(x => x.addEventListener("change", vista));
-    q(".filt-ok").addEventListener("click", () => { const f = leer(); MS.filtro.reglas = f.reglas; MS.filtro.todas = f.todas; M.cerrar(); aplicarFiltroElementos(); });
-    q(".filt-quitar").addEventListener("click", () => { MS.filtro.reglas = []; M.cerrar(); aplicarFiltroElementos(); });
-    q(".filt-quitar").hidden = !MS.filtro.reglas.length;
+    q(".filt-ok").addEventListener("click", () => { const f = leer(); F.reglas = f.reglas; F.todas = f.todas; M.cerrar(); alAplicar(); });
+    q(".filt-quitar").addEventListener("click", () => { F.reglas = []; M.cerrar(); alAplicar(); });
+    q(".filt-quitar").hidden = !F.reglas.length;
     q(".filt-cancel").addEventListener("click", M.cerrar);
     q(".md-x").addEventListener("click", M.cerrar);
     vista();
@@ -7354,10 +7916,30 @@ function workerMain(){
   $("mClose").addEventListener("click", () => setMeasure(false));
   $("mScope").addEventListener("change", refreshMeasure);
   $("mCat").addEventListener("change", renderMeasure);
+  MS.porMaterial = loadPref("visor-bim-boq-modo", "tipo") === "mat"; MS.matModo = "";
+  function pintarModoMed(){
+    $("mModoMed").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String((b.dataset.mm === "mat") === MS.porMaterial)));
+    const sel = $("mMatModo"); sel.hidden = !MS.porMaterial;
+    if (MS.porMaterial){
+      const cats = new Set();
+      S.models.forEach(m => { if (!m.ready || !m.data) return; const d = m.data; for (let e = 0; e < m.n; e++){ const ri = d.rowOf[e]; if (ri >= 0) cats.add(d.catCol >= 0 ? String(d.rows[ri][d.catCol] || "") : ""); } });
+      sel.innerHTML = "";
+      sel.append(new Option("Todos los materiales", "")); sel.append(new Option("Separar por categoría", "sep"));
+      [...cats].filter(Boolean).sort((a, b) => a.localeCompare(b, "es")).forEach(c => sel.append(new Option("Solo " + c, c)));
+      if (MS.matModo && ![...sel.options].some(o => o.value === MS.matModo)) MS.matModo = "";
+      sel.value = MS.matModo;
+    }
+  }
+  $("mModoMed").addEventListener("click", ev => {
+    const b = ev.target.closest("button[data-mm]"); if (!b) return;
+    MS.porMaterial = b.dataset.mm === "mat"; savePref("visor-bim-boq-modo", MS.porMaterial ? "mat" : "tipo");
+    pintarModoMed(); refreshMeasure();
+  });
+  $("mMatModo").addEventListener("change", e => { MS.matModo = e.target.value; refreshMeasure(); });
   $("mFilter").addEventListener("input", renderMeasure);
   ["mSinPartida"].forEach(id => $(id).addEventListener("change", renderMeasure));
   $("mFase").addEventListener("change", e => { MS.filtro.fase = e.target.value; e.target.classList.toggle("activo", !!MS.filtro.fase); aplicarFiltroElementos(); });
-  $("mFiltroParam").addEventListener("click", AbrirFiltroParametro);
+  $("mFiltroParam").addEventListener("click", () => AbrirFiltroParametro());
   $("mTable").addEventListener("change", onMeasureChange);
   $("mTable").addEventListener("click", onMeasureClick);
   $("mTable").addEventListener("pointerdown", iniciarResize);
@@ -7403,10 +7985,13 @@ function workerMain(){
   $("mBc3").addEventListener("click", ExportarBC3);
   $("allOn").addEventListener("click", () => setAllCats(true));
   $("allOff").addEventListener("click", () => setAllCats(false));
-  $("searchBtn").addEventListener("click", () => runSearch(false));
   $("searchText").addEventListener("keydown", e => { if (e.key === "Enter") runSearch(false); });
+  $("searchText").addEventListener("input", () => programarBusqueda(350));
+  $("searchCol").addEventListener("change", () => { if ($("searchText").value.trim()) programarBusqueda(0); });
   $("clearBtn").addEventListener("click", clearSearch);
-  $("ghost").addEventListener("change", () => { S.ghostOn = $("ghost").checked; rebuildAll(); });
+  // Atenuar u ocultar lo que no cumple la búsqueda (una cosa u otra)
+  $("ghost").addEventListener("change", () => { S.ghostOn = $("ghost").checked; if (S.ghostOn){ S.hideOthers = false; $("hideOthers").checked = false; } rebuildAll(); });
+  $("hideOthers").addEventListener("change", () => { S.hideOthers = $("hideOthers").checked; if (S.hideOthers){ S.ghostOn = false; $("ghost").checked = false; } rebuildAll(); });
   $("sumCol").addEventListener("change", updateSum);
   $("propFilter").addEventListener("input", renderPropRows);
   $("zoomSel").addEventListener("click", fitSelection);

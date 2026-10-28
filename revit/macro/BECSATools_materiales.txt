@@ -1,0 +1,24 @@
+Medir por material en el visor: cambio para el "Exportar Visor" de BECSATools
+==============================================================================
+
+La macro ExportadorVisor.cs de esta carpeta ya lo lleva. El comando "Exportar Visor"
+de BECSATools es la misma macro adaptada, así que hay que hacerle los mismos 5 cambios
+(los nombres de los métodos son los mismos):
+
+1. Junto a las otras constantes de columnas (COL_KG...):
+       private const string COL_MAT = "_Materiales (visor)";
+
+2. Al principio de ExportarVisor(), después de crear el Stopwatch:
+       _infoMaterial.Clear();
+
+3. En DatosElemento(), justo después de AnadirMediciones(el, d);
+       AnadirMateriales(doc, el, d);
+
+4. En la lista "fijas" (las columnas fijas del Excel), añadir COL_MAT al final.
+
+5. Copiar de ExportadorVisor.cs el bloque "Materiales" completo (desde el comentario
+   "// ---------- Materiales (para "Por material"..." hasta el método Json, incluido):
+   _infoMaterial, AnadirMateriales, InfoMaterial, IdLargo, TextoDe y Json.
+
+Es compatible con Revit 2023 y 2024 (no usa ElementId.Value ni IntegerValue).
+Los modelos exportados antes de este cambio se siguen abriendo; solo no traen materiales.

@@ -4,7 +4,9 @@
  * Exporta lo que se ve en la vista 3D activa a dos archivos en el Escritorio\ExportVisor:
  *   - <modelo>.dae  : geometría triangulada (Collada), un nodo por elemento con name = ElementId
  *   - <modelo>.xlsx : una fila por elemento con ElementId, UniqueId, categoría, familia, tipo,
- *                     nivel y todos sus parámetros de ejemplar y de tipo (prefijo "Tipo: ")
+ *                     nivel y todos sus parámetros de ejemplar y de tipo (prefijo "Tipo: ").
+ *                     La columna "_Materiales (visor)" lleva los materiales de cada elemento (capas, sólidos
+ *                     y pinturas) con su área, volumen y kg, para medir por material en el visor.
  *
  * El visor (visor.html) enlaza ambos archivos por la columna ElementId.
  *
@@ -52,6 +54,7 @@ using Autodesk.Revit.UI;
     private const string COL_TAM_MEP = "Tamaño MEP";            // tamaño calculado, o espesor en aislamientos
     private const string COL_W = "W (kg/m)";                    // peso lineal del perfil (parámetro W)
     private const string COL_KG = "Peso (kg)";                  // W x longitud (longitud de corte en vigas)
+    private const string COL_MAT = "_Materiales (visor)";       // materiales del elemento para medir por material en el visor
 
     // Instalaciones que se miden por tipo + tamaño (mismo criterio que el add-in de Woodea)
     private static readonly HashSet<BuiltInCategory> CATEGORIAS_MEP = new HashSet<BuiltInCategory>
@@ -81,6 +84,7 @@ using Autodesk.Revit.UI;
         }
 
         Stopwatch reloj = Stopwatch.StartNew();
+        _infoMaterial.Clear();
 
         _transformacion = USAR_COORDENADAS_COMPARTIDAS
             ? doc.ActiveProjectLocation.GetTotalTransform().Inverse
@@ -154,7 +158,7 @@ using Autodesk.Revit.UI;
             EscribirEscena(dae, ids);
         }
 
-        List<string> fijas = new List<string> { "ElementId", "UniqueId", "Categoría", "Familia", "Tipo", "Nivel", COL_TAM_MEP, COL_LONG, COL_AREA, COL_AREA_BRUTA, COL_VOL, COL_W, COL_KG };
+        List<string> fijas = new List<string> { "ElementId", "UniqueId", "Categoría", "Familia", "Tipo", "Nivel", COL_TAM_MEP, COL_LONG, COL_AREA, COL_AREA_BRUTA, COL_VOL, COL_W, COL_KG, COL_MAT };
         List<string> columnas = new List<string>(fijas);
         columnas.AddRange(columnasExtra.Where(c => !fijas.Contains(c)).OrderBy(c => c.StartsWith("Tipo: ") ? 1 : 0).ThenBy(c => c, StringComparer.CurrentCultureIgnoreCase));
         EscribirXlsx(rutaXlsx, columnas, filas);
@@ -286,9 +290,114 @@ using Autodesk.Revit.UI;
         d["Nivel"] = nivel;
 
         AnadirMediciones(el, d);
+        AnadirMateriales(doc, el, d);
         AnadirParametros(el, "", d, columnasExtra);
         if (tipo != null) AnadirParametros(tipo, "Tipo: ", d, columnasExtra);
         return d;
+    }
+
+    // ---------- Materiales (para "Por material" en la Medición del visor) ----------
+    // Columna "_Materiales (visor)": [["Material","Clase",m2,m3,kg,pintura(0/1),"Nota clave","Descripción",coste], ...]
+    // Capas de muros, suelos y cubiertas y sólidos de familias con su área y volumen; pinturas aparte con su área.
+    // kg = volumen x densidad, solo si el recurso estructural del material es metálico.
+    private readonly Dictionary<long, string[]> _infoMaterial = new Dictionary<long, string[]>();
+
+    private void AnadirMateriales(Document doc, Element el, Dictionary<string, string> d)
+    {
+        StringBuilder sb = new StringBuilder("[");
+        int n = 0;
+        foreach (bool pintura in new bool[] { false, true })
+        {
+            ICollection<ElementId> ids = null;
+            try { ids = el.GetMaterialIds(pintura); } catch { ids = null; }
+            if (ids == null) continue;
+            foreach (ElementId mid in ids)
+            {
+                double area = 0, vol = 0;
+                try { area = el.GetMaterialArea(mid, pintura); } catch { area = 0; }
+                if (!pintura) { try { vol = el.GetMaterialVolume(mid); } catch { vol = 0; } }
+                area = UnitUtils.ConvertFromInternalUnits(area, UnitTypeId.SquareMeters);
+                vol = UnitUtils.ConvertFromInternalUnits(vol, UnitTypeId.CubicMeters);
+                if (area <= 1e-9 && vol <= 1e-9) continue;
+                string[] info = InfoMaterial(doc, mid);   // nombre, clase, densidad si es metal, nota clave, descripción, coste
+                double kg = 0, dens;
+                if (!pintura && info[2].Length > 0 && double.TryParse(info[2], NumberStyles.Float, INV, out dens)) kg = vol * dens;
+                if (n++ > 0) sb.Append(',');
+                sb.Append('[').Append(Json(info[0])).Append(',').Append(Json(info[1])).Append(',')
+                  .Append(area.ToString("0.####", INV)).Append(',').Append(vol.ToString("0.#####", INV)).Append(',')
+                  .Append(kg.ToString("0.###", INV)).Append(',').Append(pintura ? '1' : '0').Append(',')
+                  .Append(Json(info[3])).Append(',').Append(Json(info[4])).Append(',').Append(info[5].Length > 0 ? info[5] : "0").Append(']');
+            }
+        }
+        d[COL_MAT] = sb.Append(']').ToString();
+    }
+
+    private string[] InfoMaterial(Document doc, ElementId id)
+    {
+        long clave = IdLargo(id);
+        string[] r;
+        if (_infoMaterial.TryGetValue(clave, out r)) return r;
+        r = new string[] { "", "", "", "", "", "" };
+        Material mt = doc.GetElement(id) as Material;
+        if (mt != null)
+        {
+            r[0] = mt.Name;
+            r[1] = mt.MaterialClass ?? "";
+            try
+            {
+                if (mt.StructuralAssetId != ElementId.InvalidElementId)
+                {
+                    PropertySetElement pse = doc.GetElement(mt.StructuralAssetId) as PropertySetElement;
+                    StructuralAsset sa = pse != null ? pse.GetStructuralAsset() : null;
+                    if (sa != null && sa.StructuralAssetClass == StructuralAssetClass.Metal && sa.Density > 0)
+                        r[2] = UnitUtils.ConvertFromInternalUnits(sa.Density, UnitTypeId.KilogramsPerCubicMeter).ToString("0.###", INV);
+                }
+            }
+            catch { }
+            r[3] = TextoDe(mt, BuiltInParameter.KEYNOTE_PARAM);
+            r[4] = TextoDe(mt, BuiltInParameter.ALL_MODEL_DESCRIPTION);
+            try
+            {
+                Parameter pc = mt.get_Parameter(BuiltInParameter.ALL_MODEL_COST);
+                if (pc != null && pc.HasValue && pc.StorageType == StorageType.Double && pc.AsDouble() > 0) r[5] = pc.AsDouble().ToString("0.####", INV);
+            }
+            catch { }
+        }
+        else r[0] = "(Material " + id.ToString() + ")";
+        _infoMaterial[clave] = r;
+        return r;
+    }
+
+    // ElementId como número: vale igual en Revit 2023 (IntegerValue) y 2024+ (Value), sin depender de la versión
+    private static long IdLargo(ElementId id)
+    {
+        long v;
+        return long.TryParse(id.ToString(), NumberStyles.Integer, INV, out v) ? v : 0;
+    }
+
+    private static string TextoDe(Element el, BuiltInParameter bip)
+    {
+        try
+        {
+            Parameter p = el.get_Parameter(bip);
+            if (p != null && p.HasValue && p.StorageType == StorageType.String) return p.AsString() ?? "";
+        }
+        catch { }
+        return "";
+    }
+
+    private static string Json(string s)
+    {
+        if (s == null) return "\"\"";
+        StringBuilder b = new StringBuilder("\"");
+        foreach (char c in s)
+        {
+            if (c == '"') b.Append("\\\"");
+            else if (c == '\\') b.Append("\\\\");
+            else if (c < ' ') b.Append(' ');
+            else b.Append(c);
+        }
+        return b.Append('"').ToString();
     }
 
     private void AnadirMediciones(Element el, Dictionary<string, string> d)
