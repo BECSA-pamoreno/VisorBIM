@@ -1,0 +1,40 @@
+Color por material en el visor: cambio para el "Exportar Visor" de BECSATools
+=============================================================================
+
+La macro ExportadorVisor.cs de esta carpeta ya lo lleva. En el "Exportar Visor" de BECSATools
+(misma macro adaptada) hay que hacer estos cambios. Son C# 5 y valen para Revit 2023 y 2024.
+
+1. Al principio de ExportarVisor(), junto a _infoMaterial.Clear():
+       _matDaeIdx.Clear(); _matDae.Clear(); _matCategoria.Clear();
+
+2. En el bucle de elementos:
+   - después de "List<string> ids = new List<string>();" añadir
+         List<List<int>> matsPorElemento = new List<List<int>>();
+   - después de "List<int> triangulos = new List<int>();" añadir
+         List<int> matTri = new List<int>();
+         int matCat = MaterialDeCategoria(doc, cat);
+   - las llamadas a RecogerGeometria pasan a ser
+         RecogerGeometria(doc, geo, vertices, triangulos, matTri, matCat);
+         RecogerGeometria(doc, gp, vertices, triangulos, matTri, parte.Category != null ? MaterialDeCategoria(doc, parte.Category) : matCat);
+   - "EscribirGeometria(dae, id, vertices, triangulos);" pasa a ser
+         matsPorElemento.Add(EscribirGeometria(dae, id, vertices, triangulos, matTri));
+
+3. Al cerrar la geometría:
+         dae.WriteLine("  </library_geometries>");
+         EscribirMateriales(dae);
+         EscribirEscena(dae, ids, matsPorElemento);
+
+4. Sustituir por los de ExportadorVisor.cs los métodos RecogerGeometria, AnadirMalla,
+   EscribirGeometria y EscribirEscena, y copiar el bloque nuevo
+   "// ---------- Colores de material en el .dae ..." completo
+   (_matDaeIdx, _matDae, _matCategoria, IndiceMaterialDae, MaterialDeCategoria,
+   MaterialDeEstilo, EscribirMateriales y Xml). Usa IdLargo, que ya está del cambio de materiales.
+
+Qué hace: cada cara lleva el material de Revit (Face.MaterialElementId; si es "Por categoría",
+el material de la subcategoría o de la categoría). En el .dae, un <triangles> por material y,
+al final, library_effects/library_materials con el color de sombreado y la transparencia.
+Las caras sin material siguen con el gris "mat" y el visor les pone el color de su categoría.
+
+El archivo crece muy poco (una línea por material y una cabecera por cada material extra de
+cada elemento: en torno a un 1-3 %). Los modelos exportados antes se siguen abriendo igual;
+solo no tienen colores de material.

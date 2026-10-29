@@ -83,6 +83,16 @@ aside.left{grid-column:1} #center{grid-column:2} aside.right{grid-column:3}
 .nube-ctl label:last-child{grid-column:1 / -1}
 .nube-ctl select{font-size:12.5px;padding:3px 6px}
 .seg.mmodo button{padding:3px 10px;font-size:13px}
+.row.color-modo>*{flex:none}.row.color-modo .muted{font-size:13px}
+#matLeyenda{margin:0 0 8px;font-size:12.5px}
+#matLeyenda .ml-av{color:var(--muted);margin-bottom:4px}
+#matLeyenda ul{list-style:none;margin:4px 0 0;padding:0;max-height:180px;overflow:auto;border:1px solid var(--line);border-radius:6px}
+#matLeyenda summary{cursor:pointer;color:var(--muted)}
+body.color-mat #cats .sw{opacity:.25}
+#matLeyenda li{display:flex;align-items:center;gap:6px;padding:2px 6px}
+#matLeyenda li i{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.25);flex:none}
+#matLeyenda li i.vid{background-image:linear-gradient(135deg,rgba(255,255,255,.75) 0 45%,transparent 45%)}
+#matLeyenda li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #props td.prop-sec{font-weight:700;padding-top:10px;color:var(--ink);border-bottom:1px solid var(--line)}
 .bq-bots .btn{overflow:hidden;text-overflow:ellipsis}
 .bq-vis{margin:2px 0 6px}.bq-vis .check{margin:0;font-size:13.5px;gap:6px;white-space:nowrap}
@@ -650,6 +660,14 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
     </section>
     <section>
       <h2>Categorías</h2>
+      <div class="row color-modo">
+        <span class="muted">Color</span>
+        <div class="seg mmodo" id="colorModo" role="group" aria-label="Colorear por">
+          <button type="button" data-c="cat" aria-pressed="true" title="Un color por categoría (el de la lista)">Categoría</button>
+          <button type="button" data-c="mat" aria-pressed="false" title="El color de sombreado de cada material en Revit, cara a cara (los vidrios, transparentes)">Material</button>
+        </div>
+      </div>
+      <div id="matLeyenda" hidden></div>
       <div class="row">
         <button class="btn small" id="allOn">Mostrar todas</button>
         <button class="btn small" id="allOff">Ocultar todas</button>
@@ -901,6 +919,7 @@ function workerMain(){
   Grow.prototype.trim = function(){ return this.a.slice(0, this.n); };
 
   function isWs(c){ return c === 32 || c === 10 || c === 13 || c === 9; }
+  function desXml(t){ return t.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&"); }
 
   // Lee números de un texto sin crear subcadenas (rápido para millones de valores)
   function parseNums(str, out){
@@ -934,7 +953,10 @@ function workerMain(){
     var buf = "", pos = 0, read = 0, lastP = 0;
     var mode = 0, tok = "";          // 0 buscar etiquetas, 1 floats, 2 índices
     var unit = 1, subject = "";
-    var tagRe = /<(geometry|float_array|p|subject|unit|\/geometry)\b([^>]*)>/g;
+    var tagRe = /<(geometry|float_array|p|subject|unit|\/geometry|triangles|library_effects|library_materials)\b([^>]*)>/g;
+    // Materiales: cada <triangles material="..."> es un tramo del elemento con su material; los colores van en library_effects/materials
+    var simbolos = [], simIdx = new Map(), efectos = new Map(), materiales = new Map(), hayMat = false;
+    var runS = new Grow(Int32Array), runN = new Grow(Int32Array), elR = new Grow(Int32Array), elRN = new Grow(Int32Array);
     var cur = null;
     var curF = new Grow(Float64Array, 1 << 14), curI = new Grow(Uint32Array, 1 << 14);
     var chunks = [], ch = null;
@@ -944,7 +966,7 @@ function workerMain(){
         bb = new Grow(Float32Array, 6144);
 
     function newChunk(){
-      ch = { pos:new Grow(Float32Array, 1 << 18), idx:new Grow(Uint32Array, 1 << 18), edge:new Grow(Uint32Array, 1 << 16), vcount:0, elFirst:ids.length };
+      ch = { pos:new Grow(Float32Array, 1 << 18), idx:new Grow(Uint32Array, 1 << 18), edge:new Grow(Uint32Array, 1 << 16), vm:null, vcount:0, elFirst:ids.length };
       chunks.push(ch);
     }
 
@@ -964,11 +986,21 @@ function workerMain(){
           if (z < mnz) mnz = z; if (z > mxz) mxz = z;
         }
         var t0 = ch.idx.n / 3, tn = 0;
+        // tramos por material (si el archivo los trae): material de cada vértice y nº de triángulos válidos de cada tramo
+        var R = cur.runs, ri = 0, rFin = R.length ? R[1] : Infinity, rCnt = 0, conMat = false;
+        for (var r0 = 0; r0 < R.length; r0 += 2) if (simbolos[R[r0]] !== "mat") conMat = true;
+        if (conMat && !ch.vm){ ch.vm = new Grow(Uint16Array, 1 << 16); for (var z = 0; z < ch.vcount; z++) ch.vm.push(0); }
+        if (ch.vm){ for (var z2 = 0; z2 < nv; z2++) ch.vm.push(0); }
+        var r1 = runS.n;
         for (var t = 0; t < nt; t++){
+          while (R.length && t >= rFin && ri + 2 < R.length){ runS.push(R[ri]); runN.push(rCnt); rCnt = 0; ri += 2; rFin += R[ri + 1]; }
           var a = I[3*t], b = I[3*t+1], c = I[3*t+2];
           if (a >= nv || b >= nv || c >= nv) continue;
-          ch.idx.push(vBase + a); ch.idx.push(vBase + b); ch.idx.push(vBase + c); tn++;
+          ch.idx.push(vBase + a); ch.idx.push(vBase + b); ch.idx.push(vBase + c); tn++; rCnt++;
+          if (conMat){ var sv = R[ri] + 1, VA = ch.vm.a; VA[vBase + a] = sv; VA[vBase + b] = sv; VA[vBase + c] = sv; }
         }
+        if (R.length){ runS.push(R[ri]); runN.push(rCnt); }
+        elR.push(r1); elRN.push(runS.n - r1);
         // Aristas: bordes de cara (arista de un solo triángulo) o pliegues de más de 20 grados
         var e0 = ch.edge.n / 2, en = 0;
         if (tn <= EDGE_MAX_TRIS){
@@ -1050,7 +1082,7 @@ function workerMain(){
         if (name === "geometry"){
           finishElement();
           var nm = /\bname="([^"]*)"/.exec(m[2]) || /\bid="([^"]*)"/.exec(m[2]);
-          cur = { id: nm ? nm[1].replace(/^g(?=\d+$)/, "") : String(ids.length) };
+          cur = { id: nm ? nm[1].replace(/^g(?=\d+$)/, "") : String(ids.length), runs:[] };
         } else if (name === "/geometry"){
           finishElement();
         } else if (name === "unit"){
@@ -1059,6 +1091,31 @@ function workerMain(){
           if (cur && curF.n === 0 && !selfClosing) mode = 1;
         } else if (name === "p"){
           if (cur && !selfClosing) mode = 2;
+        } else if (name === "triangles"){
+          if (cur){
+            var sm2 = /\bmaterial="([^"]*)"/.exec(m[2]), cm2 = /\bcount="(\d+)"/.exec(m[2]);
+            var sym = sm2 ? sm2[1] : "mat";
+            if (!simIdx.has(sym)){ simIdx.set(sym, simbolos.length); simbolos.push(sym); }
+            cur.runs.push(simIdx.get(sym), cm2 ? +cm2[1] : 0);
+          }
+        } else if (name === "library_effects" || name === "library_materials"){
+          var cierre = "</" + name + ">", endL = buf.indexOf(cierre, pos);
+          if (endL === -1){ if (final){ pos = buf.length; return; } pos = m.index; return; }
+          var sec = buf.substring(pos, endL), mm;
+          if (name === "library_effects"){
+            var reE = /<effect\b[^>]*\bid="([^"]*)"[^>]*>([\s\S]*?)<\/effect>/g;
+            while ((mm = reE.exec(sec))){
+              var dc = /<diffuse>\s*<color[^>]*>([^<]*)<\/color>/.exec(mm[2]);
+              if (dc){ var v4 = dc[1].trim().split(/\s+/).map(Number); efectos.set(mm[1], [v4[0] || 0, v4[1] || 0, v4[2] || 0, v4.length > 3 && isFinite(v4[3]) ? v4[3] : 1]); }
+            }
+          } else {
+            var reM = /<material\b([^>]*)>([\s\S]*?)<\/material>/g;
+            while ((mm = reM.exec(sec))){
+              var idm = /\bid="([^"]*)"/.exec(mm[1]), nmm = /\bname="([^"]*)"/.exec(mm[1]), ef = /instance_effect\s+url="#([^"]*)"/.exec(mm[2]);
+              if (idm) materiales.set(idm[1], { nombre: nmm ? desXml(nmm[1]) : idm[1], efecto: ef ? ef[1] : "" });
+            }
+          }
+          pos = endL + cierre.length;
         }
       }
     }
@@ -1077,6 +1134,32 @@ function workerMain(){
     if (tok && (mode === 1 || mode === 2)){ parseNums(tok, mode === 1 ? curF : curI); tok = ""; }
     finishElement();
 
+    // Tabla de materiales (índice = símbolo + 1 en c.vm; 0 = sin material) y vidrios al final de cada elemento
+    var tabla = simbolos.map(function(sym){
+      var mt = materiales.get(sym) || { nombre:sym, efecto:"" }, col = efectos.get(mt.efecto);
+      if (sym !== "mat" && col) hayMat = true;
+      return { nombre:mt.nombre, color: sym === "mat" || !col ? null : col.slice(0, 3), alfa: col ? col[3] : 1 };
+    });
+    var nEl = ids.length, elTT = new Int32Array(nEl), elTL = new Uint8Array(nEl);
+    if (hayMat){
+      var RS = runS.a, RN = runN.a, ER = elR.a, ERN = elRN.a, ECh = elC.a, ET = elT.a;
+      for (var e2 = 0; e2 < nEl; e2++){
+        var rr0 = ER[e2], rrn = ERN[e2], alfaMin = 1, hayT = false;
+        for (var q2 = rr0; q2 < rr0 + rrn; q2++){ var al = tabla[RS[q2]].alfa; if (al < 0.99 && RN[q2]){ hayT = true; if (al < alfaMin) alfaMin = al; } }
+        if (!hayT) continue;
+        // se reordenan los triángulos del elemento: primero los opacos y al final los transparentes (vidrios)
+        var X2 = chunks[ECh[e2]].idx.a, base = ET[e2] * 3, opa = [], tra = [], o3 = base;
+        for (var q3 = rr0; q3 < rr0 + rrn; q3++){
+          var dst = tabla[RS[q3]].alfa < 0.99 ? tra : opa;
+          for (var k3 = 0; k3 < RN[q3] * 3; k3++) dst.push(X2[o3 + k3]);
+          o3 += RN[q3] * 3;
+        }
+        var todo = opa.concat(tra);
+        for (var k4 = 0; k4 < todo.length; k4++) X2[base + k4] = todo[k4];
+        elTT[e2] = tra.length / 3;
+        elTL[e2] = Math.max(1, Math.min(9, Math.round(alfaMin * 10)));
+      }
+    }
     // Normales por vértice (las caras de Revit no comparten vértices: aristas nítidas)
     var outChunks = chunks.map(function(c){
       var P = c.pos.trim(), X = c.idx.trim(), N = new Float32Array(P.length);
@@ -1090,7 +1173,7 @@ function workerMain(){
       for (var i = 0; i < N.length; i += 3){
         var l = Math.hypot(N[i], N[i+1], N[i+2]) || 1; N[i] /= l; N[i+1] /= l; N[i+2] /= l;
       }
-      return { pos:P, nrm:N, idx:X, edge:c.edge.trim(), elFirst:c.elFirst };
+      return { pos:P, nrm:N, idx:X, edge:c.edge.trim(), elFirst:c.elFirst, vm: hayMat && c.vm ? c.vm.trim() : null };
     });
     var origin = [0, 0, 0], system = "";
     var om = /ORIGEN\s+(-?[\d.eE+]+)\s+(-?[\d.eE+]+)\s+(-?[\d.eE+]+)/.exec(subject);
@@ -1098,13 +1181,14 @@ function workerMain(){
     var sm = /SISTEMA\s+(\S+)/.exec(subject); if (sm) system = sm[1];
     return {
       origin:origin, system:system, ids:ids, chunks:outChunks,
+      materiales: hayMat ? tabla : null, elTT:elTT, elTL:elTL,
       elC:elC.trim(), elV:elV.trim(), elVN:elVN.trim(), elT:elT.trim(), elTN:elTN.trim(), elE:elE.trim(), elEN:elEN.trim(), bbox:bb.trim()
     };
   }
 
   function transferList(res){
-    var list = [res.elC.buffer, res.elV.buffer, res.elVN.buffer, res.elT.buffer, res.elTN.buffer, res.elE.buffer, res.elEN.buffer, res.bbox.buffer];
-    res.chunks.forEach(function(c){ list.push(c.pos.buffer, c.nrm.buffer, c.idx.buffer, c.edge.buffer); });
+    var list = [res.elC.buffer, res.elV.buffer, res.elVN.buffer, res.elT.buffer, res.elTN.buffer, res.elE.buffer, res.elEN.buffer, res.bbox.buffer, res.elTT.buffer, res.elTL.buffer];
+    res.chunks.forEach(function(c){ list.push(c.pos.buffer, c.nrm.buffer, c.idx.buffer, c.edge.buffer); if (c.vm) list.push(c.vm.buffer); });
     return list;
   }
 
@@ -1357,6 +1441,8 @@ function workerMain(){
     m.match = new Uint8Array(m.n);
     m.catIdx = new Int32Array(m.n);
     m.opac = new Uint8Array(m.n);
+    m.mats = res.materiales;                     // null si el archivo no trae materiales (exportación antigua o Civil 3D)
+    m.elTT = res.elTT; m.elTL = res.elTL;        // triángulos de vidrio al final de cada elemento y su opacidad (1..9)
     m.tris = 0;
     if (!S.sceneOrigin) S.sceneOrigin = m.origin.slice();
     const d = [m.origin[0] - S.sceneOrigin[0], m.origin[1] - S.sceneOrigin[1], m.origin[2] - S.sceneOrigin[2]];
@@ -1392,7 +1478,7 @@ function workerMain(){
       m.group.add(main, edges, sel, ghost);
       m.tris += c.idx.length / 3;
       const elEnd = ci + 1 < res.chunks.length ? res.chunks[ci + 1].elFirst : m.n;
-      return { full:c.idx, fullEdge:c.edge, pos:c.pos, col, main, ghost, sel, edges, elFirst:c.elFirst, elEnd };
+      return { full:c.idx, fullEdge:c.edge, pos:c.pos, col, vm:c.vm, main, ghost, sel, edges, elFirst:c.elFirst, elEnd };
     });
     scene.add(m.group);
   }
@@ -1449,16 +1535,24 @@ function workerMain(){
   }
 
 
+  // Color por categoría (paleta del visor) o por material (color de sombreado del material en Revit)
+  const porMaterial = m => S.colorMat && !!m.mats;
   function recolor(m){
     if (!m.ready) return;
     let lastHex = null, r = 0, g = 0, b = 0;
+    const MT = porMaterial(m) ? m.mats.map(x => x.color ? x.color.map(v => Math.round(Math.max(0, Math.min(1, v)) * 255)) : null) : null;
     m.chunks.forEach(c => {
-      const A = c.col.array;
+      const A = c.col.array, VM = MT ? c.vm : null;
       for (let e = c.elFirst; e < c.elEnd; e++){
         const hex = colorFor(m, e);
         if (hex !== lastHex){ tmpColor.set(hex); r = Math.round(tmpColor.r * 255); g = Math.round(tmpColor.g * 255); b = Math.round(tmpColor.b * 255); lastHex = hex; }
         const v0 = m.elV[e] * 3, v1 = v0 + m.elVN[e] * 3;
-        for (let i = v0; i < v1; i += 3){ A[i] = r; A[i+1] = g; A[i+2] = b; }
+        if (VM){
+          for (let i = v0, j = m.elV[e]; i < v1; i += 3, j++){
+            const k = VM[j], cm = k ? MT[k - 1] : null;
+            if (cm){ A[i] = cm[0]; A[i+1] = cm[1]; A[i+2] = cm[2]; } else { A[i] = r; A[i+1] = g; A[i+2] = b; }
+          }
+        } else for (let i = v0; i < v1; i += 3){ A[i] = r; A[i+1] = g; A[i+2] = b; }
       }
       c.col.needsUpdate = true;
     });
@@ -1489,6 +1583,13 @@ function workerMain(){
         if (!st) continue;
         const t0 = m.elT[e] * 3, tn = m.elTN[e] * 3;
         if (st === 1 && m.opac[e]){ const k = m.opac[e]; trR[k].push(t0, tn); trN[k] += tn; }
+        else if (st === 1 && m.elTT[e] && porMaterial(m)){   // vidrios del material: transparentes; el resto del elemento, normal
+          const gt = m.elTT[e] * 3, k = m.elTL[e];
+          MI.set(F.subarray(t0, t0 + tn - gt), nm); nm += tn - gt;
+          trR[k].push(t0 + tn - gt, gt); trN[k] += gt;
+          const e0 = m.elE[e] * 2, en = m.elEN[e] * 2;
+          if (en){ EI.set(FE.subarray(e0, e0 + en), ne); ne += en; }
+        }
         else if (st === 3 && m.opac[e]){ trR[0].push(t0, tn); trN[0] += tn; }
         else if (st === 1){
           MI.set(F.subarray(t0, t0 + tn), nm); nm += tn;
@@ -1549,8 +1650,37 @@ function workerMain(){
   }
   function rebuildAll(){ S.models.forEach(m => rebuild(m)); requestRender(); try { civRefrescarCorte(); } catch(err){} }
 
+  // Colorear por categoría o por material
+  try { S.colorMat = localStorage.getItem("visorbim.colorMat") === "1"; } catch (err) { S.colorMat = false; }
+  function pintarColorModo(){
+    document.querySelectorAll("#colorModo button").forEach(b => b.setAttribute("aria-pressed", String((b.dataset.c === "mat") === !!S.colorMat)));
+    const box = $("matLeyenda"), listos = S.models.filter(m => m.ready);
+    document.body.classList.toggle("color-mat", !!S.colorMat);
+    box.hidden = !S.colorMat || !listos.length;
+    if (box.hidden) return;
+    const conMat = listos.filter(m => m.mats), sinMat = listos.filter(m => !m.mats);
+    const mapa = new Map();
+    conMat.forEach(m => m.mats.forEach(x => { if (x.color && !mapa.has(x.nombre)) mapa.set(x.nombre, x); }));
+    let h = "";
+    if (sinMat.length) h += '<div class="ml-av">' + (conMat.length ? "Sin colores de material (se ven por categoría): " : "Ningún modelo trae colores de material; se ven por categoría. Vuelve a exportarlos con el exportador actualizado: ") + sinMat.map(m => escH(m.name)).join(", ") + "</div>";
+    if (mapa.size){
+      h += '<details><summary>Leyenda de colores (' + mapa.size + ' materiales)</summary><ul>' + [...mapa.values()].sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).map(x => {
+        const c = "rgb(" + x.color.map(v => Math.round(v * 255)).join(",") + ")", vid = x.alfa < 0.99;
+        return '<li title="' + escH(x.nombre) + (vid ? " · transparente " + Math.round((1 - x.alfa) * 100) + " %" : "") + '"><i' + (vid ? ' class="vid"' : "") + ' style="background-color:' + c + '"></i><span>' + escH(x.nombre) + "</span></li>";
+      }).join("") + "</ul></details>";
+    }
+    box.innerHTML = h;
+  }
+  function setColorMat(v){
+    S.colorMat = !!v;
+    try { localStorage.setItem("visorbim.colorMat", S.colorMat ? "1" : "0"); } catch (err) {}
+    S.models.forEach(recolor); rebuildAll(); pintarColorModo();
+  }
+  document.querySelectorAll("#colorModo button").forEach(b => b.addEventListener("click", () => setColorMat(b.dataset.c === "mat")));
+
   function onModelsChanged(fit){
     rebuildCats();
+    pintarColorModo();
     fillColumnSelects();
     S.models.forEach(recolor);
     if (S.search) runSearch(true);

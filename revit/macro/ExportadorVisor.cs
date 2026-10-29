@@ -7,6 +7,9 @@
  *                     nivel y todos sus parámetros de ejemplar y de tipo (prefijo "Tipo: ").
  *                     La columna "_Materiales (visor)" lleva los materiales de cada elemento (capas, sólidos
  *                     y pinturas) con su área, volumen y kg, para medir por material en el visor.
+ *   En el .dae cada cara lleva su material (color de sombreado y transparencia de Revit), para que el
+ *   visor pueda colorear por material. Las caras sin material usan el gris "mat" y el visor les pone
+ *   el color de su categoría.
  *
  * El visor (visor.html) enlaza ambos archivos por la columna ElementId.
  *
@@ -85,6 +88,7 @@ using Autodesk.Revit.UI;
 
         Stopwatch reloj = Stopwatch.StartNew();
         _infoMaterial.Clear();
+        _matDaeIdx.Clear(); _matDae.Clear(); _matCategoria.Clear();
 
         _transformacion = USAR_COORDENADAS_COMPARTIDAS
             ? doc.ActiveProjectLocation.GetTotalTransform().Inverse
@@ -118,6 +122,7 @@ using Autodesk.Revit.UI;
             dae.WriteLine("  <library_geometries>");
 
             List<string> ids = new List<string>();
+            List<List<int>> matsPorElemento = new List<List<int>>();
             foreach (Element el in elementos)
             {
                 Category cat = el.Category;
@@ -132,7 +137,9 @@ using Autodesk.Revit.UI;
 
                 List<XYZ> vertices = new List<XYZ>();
                 List<int> triangulos = new List<int>();
-                if (geo != null) RecogerGeometria(geo, vertices, triangulos);
+                List<int> matTri = new List<int>();   // material (índice en _matDae, -1 = sin material) de cada triángulo
+                int matCat = MaterialDeCategoria(doc, cat);
+                if (geo != null) RecogerGeometria(doc, geo, vertices, triangulos, matTri, matCat);
                 // Si la escalera no trae geometría propia, se toma la de sus tramos, descansillos y zancas
                 if (escalera != null && triangulos.Count == 0)
                 {
@@ -141,13 +148,13 @@ using Autodesk.Revit.UI;
                         Element parte = doc.GetElement(pid);
                         GeometryElement gp = null;
                         try { gp = parte != null ? parte.get_Geometry(opciones) : null; } catch { gp = null; }
-                        if (gp != null) RecogerGeometria(gp, vertices, triangulos);
+                        if (gp != null) RecogerGeometria(doc, gp, vertices, triangulos, matTri, parte.Category != null ? MaterialDeCategoria(doc, parte.Category) : matCat);
                     }
                 }
                 if (triangulos.Count == 0) continue;
 
                 string id = el.Id.ToString();
-                EscribirGeometria(dae, id, vertices, triangulos);
+                matsPorElemento.Add(EscribirGeometria(dae, id, vertices, triangulos, matTri));
                 ids.Add(id);
                 triangulosTotales += triangulos.Count / 3;
 
@@ -155,7 +162,8 @@ using Autodesk.Revit.UI;
             }
 
             dae.WriteLine("  </library_geometries>");
-            EscribirEscena(dae, ids);
+            EscribirMateriales(dae);
+            EscribirEscena(dae, ids, matsPorElemento);
         }
 
         List<string> fijas = new List<string> { "ElementId", "UniqueId", "Categoría", "Familia", "Tipo", "Nivel", COL_TAM_MEP, COL_LONG, COL_AREA, COL_AREA_BRUTA, COL_VOL, COL_W, COL_KG, COL_MAT };
@@ -173,10 +181,12 @@ using Autodesk.Revit.UI;
 
     // ---------- Geometría ----------
 
-    private void RecogerGeometria(GeometryElement geo, List<XYZ> vertices, List<int> triangulos)
+    // matHeredado: material de la categoría (o subcategoría) para las caras "Por categoría"
+    private void RecogerGeometria(Document doc, GeometryElement geo, List<XYZ> vertices, List<int> triangulos, List<int> matTri, int matHeredado)
     {
         foreach (GeometryObject obj in geo)
         {
+            int matObj = MaterialDeEstilo(doc, obj.GraphicsStyleId, matHeredado);   // subcategoría del sólido (p. ej. Vidrio)
             Solid solido = obj as Solid;
             if (solido != null)
             {
@@ -185,25 +195,25 @@ using Autodesk.Revit.UI;
                 {
                     Mesh malla = null;
                     try { malla = cara.Triangulate(); } catch { malla = null; }
-                    if (malla != null) AnadirMalla(malla, vertices, triangulos);
+                    if (malla != null) AnadirMalla(malla, vertices, triangulos, matTri, IndiceMaterialDae(doc, cara.MaterialElementId, matObj));
                 }
                 continue;
             }
 
             Mesh mallaSuelta = obj as Mesh;
-            if (mallaSuelta != null) { AnadirMalla(mallaSuelta, vertices, triangulos); continue; }
+            if (mallaSuelta != null) { AnadirMalla(mallaSuelta, vertices, triangulos, matTri, IndiceMaterialDae(doc, mallaSuelta.MaterialElementId, matObj)); continue; }
 
             // Familias: la geometría de ejemplar ya viene en coordenadas del modelo
             GeometryInstance instancia = obj as GeometryInstance;
             if (instancia != null)
             {
                 GeometryElement geoInst = instancia.GetInstanceGeometry();
-                if (geoInst != null) RecogerGeometria(geoInst, vertices, triangulos);
+                if (geoInst != null) RecogerGeometria(doc, geoInst, vertices, triangulos, matTri, matObj);
             }
         }
     }
 
-    private void AnadirMalla(Mesh malla, List<XYZ> vertices, List<int> triangulos)
+    private void AnadirMalla(Mesh malla, List<XYZ> vertices, List<int> triangulos, List<int> matTri, int mat)
     {
         int desplazamiento = vertices.Count;
         foreach (XYZ v in malla.Vertices) vertices.Add(v);
@@ -213,7 +223,85 @@ using Autodesk.Revit.UI;
             triangulos.Add(desplazamiento + (int)t.get_Index(0));
             triangulos.Add(desplazamiento + (int)t.get_Index(1));
             triangulos.Add(desplazamiento + (int)t.get_Index(2));
+            matTri.Add(mat);
         }
+    }
+
+    // ---------- Colores de material en el .dae (para "Color: Material" en el visor) ----------
+    // Cada material usado es un <material id="m<ElementId>"> con su color de sombreado y su opacidad (1 - transparencia).
+    private readonly Dictionary<long, int> _matDaeIdx = new Dictionary<long, int>();
+    private readonly List<string[]> _matDae = new List<string[]>();          // id, nombre, "r g b a"
+    private readonly Dictionary<long, int> _matCategoria = new Dictionary<long, int>();
+
+    private int IndiceMaterialDae(Document doc, ElementId id, int siNo)
+    {
+        if (id == null || id == ElementId.InvalidElementId) return siNo;
+        long clave = IdLargo(id);
+        int i;
+        if (_matDaeIdx.TryGetValue(clave, out i)) return i;
+        i = -1;
+        Material mt = doc.GetElement(id) as Material;
+        if (mt != null)
+        {
+            Color c = null;
+            try { c = mt.Color; } catch { c = null; }
+            if (c != null && c.IsValid)
+            {
+                double alfa = 1.0 - Math.Max(0, Math.Min(100, mt.Transparency)) / 100.0;
+                string rgba = (c.Red / 255.0).ToString("0.###", INV) + " " + (c.Green / 255.0).ToString("0.###", INV) + " " +
+                              (c.Blue / 255.0).ToString("0.###", INV) + " " + alfa.ToString("0.##", INV);
+                i = _matDae.Count;
+                _matDae.Add(new string[] { "m" + clave.ToString(INV), mt.Name, rgba });
+            }
+        }
+        _matDaeIdx[clave] = i;
+        return i < 0 ? siNo : i;
+    }
+
+    private int MaterialDeCategoria(Document doc, Category cat)
+    {
+        if (cat == null) return -1;
+        long clave = IdLargo(cat.Id);
+        int i;
+        if (_matCategoria.TryGetValue(clave, out i)) return i;
+        i = -1;
+        try { if (cat.Material != null) i = IndiceMaterialDae(doc, cat.Material.Id, -1); } catch { i = -1; }
+        if (i < 0 && cat.Parent != null) i = MaterialDeCategoria(doc, cat.Parent);
+        _matCategoria[clave] = i;
+        return i;
+    }
+
+    private int MaterialDeEstilo(Document doc, ElementId estiloId, int siNo)
+    {
+        if (estiloId == null || estiloId == ElementId.InvalidElementId) return siNo;
+        GraphicsStyle gs = doc.GetElement(estiloId) as GraphicsStyle;
+        if (gs == null || gs.GraphicsStyleCategory == null) return siNo;
+        int i = MaterialDeCategoria(doc, gs.GraphicsStyleCategory);
+        return i < 0 ? siNo : i;
+    }
+
+    private void EscribirMateriales(StreamWriter w)
+    {
+        if (_matDae.Count == 0) return;
+        w.WriteLine("  <library_effects>");
+        foreach (string[] m in _matDae)
+        {
+            string a = m[2].Substring(m[2].LastIndexOf(' ') + 1);
+            w.WriteLine("    <effect id=\"fx" + m[0] + "\"><profile_COMMON><technique sid=\"common\"><lambert><diffuse><color>" + m[2] +
+                "</color></diffuse><transparent opaque=\"A_ONE\"><color>1 1 1 1</color></transparent><transparency><float>" + a +
+                "</float></transparency></lambert></technique></profile_COMMON></effect>");
+        }
+        w.WriteLine("  </library_effects>");
+        w.WriteLine("  <library_materials>");
+        foreach (string[] m in _matDae)
+            w.WriteLine("    <material id=\"" + m[0] + "\" name=\"" + Xml(m[1]) + "\"><instance_effect url=\"#fx" + m[0] + "\"/></material>");
+        w.WriteLine("  </library_materials>");
+    }
+
+    private static string Xml(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return "";
+        return s.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;");
     }
 
     private void EscribirCabeceraDae(StreamWriter w)
@@ -233,7 +321,8 @@ using Autodesk.Revit.UI;
         w.WriteLine("  <library_materials><material id=\"mat\" name=\"mat\"><instance_effect url=\"#fx\"/></material></library_materials>");
     }
 
-    private void EscribirGeometria(StreamWriter w, string id, List<XYZ> vertices, List<int> triangulos)
+    // Devuelve los materiales usados por el elemento (-1 = sin material) para el bind_material de la escena
+    private List<int> EscribirGeometria(StreamWriter w, string id, List<XYZ> vertices, List<int> triangulos, List<int> matTri)
     {
         string g = "g" + id;
         w.WriteLine("    <geometry id=\"" + g + "\" name=\"" + id + "\"><mesh>");
@@ -250,18 +339,45 @@ using Autodesk.Revit.UI;
         w.Write(sb.ToString());
         w.WriteLine("</float_array><technique_common><accessor source=\"#" + g + "-pa\" count=\"" + vertices.Count + "\" stride=\"3\"><param name=\"X\" type=\"float\"/><param name=\"Y\" type=\"float\"/><param name=\"Z\" type=\"float\"/></accessor></technique_common></source>");
         w.WriteLine("      <vertices id=\"" + g + "-v\"><input semantic=\"POSITION\" source=\"#" + g + "-p\"/></vertices>");
-        w.Write("      <triangles material=\"mat\" count=\"" + (triangulos.Count / 3) + "\"><input semantic=\"VERTEX\" source=\"#" + g + "-v\" offset=\"0\"/><p>");
-        w.Write(string.Join(" ", triangulos));
-        w.WriteLine("</p></triangles>");
+        // un <triangles> por material, en el orden en que aparecen (una sola pasada por los triángulos)
+        List<int> usados = new List<int>();
+        Dictionary<int, StringBuilder> textos = new Dictionary<int, StringBuilder>();
+        Dictionary<int, int> cuenta = new Dictionary<int, int>();
+        for (int t = 0; t < matTri.Count; t++)
+        {
+            int mt = matTri[t];
+            StringBuilder q;
+            if (!textos.TryGetValue(mt, out q)) { q = new StringBuilder(); textos[mt] = q; cuenta[mt] = 0; usados.Add(mt); }
+            if (cuenta[mt] > 0) q.Append(' ');
+            cuenta[mt] = cuenta[mt] + 1;
+            q.Append(triangulos[3 * t]).Append(' ').Append(triangulos[3 * t + 1]).Append(' ').Append(triangulos[3 * t + 2]);
+        }
+        foreach (int mt in usados)
+        {
+            StringBuilder p = textos[mt];
+            int n = cuenta[mt];
+            string simbolo = mt < 0 ? "mat" : _matDae[mt][0];
+            w.Write("      <triangles material=\"" + simbolo + "\" count=\"" + n + "\"><input semantic=\"VERTEX\" source=\"#" + g + "-v\" offset=\"0\"/><p>");
+            w.Write(p.ToString());
+            w.WriteLine("</p></triangles>");
+        }
         w.WriteLine("    </mesh></geometry>");
+        return usados;
     }
 
-    private void EscribirEscena(StreamWriter w, List<string> ids)
+    private void EscribirEscena(StreamWriter w, List<string> ids, List<List<int>> mats)
     {
         w.WriteLine("  <library_visual_scenes><visual_scene id=\"Scene\" name=\"Scene\">");
-        foreach (string id in ids)
+        for (int k = 0; k < ids.Count; k++)
         {
-            w.WriteLine("    <node id=\"n" + id + "\" name=\"" + id + "\"><instance_geometry url=\"#g" + id + "\"><bind_material><technique_common><instance_material symbol=\"mat\" target=\"#mat\"/></technique_common></bind_material></instance_geometry></node>");
+            string id = ids[k];
+            StringBuilder b = new StringBuilder();
+            foreach (int mt in mats[k])
+            {
+                string s = mt < 0 ? "mat" : _matDae[mt][0];
+                b.Append("<instance_material symbol=\"").Append(s).Append("\" target=\"#").Append(s).Append("\"/>");
+            }
+            w.WriteLine("    <node id=\"n" + id + "\" name=\"" + id + "\"><instance_geometry url=\"#g" + id + "\"><bind_material><technique_common>" + b + "</technique_common></bind_material></instance_geometry></node>");
         }
         w.WriteLine("  </visual_scene></library_visual_scenes>");
         w.WriteLine("  <scene><instance_visual_scene url=\"#Scene\"/></scene>");

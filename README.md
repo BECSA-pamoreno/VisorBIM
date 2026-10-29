@@ -60,6 +60,12 @@ Funciones:
   Color real, por altura, intensidad o clasificación; tamaño de punto. Los planos de corte también cortan la nube y **Medir**
   se engancha a sus puntos. Lee el sistema de coordenadas de la cabecera (EPSG) y avisa si no es ETRS89/ED50 UTM o si la nube
   queda a más de 20 km de los modelos.
+- **Color por categoría o por material** (Categorías › Color, en Sencillo y Avanzado; se recuerda en el navegador). Con
+  *Material* cada cara se ve con el color de sombreado de su material en Revit y los materiales con transparencia (vidrios) se
+  ven transparentes (solo color plano, sin texturas, brillos ni reflejos). Es solo la forma de pintar: se sigue
+  encendiendo y apagando por categoría. La leyenda de colores sale plegada debajo. Necesita modelos exportados con el exportador actualizado
+  (`revit/macro/BECSATools_colores.txt`); los antiguos y los de Civil 3D se siguen viendo por categoría y el visor lo avisa.
+  No pesa más: el .dae crece en torno a un 1-3 % y el dibujo es el mismo.
 - **Transparencia por elementos** (Sencillo y Avanzado), en pasos de 10 % hasta el 90 %, para ver la nube de puntos u otros
   elementos a través: botón ◐ junto a cada categoría, botón *Transp.* en cada modelo y botón *Transparencia* con la selección
   (uno o varios elementos). Tecla **T**: la selección al 70 % o de vuelta a opaca. *Mostrar todo* quita todas las
