@@ -66,6 +66,13 @@ Funciones:
   encendiendo y apagando por categoría. La leyenda de colores sale plegada debajo. Necesita modelos exportados con el exportador actualizado
   (`revit/macro/BECSATools_colores.txt`); los antiguos y los de Civil 3D se siguen viendo por categoría y el visor lo avisa.
   No pesa más: el .dae crece en torno a un 1-3 % y el dibujo es el mismo.
+- **Medición, varias filas a la vez** (como en Excel): clic, Mayús+clic y Ctrl+clic en cualquier parte de la fila, también
+  sobre los campos. Si cambias la medida de una fila seleccionada, cambian todas las seleccionadas que la tengan; la fórmula
+  personalizada también se puede aplicar a la selección. *Seleccionar en el modelo* selecciona sus elementos en el visor
+  (propiedades, ocultar, aislar, transparencia…), además de *Ver en el modelo*, que solo los resalta.
+- **Excel de la Medición**: 1ª hoja como en el visor (*Por tipo* o *Por material*), 2ª *Presupuesto*, 3ª *Criterios*. Las
+  fórmulas se guardan con su resultado, así que la Cantidad y los importes se ven aunque Excel abra el archivo en Vista
+  protegida (sin recalcular).
 - **Transparencia por elementos** (Sencillo y Avanzado), en pasos de 10 % hasta el 90 %, para ver la nube de puntos u otros
   elementos a través: botón ◐ junto a cada categoría, botón *Transp.* en cada modelo y botón *Transparencia* con la selección
   (uno o varios elementos). Tecla **T**: la selección al 70 % o de vuelta a opaca. *Mostrar todo* quita todas las

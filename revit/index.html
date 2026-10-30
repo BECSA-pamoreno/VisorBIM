@@ -892,6 +892,7 @@ body[data-modo="sencillo"] .solo-tecnico{display:none !important}
       </span>
       <input type="file" id="boqInput" accept=".json,application/json" hidden>
       <button class="btn small" id="mVer" title="Resaltar en el modelo los elementos de las filas seleccionadas">Ver en el modelo</button>
+      <button class="btn small" id="mSelMod" title="Seleccionar en el modelo los elementos de las filas seleccionadas (propiedades, ocultar, aislar, transparencia...)">Seleccionar en el modelo</button>
       <button class="btn small" id="mCsv">CSV</button>
       <button class="btn small" id="mXlsx">Excel</button>
       <button class="btn small primary solo-tecnico" id="mBc3" title="Presupuesto con mediciones para Presto, Arquímedes...">Exportar BC3</button>
@@ -5185,7 +5186,85 @@ function workerMain(){
   }
   // Hoja de bajo nivel. filas = [{ c:[celda...], alto, s (estilo por defecto), relleno:n (pinta n columnas aunque estén vacías) }]
   // celda = valor | { v, s } | { f:"FÓRMULA", s }
+  // Valores ya calculados de las fórmulas (se guardan junto a la fórmula): Excel en "Vista protegida" no recalcula y,
+  // sin ellos, las celdas con fórmula salen vacías. Entiende lo que escribe el visor: + - * / ( ), = <> < >, SUM, SUBTOTAL(9,…), ROUND, OR.
+  function xlCalculadora(h){
+    const memo = new Map(), enCurso = new Set();
+    const colN = L => { let n = 0; for (const ch of L) n = n * 26 + ch.charCodeAt(0) - 64; return n - 1; };
+    const celda = (L, r) => { const F = h.filas[r - 1]; return F ? F.c[colN(L)] : undefined; };
+    const esSubtotal = c => c && typeof c === "object" && c.f && /^SUBTOTAL\(/i.test(c.f);
+    function valor(L, r){
+      const c = celda(L, r);
+      if (c && typeof c === "object" && c.f) return calc(c.f, L + r);
+      const v = c && typeof c === "object" ? c.v : c;
+      return typeof v === "number" ? v : (v === "" || v == null ? 0 : v);
+    }
+    const num = v => typeof v === "boolean" ? (v ? 1 : 0) : typeof v === "number" ? v : (() => { throw new Error("texto"); })();
+    function calc(f, clave){
+      if (memo.has(clave)) return memo.get(clave);
+      if (enCurso.has(clave)) throw new Error("circular");
+      enCurso.add(clave);
+      const s = f; let i = 0;
+      const esp = () => { while (s[i] === " ") i++; };
+      const ve = t => { esp(); if (s.startsWith(t, i)){ i += t.length; return true; } return false; };
+      const rango = () => { const m = /^([A-Z]+)(\d+)(?::([A-Z]+)(\d+))?/.exec(s.slice(i)); if (!m) return null; i += m[0].length; return m; };
+      function celdasDe(m, saltarSub){
+        const out = [];
+        if (!m[3]) { if (!(saltarSub && esSubtotal(celda(m[1], +m[2])))) out.push(valor(m[1], +m[2])); return out; }
+        const c0 = colN(m[1]), c1 = colN(m[3]);
+        for (let r = +m[2]; r <= +m[4]; r++) for (let c = c0; c <= c1; c++){
+          let L = ""; for (let n = c + 1; n > 0; n = Math.floor((n - 1) / 26)) L = String.fromCharCode(65 + (n - 1) % 26) + L;
+          if (saltarSub && esSubtotal(celda(L, r))) continue;
+          out.push(valor(L, r));
+        }
+        return out;
+      }
+      function args(fn){
+        const l = []; if (ve(")")) return l;
+        do {
+          esp();
+          const g = i, m = /^[A-Z]+\d+:[A-Z]+\d+/.test(s.slice(i)) ? rango() : null;
+          if (m) l.push({ rango:m }); else { i = g; l.push({ v:expr() }); }
+        } while (ve(","));
+        if (!ve(")")) throw new Error("falta )");
+        return l;
+      }
+      function prim(){
+        esp();
+        const nm = /^\d+(\.\d+)?([eE][-+]?\d+)?/.exec(s.slice(i)); if (nm){ i += nm[0].length; return parseFloat(nm[0]); }
+        if (ve("(")){ const v = expr(); if (!ve(")")) throw new Error("falta )"); return v; }
+        const fm = /^([A-Z]+)\(/.exec(s.slice(i));
+        if (fm){
+          i += fm[0].length; const fn = fm[1], a = args(fn);
+          const nums = (desde, sub) => a.slice(desde).flatMap(x => x.rango ? celdasDe(x.rango, sub).filter(v => typeof v === "number") : [num(x.v)]);
+          if (fn === "SUM") return nums(0, false).reduce((p, q) => p + q, 0);
+          if (fn === "SUBTOTAL"){ if (num(a[0].v) !== 9) throw new Error("subtotal"); return nums(1, true).reduce((p, q) => p + q, 0); }
+          if (fn === "ROUND"){ const x = num(a[0].v), d = a[1] ? num(a[1].v) : 0, k = Math.pow(10, d); return Math.sign(x) * Math.round(Math.abs(x) * k + 1e-9) / k; }
+          if (fn === "OR") return a.some(x => x.rango ? celdasDe(x.rango, false).some(v => num(v) !== 0) : num(x.v) !== 0);
+          throw new Error("función " + fn);
+        }
+        const m = rango(); if (m && !m[3]) return valor(m[1], +m[2]);
+        throw new Error("no entiendo " + s.slice(i, i + 10));
+      }
+      function una(){ if (ve("-")) return -num(una()); if (ve("+")) return num(una()); return prim(); }
+      function mul(){ let v = una(); for (;;){ if (ve("*")) v = num(v) * num(una()); else if (ve("/")) v = num(v) / num(una()); else return v; } }
+      function sum(){ let v = mul(); for (;;){ if (ve("+")) v = num(v) + num(mul()); else if (ve("-")) v = num(v) - num(mul()); else return v; } }
+      function expr(){
+        const a = sum();
+        for (const op of ["<>", "<=", ">=", "=", "<", ">"]) if (ve(op)){ const b = num(sum()), x = num(a);
+          return op === "<>" ? x !== b : op === "<=" ? x <= b : op === ">=" ? x >= b : op === "=" ? x === b : op === "<" ? x < b : x > b; }
+        return a;
+      }
+      let v;
+      try { v = expr(); esp(); if (i < s.length) throw new Error("sobra"); }
+      finally { enCurso.delete(clave); }
+      memo.set(clave, v);
+      return v;
+    }
+    return (f, ref) => { try { const v = calc(f, ref.replace(/^([A-Z]+)(\d+)$/, "$1$2")); const n = typeof v === "boolean" ? (v ? 1 : 0) : v; return typeof n === "number" && isFinite(n) ? n : null; } catch (e) { return null; } };
+  }
   function xlHojaXml(h){
+    const calcular = xlCalculadora(h);
     const filas = h.filas.map((F, ri) => {
       const r = ri + 1, def = F.s || "def", n = Math.max(F.c.length, F.relleno || 0);
       let xs = "";
@@ -5193,7 +5272,7 @@ function workerMain(){
         let c = F.c[i], s = Array.isArray(def) ? (def[i] || "def") : def, v = c, f = null;
         if (c && typeof c === "object"){ s = c.s || s; v = c.v; f = c.f || null; }
         const si = XL_IDX[s] ?? 0, ref = xlCol(i) + r;
-        if (f) xs += `<c r="${ref}" s="${si}"><f>${xlEsc(f)}</f></c>`;
+        if (f){ const cv = calcular(f, ref); xs += `<c r="${ref}" s="${si}"><f>${xlEsc(f)}</f>${cv === null ? "" : `<v>${+cv.toPrecision(15)}</v>`}</c>`; }
         else if (v === "" || v == null || (typeof v === "number" && !isFinite(v))){ if (si) xs += `<c r="${ref}" s="${si}"/>`; }
         else if (typeof v === "number") xs += `<c r="${ref}" s="${si}"><v>${v}</v></c>`;
         else xs += `<c r="${ref}" s="${si}" t="inlineStr"><is><t xml:space="preserve">${xlEsc(v)}</t></is></c>`;
@@ -5389,7 +5468,7 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
         p = { cod:f.Codigo || "", ud, res:f.Codigo ? (f.Resumen || "") : (f.fam ? f.fam + " · " : "") + TipoVisible(f), precio:f.TienePrecio ? f.Precio : 0, lineas:[] };
         cap.pmap.set(kp, p); cap.partidas.push(p);
       }
-      const com = (f.Codigo ? f.cat + ": " + f.fam + " - " + TipoVisible(f) : f.n + " elementos") + (MS.multiModel ? " [" + f.model + "]" : "");
+      const com = (f.Codigo ? f.cat + ": " + f.fam + " - " + TipoVisible(f) : f.n + (f.n === 1 ? " elemento" : " elementos")) + (MS.multiModel ? " [" + f.model + "]" : "");
       p.lineas.push({ com, ud:u, med, n:f.n });
     });
     const ordenar = n => {
@@ -6915,6 +6994,7 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
     $("mQuitar").disabled = n === 0;
     $("mSync").disabled = n === 0 || !MS.bc3;
     $("mVer").disabled = n === 0;
+    $("mSelMod").disabled = n === 0;
   }
   function ActualizarCabeceraBC3(){
     const b = MS.bc3;
@@ -6938,6 +7018,19 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
     if (campo === "med"){
       const ud = el.value;
       if (ud === ACCION_FX){ el.value = el.dataset.prev || ""; AbrirFormula(f); return; }
+      const varias = MS.sel.has(f.key) && MS.sel.size > 1 ? FilasSeleccionadas() : null;
+      if (ud && varias){   // como en Excel: se cambia en una fila de la selección y cambian todas
+        let n = 0; const sin = [];
+        varias.forEach(g => {
+          if (g !== f && isNaN(MedicionEnUd(g, ud))){ sin.push(g.tipo); return; }
+          if (ud !== UdEfectiva(g)) FijarMedida(g, ud);
+          n++;
+        });
+        saveBoq();
+        varias.forEach(g => refrescarFila(g)); ActualizarKpis();
+        MostrarEstado(n + " fila(s) se miden en " + TextoUd(ud) + (sin.length ? ".  " + sin.length + " no tienen esa medida y no cambian: " + sin.slice(0, 4).join(", ") + (sin.length > 4 ? "…" : "") : "."), sin.length ? 2 : 1);
+        return;
+      }
       if (ud && ud !== UdEfectiva(f)){
         FijarMedida(f, ud); saveBoq();
         MostrarEstado(f.tipo + ": se mide en " + TextoUd(ud) + (f.UdSel ? " (elegido a mano, se recuerda en este navegador)" : ""), 1);
@@ -7013,7 +7106,8 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
       AbrirNavegador(filas);
       return;
     }
-    const enControl = !!e.target.closest("input, select, button");
+    const conTecla = e.shiftKey || e.ctrlKey || e.metaKey;
+    const enControl = !conTecla && !!e.target.closest("input, select, button");
     const keys = MS.filtered.map(r => r.key);
     if (e.shiftKey && MS.anchor && !enControl){
       const a = keys.indexOf(MS.anchor), b = keys.indexOf(f.key);
@@ -7045,6 +7139,21 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
     rebuildAll();
     if (!box.isEmpty()) fitTo(box);
     MostrarEstado("Resaltados " + fmtInt(n) + " elemento(s) en el modelo.", 0);
+  }
+  // Selecciona en el visor los elementos de las filas (como un clic en el modelo) y encuadra
+  function seleccionarEnModelo(filas){
+    if (!filas.length){ MostrarEstado("Selecciona filas de la tabla.", 2); return; }
+    const L = [], vistos = new Set(), box = new THREE.Box3();
+    filas.forEach(r => { for (let i = 0; i < r.els.length; i += 2){
+      const m = r.els[i], e = r.els[i + 1], k = m.id + ":" + e;
+      if (vistos.has(k)) continue;   // por material, un elemento puede estar en varias filas
+      vistos.add(k); L.push(m, e);
+      const B = m.bbox, j = e * 6, o = m.group.position;
+      box.expandByPoint(tmpV.set(B[j] + o.x, B[j+1] + o.y, B[j+2] + o.z)); box.expandByPoint(tmpV.set(B[j+3] + o.x, B[j+4] + o.y, B[j+5] + o.z));
+    } });
+    S.selSet = new Map(); changeSelection(L, false);
+    if (!box.isEmpty()) fitTo(box);
+    MostrarEstado("Seleccionados " + fmtInt(L.length / 2) + " elemento(s) en el modelo.", 1);
   }
   // Autocompletar códigos del BC3 mientras se escribe
   function sugerirCodigos(el){
@@ -7310,6 +7419,7 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
           <input type="text" class="fx-ud" aria-label="Unidad del resultado">
           <div class="lbl">Resultado en el primer elemento</div>
           <div class="fx-prev"></div>
+          <label class="check fx-selw"><input type="checkbox" class="fx-sel" checked> <span></span></label>
           <label class="check"><input type="checkbox" class="fx-cat"> <span></span></label>
         </div>
       </div>
@@ -7318,6 +7428,9 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
     q(".md-sub").textContent = f.esMat ? "Material «" + f.tipo + "»  ·  " + f.fam + "  (" + fmtInt(f.n) + " elementos)" : f.cat + "  ·  " + f.fam + "  ·  " + f.tipo + "  (" + fmtInt(f.n) + " elementos)";
     if (f.esMat) q(".fx-ayuda").insertAdjacentHTML("afterbegin", "<b>Por material:</b> [Área material], [Volumen material], [Peso material] y [Espesor material] son la cantidad de este material en cada elemento; el resto de parámetros son del elemento entero.  Ej.: [Volumen material] * 2400<br>");
     const txt = q(".fx-f"), ud = q(".fx-ud"), prev = q(".fx-prev"), ok = q(".fx-ok"), chk = q(".fx-cat"), tb = q(".fx-lista tbody"), filtro = q(".fx-filtro");
+    const filasSel = MS.sel.has(f.key) && MS.sel.size > 1 ? FilasSeleccionadas() : null;
+    q(".fx-selw").hidden = !filasSel;
+    if (filasSel) q(".fx-sel + span").textContent = "Aplicar a las " + filasSel.length + " filas seleccionadas";
     q(".fx-cat + span").textContent = f.esMat ? "Aplicar a todos los materiales de «" + f.cat + "»" : "Aplicar a todos los tipos de «" + f.cat + "»";
     txt.value = f.Formula; ud.value = f.UdFormula || "ud";
     q(".fx-quitar").hidden = !f.Formula;
@@ -7351,7 +7464,8 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
     filtro.addEventListener("input", rellenar);
     txt.addEventListener("input", previsualizar); ud.addEventListener("input", previsualizar);
     const aplicar = (formula, unidad) => {
-      const destino = MS.rows.filter(g => g === f || (chk.checked && g.cat === f.cat && g.model === f.model));
+      const enSel = filasSel && q(".fx-sel").checked ? new Set(filasSel) : null;
+      const destino = MS.rows.filter(g => g === f || (enSel && enSel.has(g)) || (chk.checked && g.cat === f.cat && g.model === f.model));
       const tipos = new Set(destino.map(g => g.tkey));
       tipos.forEach(tk => { if (formula) MS.formulas[tk] = [formula, unidad]; else delete MS.formulas[tk]; });
       let err = 0, con = 0;
@@ -7563,10 +7677,11 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
     // Por tipo: la tabla de la Medición, por categoría
     const porCat = new Map();
     MS.filtered.forEach(f => { if (!porCat.has(f.cat)) porCat.set(f.cat, []); porCat.get(f.cat).push(f); });
-    const cols = [{ t:"Modelo", w:16 }, { t:"Familia", w:26 }, { t:"Tipo", w:32 }, { t:"Cantidad", w:9, s:"int", sum:true }, { t:"ml", w:11, s:"n3", sum:true }, { t:"m²", w:11, s:"n3", sum:true },
+    const PM = !!MS.porMaterial;
+    const cols = [{ t:"Modelo", w:16 }, { t:PM ? "Usado en" : "Familia", w:26 }, { t:PM ? "Material" : "Tipo", w:32 }, { t:"Nº elementos", w:9, s:"int", sum:true }, { t:"ml", w:11, s:"n3", sum:true }, { t:"m²", w:11, s:"n3", sum:true },
       { t:"m³", w:11, s:"n3", sum:true }, { t:"Acero kg", w:11, s:"n2", sum:true }, { t:"Código", w:12, s:"pcod" }, { t:"Resumen", w:44 }, { t:"Ud", w:6 }, { t:"Medición", w:12, s:"n3" },
       { t:"Precio", w:10, s:"n2" }, { t:"Importe", w:12, s:"n2", sum:true }, { t:"Estado", w:16 }];
-    const hojaT = xlHojaTabla({ nombre:"Por tipo", titulo:"Medición por tipo", sub, cols,
+    const hojaT = xlHojaTabla({ nombre:PM ? "Por material" : "Por tipo", titulo:PM ? "Medición por material" : "Medición por tipo", sub, cols,
       grupos:[...porCat].sort((a, b) => a[0].localeCompare(b[0], "es")).map(([cat, fs]) => ({ titulo:cat, filas:fs.map(f => {
         const u = UdEfectiva(f), med = Medicion(f), imp = Importe(f);
         return [f.model, f.fam, TipoVisible(f), f.n, f.has.ml ? round(f.sums.ml, 3) : "", f.has.m2 ? round(f.sums.m2, 3) : "", f.has.m3 ? round(f.sums.m3, 3) : "", f.has.kg ? round(f.sums.kg, 2) : "",
@@ -7577,12 +7692,13 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
       ["Muros y suelos", "m² = área neta de Revit; m² bruta = sin descontar huecos"],
       ["Instalaciones", "Una línea por tipo y tamaño; aislamientos por espesor"],
       ["kg", "Peso calculado por la macro de exportación o W (kg/m) x longitud"],
-      ["Presupuesto", "Capítulos del BC3 (o uno por categoría si no hay BC3). Cada tipo de Revit es una línea de medición de su partida; los tipos sin partida van al final, por categoría."]];
+      ["Presupuesto", "Capítulos del BC3 (o uno por categoría si no hay BC3). Cada " + (PM ? "material" : "tipo de Revit") + " es una línea de medición de su partida, con la cantidad medida en la unidad de la partida; " + (PM ? "los materiales" : "los tipos") + " sin partida van al final, por " + (PM ? "clase" : "categoría") + "."]];
+    if (PM) crit.splice(4, 0, ["Por material", "Cada elemento se reparte entre sus materiales (capas, sólidos y pinturas) con su área, volumen y peso, como en BoQ de BECSATools"]);
     const fc = []; xlCabecera(fc, proyecto, "Criterios de medición", []);
     fc.push({ c:["Concepto", "Criterio"], s:"cab" });
     crit.forEach(r => fc.push({ c:r, s:["tTxt", "txtW"] }));
     const hojaC = { nombre:"Criterios", filas:fc, anchos:[22, 100] };
-    download(xlsxConFormato([hojaP, hojaT, hojaC]), "Presupuesto_" + nombreProyecto() + "_" + stamp() + ".xlsx");
+    download(xlsxConFormato([hojaT, hojaP, hojaC]), "Presupuesto_" + nombreProyecto() + "_" + stamp() + ".xlsx");
     MostrarEstado("Excel exportado.", 1);
   }
 
@@ -8530,6 +8646,11 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
   $("mFiltroParam").addEventListener("click", () => AbrirFiltroParametro());
   $("mTable").addEventListener("change", onMeasureChange);
   $("mTable").addEventListener("click", onMeasureClick);
+  $("mTable").addEventListener("mousedown", e => {
+    if ((e.shiftKey || e.ctrlKey || e.metaKey) && e.target.closest("tbody tr") && e.target.closest("input, select") ){
+      e.preventDefault(); if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    }
+  });
   $("mTable").addEventListener("pointerdown", iniciarResize);
   $("mTable").addEventListener("dblclick", e => {
     const rs = e.target.closest(".col-rs");
@@ -8568,6 +8689,7 @@ ${vista}<sheetFormatPr defaultRowHeight="14.4"/>${cols}<sheetData>${filas}</shee
   document.addEventListener("pointerdown", e => { if (!$("mSharePop").hidden && !e.target.closest(".mmenu")){ $("mSharePop").hidden = true; $("mShare").setAttribute("aria-expanded", "false"); } });
   $("boqInput").addEventListener("change", e => { const f = e.target.files[0]; if (f) ImportarDatos(f); e.target.value = ""; });
   $("mVer").addEventListener("click", () => verEnModelo(FilasSeleccionadas()));
+  $("mSelMod").addEventListener("click", () => seleccionarEnModelo(FilasSeleccionadas()));
   $("mCsv").addEventListener("click", exportCsv);
   $("mXlsx").addEventListener("click", exportXlsx);
   $("mBc3").addEventListener("click", ExportarBC3);
